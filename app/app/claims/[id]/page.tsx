@@ -9,6 +9,10 @@ import { env } from "@/lib/env";
 import { isObjectId } from "@/lib/utils";
 import { Badge, PageHeader, StatusBadge } from "@/components/ui/feedback";
 import { ClaimEditor } from "@/components/claim/claim-editor";
+import { ClaimReadiness } from "@/components/claim/claim-readiness";
+import { claimReadiness } from "@/lib/claim-readiness";
+import { FlightReport } from "@/models";
+import { tripFlightKey } from "@/lib/ripple/flight-id";
 
 export const metadata: Metadata = { title: "Claim" };
 
@@ -20,6 +24,8 @@ export default async function ClaimPage({ params }: { params: Promise<{ id: stri
   if (!ctx) notFound();
   const claim = claimView(ctx.claim);
   const t = ctx.trip;
+  const observations = await FlightReport.countDocuments({ userId: user.oid, flightKey: tripFlightKey(t) }).catch(() => 0);
+  const readiness = claimReadiness(ctx, { now: new Date(), observations });
   return (
     <>
       <Link href={`/app/trips/${t._id}?tab=claim`} className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
@@ -39,6 +45,9 @@ export default async function ClaimPage({ params }: { params: Promise<{ id: stri
         }
         description={ctx.eligibility?.summary ?? `${ctx.bags.length} bag${ctx.bags.length === 1 ? "" : "s"} included`}
       />
+      <div className="mb-6">
+        <ClaimReadiness r={readiness} />
+      </div>
       <ClaimEditor
         claim={claim}
         manifest={exportManifest(ctx)}

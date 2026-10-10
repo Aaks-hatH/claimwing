@@ -97,3 +97,46 @@ export async function weatherAround(opts: {
     } satisfies WeatherContext;
   });
 }
+
+/**
+ * Current conditions at an airport, in the units the delay model was trained with
+ * (km/h, km, mm, degrees C). Used as model inputs only; cached for 30 minutes per airport.
+ */
+export type WeatherNow = {
+  windKmh: number | null;
+  visibilityKm: number | null;
+  precipMm: number | null;
+  tempC: number | null;
+  code: number | null;
+  severe: boolean;
+  description: string;
+  fetchedAt: string;
+  source: string;
+};
+
+export async function weatherNow(airport: string, lat: number, lon: number): Promise<WeatherNow | null> {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,visibility&wind_speed_unit=kmh&timezone=GMT`;
+  return cached(`wxnow:${airport}`, 1800, async () => {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000), cache: "no-store" });
+      if (!res.ok) return null;
+      const c = ((await res.json()) as { current?: Record<string, number | null> }).current;
+      if (!c) return null;
+      const code = c.weather_code ?? null;
+      const vis = c.visibility ?? null;
+      return {
+        windKmh: c.wind_speed_10m ?? null,
+        visibilityKm: vis === null ? null : Math.round((vis / 1000) * 10) / 10,
+        precipMm: c.precipitation ?? null,
+        tempC: c.temperature_2m ?? null,
+        code,
+        severe: (code !== null && SEVERE_CODES.has(code)) || (c.wind_gusts_10m ?? 0) >= 75 || (vis !== null && vis < 800),
+        description: WMO[code ?? -1] ?? "Unknown",
+        fetchedAt: new Date().toISOString(),
+        source: "Open-Meteo current conditions (weather model data)",
+      };
+    } catch {
+      return null;
+    }
+  });
+}

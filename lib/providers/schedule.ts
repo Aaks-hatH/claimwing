@@ -128,7 +128,7 @@ async function aerodatabox(flightNumber: string, dateLocal: string, origin?: str
 
 /* ------------------------------ AviationStack ------------------------------ */
 /**
- * GET /v1/flights?flight_iata=… — free plan is HTTP-only with a small monthly quota.
+ * GET /v1/flights?flight_iata=…: the free plan is HTTP-only with a small monthly quota.
  * Known quirk: times are labelled "+00:00" but are the airport's local clock time,
  * so we re-interpret them in each airport's time zone.
  */

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { Download, Trash2 } from "lucide-react";
+import { Download, Lightbulb, RotateCcw, Trash2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input, Label, NativeSelect } from "@/components/ui/primitives";
@@ -12,7 +12,7 @@ import { ConfirmDialog, Switch } from "@/components/ui/overlays";
 
 type Prefs = { units: "metric" | "imperial"; timeFormat: "24h" | "12h"; notifyDelays: boolean; notifyDeadlines: boolean; homeCurrency: string; sdrRate: number };
 
-export function SettingsForm({ user }: { user: { name: string; email: string; preferences: Prefs } }) {
+export function SettingsForm({ user }: { user: { name: string; email: string; preferences: Prefs & { communityReports: boolean } } }) {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const [name, setName] = useState(user.name);
@@ -20,6 +20,29 @@ export function SettingsForm({ user }: { user: { name: string; email: string; pr
   const [busy, setBusy] = useState(false);
   const [confirmText, setConfirmText] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [sharing, setSharing] = useState(user.preferences.communityReports);
+  const [sharingBusy, setSharingBusy] = useState(false);
+  const [deleteReportsOpen, setDeleteReportsOpen] = useState(false);
+
+  async function toggleSharing(on: boolean) {
+    setSharingBusy(true);
+    const prev = sharing;
+    setSharing(on);
+    const res = await fetch("/api/ripple/sharing", { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ on }) }).catch(() => null);
+    setSharingBusy(false);
+    if (!res?.ok) {
+      setSharing(prev);
+      return void toast.error("Couldn't change sharing. Check your connection and try again.");
+    }
+    toast.success(on ? "Sharing is on. Your reports are visible to others on the same flight." : "Sharing is off. Your past reports are no longer shown to anyone.");
+  }
+
+  async function guidance(body: object, done: string) {
+    const res = await fetch("/api/account/guidance", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) }).catch(() => null);
+    if (!res?.ok) return void toast.error("Couldn't save. Try again.");
+    toast.success(done);
+    router.refresh();
+  }
 
   async function save() {
     setBusy(true);
@@ -108,6 +131,67 @@ export function SettingsForm({ user }: { user: { name: string; email: string; pr
           </Button>
         </CardFooter>
       </Card>
+
+      <Card id="community">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="size-4 text-signal" aria-hidden /> Community observations
+          </CardTitle>
+          <CardDescription>
+            In Flight Ripple you can report what you see at the airport, like boarding starting or a delay announcement. Others on the same flight see a summary that never includes your name, email or booking.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <label className="flex items-center justify-between gap-3 rounded-lg border p-3 text-sm">
+            <span>
+              <span className="block font-medium">Share my observations</span>
+              <span className="text-muted-foreground">Turning this off also hides every report you already shared.</span>
+            </span>
+            <Switch checked={sharing} disabled={sharingBusy} onCheckedChange={(v) => void toggleSharing(v)} aria-label="Share my observations" />
+          </label>
+          <Button variant="outline" onClick={() => setDeleteReportsOpen(true)}>
+            <Trash2 /> Delete all my observations
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lightbulb className="size-4 text-signal" aria-hidden /> Help and tips
+          </CardTitle>
+          <CardDescription>Bring back the welcome tour or tips you dismissed.</CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-3 sm:flex-row">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              await guidance({ onboarding: "reset" }, "The welcome tour will open now.");
+              router.push("/app/welcome");
+            }}
+          >
+            <RotateCcw /> Restart the welcome tour
+          </Button>
+          <Button variant="outline" onClick={() => void guidance({ resetHints: true }, "Tips will show again.")}>
+            <Lightbulb /> Show dismissed tips
+          </Button>
+        </CardContent>
+      </Card>
+
+      <ConfirmDialog
+        open={deleteReportsOpen}
+        onOpenChange={setDeleteReportsOpen}
+        title="Delete all your observations?"
+        description="This permanently removes every report you've shared about any flight. Forecasts for those flights will no longer use them. It can't be undone."
+        confirmLabel="Delete observations"
+        destructive
+        onConfirm={async () => {
+          const res = await fetch("/api/ripple/reports", { method: "DELETE" }).catch(() => null);
+          const b = res ? await res.json().catch(() => ({})) : {};
+          if (!res?.ok) return void toast.error(b.error ?? "Couldn't delete your observations. Try again.");
+          toast.success(b.deleted ? `Deleted ${b.deleted} observation${b.deleted === 1 ? "" : "s"}.` : "You had no observations to delete.");
+        }}
+      />
 
       <Card>
         <CardHeader>

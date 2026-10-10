@@ -1,12 +1,13 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Briefcase, FileText, LayoutList, Plane } from "lucide-react";
+import { Briefcase, FileText, GitBranch, LayoutList, Plane } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/overlays";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutList },
   { id: "flight", label: "Flight", icon: Plane },
+  { id: "ripple", label: "Ripple", icon: GitBranch },
   { id: "baggage", label: "Baggage", icon: Briefcase },
   { id: "claim", label: "Claim", icon: FileText },
 ] as const;

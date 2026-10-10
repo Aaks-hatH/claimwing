@@ -2,7 +2,7 @@ import { z } from "zod";
 import { HttpError, ok, parseJson, withUser } from "@/lib/api";
 import { connectDB } from "@/lib/db";
 import { deleteTripCascade } from "@/lib/cascade";
-import { ApiCache, Notification, Trip, User, BaggageItem, FlightOutcome, FlightSnapshot, Claim, BaggagePhoto, DamageMarker } from "@/models";
+import { ApiCache, Notification, Trip, User, BaggageItem, FlightOutcome, FlightSnapshot, Claim, BaggagePhoto, DamageMarker, FlightReport } from "@/models";
 
 const prefs = z.object({
   name: z.string().trim().min(1).max(120).optional(),
@@ -45,6 +45,7 @@ export const DELETE = withUser(
       FlightSnapshot.deleteMany({ userId: user.oid }),
       Claim.deleteMany({ userId: user.oid }),
       Notification.deleteMany({ userId: user.oid }),
+      FlightReport.deleteMany({ userId: user.oid }),
       ApiCache.deleteMany({ key: { $regex: `^user:${user.id}` } }),
     ]);
     await User.deleteOne({ _id: user.oid });

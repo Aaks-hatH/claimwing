@@ -5,7 +5,7 @@ import { flightEligibility, baggageEligibility } from "@/lib/eligibility";
 import { isObjectId } from "@/lib/utils";
 import { BaggageItem, FlightOutcome, Trip } from "@/models";
 
-/** GET /api/eligibility?tripId=… — flight and baggage eligibility from the stored facts. */
+/** GET /api/eligibility?tripId=…: flight and baggage eligibility from the stored facts. */
 export const GET = withUser(async (req, { user }) => {
   const tripId = new URL(req.url).searchParams.get("tripId");
   if (!isObjectId(tripId)) throw new HttpError(400, "tripId is required");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Check, Columns2, EyeOff, Minus, MousePointerSquareDashed, Plus, RotateCcw, SplitSquareHorizontal, Sparkles, Trash2, X } from "lucide-react";
+import { Check, Columns2, EyeOff, Flame, Minus, MousePointerSquareDashed, Plus, RotateCcw, SplitSquareHorizontal, Sparkles, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import type { MarkerView, PhotoView } from "@/lib/baggage";
 import { ANGLE_LABELS } from "@/lib/format";
@@ -12,6 +12,7 @@ import { Alert, Badge, EmptyState } from "@/components/ui/feedback";
 import { Switch } from "@/components/ui/overlays";
 import { cn } from "@/lib/utils";
 import { Images } from "lucide-react";
+import { DifferenceView } from "./difference-view";
 
 type Rect = { x: number; y: number; w: number; h: number };
 
@@ -97,7 +98,7 @@ function PairView({
   setPhotos: (fn: (p: PhotoView[]) => PhotoView[]) => void;
   aiEnabled: boolean;
 }) {
-  const [mode, setMode] = useState<"side" | "slider">(before && after ? "slider" : "side");
+  const [mode, setMode] = useState<"side" | "slider" | "diff">(before && after ? "slider" : "side");
   const [split, setSplit] = useState(50);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -224,6 +225,9 @@ function PairView({
               <Button size="sm" variant={mode === "side" ? "secondary" : "ghost"} onClick={() => setMode("side")} aria-pressed={mode === "side"}>
                 <Columns2 /> Side by side
               </Button>
+              <Button size="sm" variant={mode === "diff" ? "secondary" : "ghost"} onClick={() => (setMode("diff"), setMarking(false))} aria-pressed={mode === "diff"}>
+                <Flame /> Differences
+              </Button>
             </div>
           )}
           <Button size="icon-sm" variant="outline" onClick={() => setZoom((z) => Math.max(1, z - 0.5))} aria-label="Zoom out">
@@ -239,7 +243,24 @@ function PairView({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {mode === "slider" && before && after ? (
+        {mode === "diff" && before && after ? (
+          <DifferenceView
+            before={before}
+            after={after}
+            existing={markers.map((m) => m.rect)}
+            onAddSuggestion={async (rect) => {
+              const res = await fetch(`/api/baggage/${bagId}/markers`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ angle, rect, note: "Area that differs between the photos", origin: "comparison" }),
+              });
+              const body = await res.json().catch(() => ({}));
+              if (!res.ok) return void toast.error(body.error ?? "Couldn't add the suggestion. Try again.");
+              setMarkers((m) => [...m, body.marker]);
+              toast.success("Added as a suggestion. Confirm it below if it's damage.");
+            }}
+          />
+        ) : mode === "slider" && before && after ? (
           <div className="space-y-2">
             <div
               className="relative overflow-hidden rounded-lg border bg-black touch-none"
@@ -347,7 +368,7 @@ function PairView({
                 <span className="min-w-0 flex-1">{m.note || "Damage"}</span>
                 {!m.confirmed ? (
                   <>
-                    <Badge tone="warning">Suggested, not confirmed</Badge>
+                    <Badge tone="warning">{m.source === "comparison" ? "Found by comparison, not confirmed" : "AI suggestion, not confirmed"}</Badge>
                     <Button size="sm" variant="outline" onClick={() => updateMarker(m.id, { confirmed: true })}>
                       <Check /> Confirm
                     </Button>
@@ -357,7 +378,7 @@ function PairView({
                   </>
                 ) : (
                   <>
-                    <Badge tone={m.source === "ai" ? "info" : "neutral"}>{m.source === "ai" ? "AI suggestion, confirmed by you" : "Marked by you"}</Badge>
+                    <Badge tone={m.source === "user" ? "neutral" : "info"}>{m.source === "ai" ? "AI suggestion, confirmed by you" : m.source === "comparison" ? "Found by comparison, confirmed by you" : "Marked by you"}</Badge>
                     <Button size="icon-sm" variant="ghost" onClick={() => deleteMarker(m.id)} aria-label="Delete marker">
                       <Trash2 />
                     </Button>

@@ -75,6 +75,9 @@ export default async function Landing() {
         <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-4 md:px-8">
           <Logo />
           <nav className="flex items-center gap-1.5" aria-label="Account">
+            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Link href="/demo">Demo Center</Link>
+            </Button>
             {signedIn ? (
               <Button asChild size="sm">
                 <Link href="/app">Open dashboard</Link>
@@ -115,7 +118,13 @@ export default async function Landing() {
                     <a href="#board">Try the evidence engine</a>
                   </Button>
                 </div>
-                <p className="mt-6 text-xs text-muted-foreground">No cut of your claim. You choose what to send.</p>
+                <p className="mt-6 text-xs text-muted-foreground">
+                  No cut of your claim. You choose what to send.{" "}
+                  <Link href="/demo?s=cascade" className="font-medium text-foreground underline decoration-signal underline-offset-4">
+                    Watch a delay ripple through three flights
+                  </Link>{" "}
+                  in the Demo Center, no account needed.
+                </p>
               </div>
 
               <div className="hero-spotlight" aria-label="Live flight tracking visual" data-rise style={{ "--rise-delay": "300ms" } as React.CSSProperties}>

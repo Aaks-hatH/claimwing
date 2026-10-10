@@ -58,3 +58,10 @@ export async function spaced(name: string, minIntervalMs: number): Promise<void>
   await prev;
   setTimeout(release, minIntervalMs);
 }
+
+/** Drops a cached value everywhere (used when new observations make a cached result outdated). */
+export async function invalidate(key: string): Promise<void> {
+  l1.delete(key);
+  await connectDB();
+  await ApiCache.deleteOne({ key }).catch(() => undefined);
+}

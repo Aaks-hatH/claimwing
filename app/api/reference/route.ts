@@ -9,6 +9,6 @@ export async function GET(req: Request) {
   const items =
     type === "airline"
       ? searchAirlines(q).map((a) => ({ code: a.iata, label: a.name, sub: `${a.iata} · ${a.icao}${a.country ? ` · ${a.country}` : ""}` }))
-      : searchAirports(q).map((a) => ({ code: a.iata, label: a.city ? `${a.city} — ${a.name}` : a.name, sub: `${a.iata} · ${a.country}`, tz: a.tz }));
+      : searchAirports(q).map((a) => ({ code: a.iata, label: a.city ? `${a.city}, ${a.name}` : a.name, sub: `${a.iata} · ${a.country}`, tz: a.tz }));
   return NextResponse.json({ items }, { headers: { "Cache-Control": "public, max-age=86400" } });
 }

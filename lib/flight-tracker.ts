@@ -10,6 +10,8 @@ import { getScheduleCached } from "./providers/schedule";
 import { loadReplay, replayInstant, replayMinute, replayPosition, replaySchedule, type ReplayClock } from "./providers/replay";
 import type { PositionReport, ScheduleInfo } from "./providers/types";
 import { notify } from "./notifications";
+import { invalidate } from "./providers/cache";
+import { tripFlightKey } from "./ripple/flight-id";
 import { minutesBetween, formatDuration } from "./time";
 
 type EvidenceKind = TimeEvidence["kind"];
@@ -132,6 +134,11 @@ export async function pollTrip(tripId: string | Types.ObjectId, userId: string |
       tracking.icao24Source = src;
     }
     if (schedule.callsign && !tracking.callsign) tracking.callsign = schedule.callsign;
+    if (schedule.registration) {
+      const changed = recordAircraft(trip, schedule.registration, schedule.aircraftModel, src, realNow);
+      // A new aircraft invalidates any rotation Flight Ripple built for this flight.
+      if (changed) await invalidate(`ripple:v1:${tripFlightKey(trip)}`).catch(() => undefined);
+    }
     outcome.scheduleStatus = schedule.status ?? undefined;
     if (schedule.normalizedStatus === "cancelled") outcome.disruption = "cancellation";
     if (schedule.normalizedStatus !== "unknown") tracking.status = schedule.normalizedStatus;
@@ -257,6 +264,18 @@ export async function pollTrip(tripId: string | Types.ObjectId, userId: string |
   trip.markModified("tracking");
   await Promise.all([trip.save(), outcome.save()]);
   return buildState(trip, now, errors);
+}
+
+/** Stores the aircraft assigned to the flight and keeps a history so swaps can be detected. */
+function recordAircraft(trip: InstanceType<typeof Trip>, registration: string, model: string | null, source: string, at: Date): boolean {
+  const reg = registration.toUpperCase().trim();
+  const a = trip.aircraft ?? { history: [] };
+  const history = a.history ?? [];
+  const changed = a.registration !== reg;
+  if (changed) history.push({ registration: reg, source, firstSeenAt: at });
+  trip.aircraft = { registration: reg, model: model ?? a.model ?? null, source, seenAt: at, history: history.slice(-10) };
+  trip.markModified("aircraft");
+  return changed;
 }
 
 function hasFinalArrival(evidence: TimeEvidence[]) {

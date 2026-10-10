@@ -13,7 +13,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div>
             <p className="auth-aside-kicker"><ShieldCheck size={14} aria-hidden /> YOUR TRIP, ON THE RECORD</p>
             <h1 className="auth-aside-copy">Travel plans change. <em>Your record shouldn’t.</em></h1>
-            <p className="auth-aside-description">Keep the flight timeline, booking details and bag evidence together—so you can show what happened, in your own words.</p>
+            <p className="auth-aside-description">Keep the flight timeline, booking details and bag evidence together, so you can show what happened, in your own words.</p>
           </div>
           <div className="auth-aside-route">
             <span className="auth-aside-route-mark"><Plane size={18} aria-hidden /></span>

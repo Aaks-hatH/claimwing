@@ -22,7 +22,7 @@ export function formatLocal(
   tz: string | null | undefined,
   opts: { withZone?: boolean; withDate?: boolean; hour12?: boolean } = {},
 ) {
-  if (!d) return "—";
+  if (!d) return "Not recorded";
   const { withZone = true, withDate = true, hour12 = false } = opts;
   const dt = DateTime.fromJSDate(new Date(d)).setZone(zoneOr(tz));
   const time = dt.toFormat(hour12 ? "h:mm a" : "HH:mm");
@@ -31,13 +31,13 @@ export function formatLocal(
 }
 
 export function formatUtc(d: Date | string | null | undefined) {
-  if (!d) return "—";
+  if (!d) return "Not recorded";
   return DateTime.fromJSDate(new Date(d)).toUTC().toFormat("yyyy-LL-dd HH:mm 'UTC'");
 }
 
 /** 197 -> "3 h 17 min"; negative values are shown as early. */
 export function formatDuration(minutes: number | null | undefined) {
-  if (minutes === null || minutes === undefined || !Number.isFinite(minutes)) return "—";
+  if (minutes === null || minutes === undefined || !Number.isFinite(minutes)) return "Unknown";
   const m = Math.round(Math.abs(minutes));
   const h = Math.floor(m / 60);
   const r = m % 60;

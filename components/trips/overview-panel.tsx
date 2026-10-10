@@ -49,9 +49,9 @@ export function OverviewPanel({
                 ["Scheduled departure", `${formatLocal(trip.scheduledDeparture, trip.origin.tz)} · ${trip.origin.iata}`],
                 ["Scheduled arrival", `${formatLocal(trip.scheduledArrival, trip.destination.tz)} · ${trip.destination.iata}`],
                 ["Actual arrival", outcome?.actualArrival ? `${formatLocal(outcome.actualArrival, trip.destination.tz)}` : "Not yet recorded"],
-                ["Delay", outcome?.delayMinutes != null ? `${formatDuration(outcome.delayMinutes)}${outcome.delaySource ? ` (${outcome.delaySource})` : ""}` : "—"],
-                ["Distance", eligibility ? formatDistance(eligibility.distanceKm, units) : "—"],
-                ["Ticket price", trip.ticketPrice ? formatMoney(trip.ticketPrice.amount, trip.ticketPrice.currency) : "—"],
+                ["Delay", outcome?.delayMinutes != null ? `${formatDuration(outcome.delayMinutes)}${outcome.delaySource ? ` (${outcome.delaySource})` : ""}` : "Not recorded yet"],
+                ["Distance", eligibility ? formatDistance(eligibility.distanceKm, units) : "Unknown"],
+                ["Ticket price", trip.ticketPrice ? formatMoney(trip.ticketPrice.amount, trip.ticketPrice.currency) : "Not entered"],
               ]}
             />
           </CardContent>

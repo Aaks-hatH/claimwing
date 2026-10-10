@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { withUser } from "@/lib/api";
 import { connectDB } from "@/lib/db";
-import { BaggageItem, BaggagePhoto, Claim, DamageMarker, FlightOutcome, FlightSnapshot, Notification, Trip, User } from "@/models";
+import { BaggageItem, BaggagePhoto, Claim, DamageMarker, FlightOutcome, FlightReport, FlightSnapshot, Notification, Trip, User } from "@/models";
 
 /** All of the user's records as JSON (photos are referenced by their download URLs). */
 export const GET = withUser(
   async (_req, { user }) => {
     await connectDB();
     const q = { userId: user.oid };
-    const [profile, trips, outcomes, snapshots, bags, photos, markers, claims, notifications] = await Promise.all([
+    const [profile, trips, outcomes, snapshots, bags, photos, markers, claims, notifications, flightReports] = await Promise.all([
       User.findById(user.oid).select("-passwordHash").lean(),
       Trip.find(q).lean(),
       FlightOutcome.find(q).lean(),
@@ -18,6 +18,7 @@ export const GET = withUser(
       DamageMarker.find(q).lean(),
       Claim.find(q).lean(),
       Notification.find(q).lean(),
+      FlightReport.find(q).select("-contributor").lean(),
     ]);
     const body = JSON.stringify(
       {
@@ -28,6 +29,7 @@ export const GET = withUser(
         outcomes,
         snapshots,
         bags,
+        flightReports,
         photos,
         markers,
         claims,

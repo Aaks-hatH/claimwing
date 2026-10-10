@@ -6,9 +6,8 @@ import { requirePageUser } from "@/lib/session";
 import { listTrips } from "@/lib/dal";
 import { nowMs } from "@/lib/time";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/primitives";
 import { EmptyState, PageHeader } from "@/components/ui/feedback";
-import { TripRow } from "@/components/trips/trip-row";
+import { FlightFilter, type FlightItem } from "@/components/trips/flight-filter";
 import { DemoTripButton } from "@/components/trips/demo-trip-button";
 
 export const metadata: Metadata = { title: "Trips" };
@@ -17,8 +16,6 @@ export default async function TripsPage() {
   const user = await requirePageUser();
   const items = await listTrips(user.oid);
   const now = nowMs();
-  const upcoming = items.filter((i) => new Date(i.trip.scheduledArrival).getTime() > now - 12 * 3600_000);
-  const past = items.filter((i) => !upcoming.includes(i));
 
   return (
     <>
@@ -52,35 +49,7 @@ export default async function TripsPage() {
           }
         />
       ) : (
-        <div className="space-y-6">
-          {upcoming.length > 0 && (
-            <section>
-              <h2 className="mb-2 text-sm font-medium text-muted-foreground">Upcoming and active</h2>
-              <Card>
-                <CardContent className="divide-y p-0">
-                  {upcoming
-                    .slice()
-                    .reverse()
-                    .map((i) => (
-                      <TripRow key={i.trip.id} trip={i.trip} delayMinutes={i.outcome?.delayMinutes} eligibility={i.eligibility?.status} />
-                    ))}
-                </CardContent>
-              </Card>
-            </section>
-          )}
-          {past.length > 0 && (
-            <section>
-              <h2 className="mb-2 text-sm font-medium text-muted-foreground">Past</h2>
-              <Card>
-                <CardContent className="divide-y p-0">
-                  {past.map((i) => (
-                    <TripRow key={i.trip.id} trip={i.trip} delayMinutes={i.outcome?.delayMinutes} eligibility={i.eligibility?.status} />
-                  ))}
-                </CardContent>
-              </Card>
-            </section>
-          )}
-        </div>
+        <FlightFilter now={now} items={items.map((i) => ({ trip: i.trip, delay: i.outcome?.delayMinutes ?? null, eligibility: (i.eligibility?.status as FlightItem["eligibility"]) ?? null }))} />
       )}
     </>
   );

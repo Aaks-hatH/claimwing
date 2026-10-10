@@ -173,7 +173,8 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
       });
       const body = (await response.json().catch(() => ({}))) as { trip?: { id?: string }; error?: string };
       if (!response.ok || !body.trip?.id) throw new Error(body.error ?? "Your account is ready, but we couldn’t save this flight yet.");
-      const destination = callbackUrl === "/app" ? `/app/trips/${body.trip.id}` : callbackUrl;
+      // New accounts get the (skippable) welcome tour once, starting from the flight they just added.
+      const destination = callbackUrl === "/app" ? `/app/welcome?trip=${body.trip.id}` : callbackUrl;
       router.push(destination);
       router.refresh();
     } catch (cause) {

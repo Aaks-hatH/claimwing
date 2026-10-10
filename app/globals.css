@@ -389,3 +389,22 @@ a:hover > .logo-mark { transform: rotate(-14deg) scale(1.06); }
   .plane-fly { animation: none !important; left: 50%; top: 25%; }
   .live-dot { animation: none; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Flight Ripple and Demo Center                                       */
+/* ------------------------------------------------------------------ */
+/* Guided spotlight: the section a demo step is about gets a soft ring that settles. */
+@keyframes spotlight-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 0%, transparent); }
+  30% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--signal) 35%, transparent); }
+  100% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 22%, transparent); }
+}
+.ripple-section { transition: border-color 300ms ease, box-shadow 300ms ease; scroll-margin-top: 13rem; }
+.ripple-section[data-spotlight="spotlight"] { border-color: color-mix(in srgb, var(--signal) 55%, var(--border)); animation: spotlight-ring 1.4s cubic-bezier(.2,.8,.2,1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .ripple-section[data-spotlight="spotlight"] { animation: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--signal) 22%, transparent); }
+}
+/* A value that just changed (flight status, estimate): one soft pulse, then rest. */
+@keyframes change-flash { 0% { background: color-mix(in srgb, var(--signal) 28%, transparent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--signal) 22%, transparent); } 100% { background: transparent; box-shadow: 0 0 0 0 transparent; } }
+.change-flash { animation: change-flash 1.8s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .change-flash { animation: none; outline: 2px solid color-mix(in srgb, var(--signal) 40%, transparent); outline-offset: 2px; } }

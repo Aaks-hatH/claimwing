@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
-import { FileText, LayoutDashboard, LogOut, Monitor, Moon, Plane, Settings, Sun, Plus } from "lucide-react";
+import { Suspense, useEffect, useState } from "react";
+import { FileText, FlaskConical, HelpCircle, LayoutDashboard, LogOut, Monitor, Moon, Plane, Search, Settings, Sun, Plus } from "lucide-react";
 import { Logo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +17,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/overlays";
 import { NotificationBell } from "./notification-bell";
+import { CommandPalette } from "./command-palette";
+import { HelpPanel } from "./help-panel";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -34,6 +37,20 @@ function useActive() {
 export function AppShell({ user, children }: { user: { name: string; email: string; image?: string | null }; children: React.ReactNode }) {
   const isActive = useActive();
   const { setTheme } = useTheme();
+  const [helpOpen, setHelpOpen] = useState(false);
+
+  // "?" opens contextual help (ignored while typing).
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const t = e.target as HTMLElement;
+      if (e.key === "?" && !t.closest("input, textarea, select, [contenteditable=true]")) {
+        e.preventDefault();
+        setHelpOpen(true);
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
   const initials = user.name
     .split(/\s+/)
     .map((p) => p[0])
@@ -71,6 +88,25 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
           </nav>
 
           <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("claimwing:command-palette"))}
+              className="hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:inline-flex"
+              aria-label="Search pages, trips and actions (Ctrl K)"
+            >
+              <Search className="size-3.5" aria-hidden /> Search <kbd className="rounded border bg-muted px-1 font-sans text-[10px]">Ctrl K</kbd>
+            </button>
+            <Button size="icon-sm" variant="ghost" className="lg:hidden" onClick={() => window.dispatchEvent(new Event("claimwing:command-palette"))} aria-label="Search pages, trips and actions">
+              <Search aria-hidden />
+            </Button>
+            <Button asChild size="icon-sm" variant="ghost" aria-label="Demo Center (simulated scenarios)" title="Demo Center">
+              <Link href="/demo">
+                <FlaskConical aria-hidden />
+              </Link>
+            </Button>
+            <Button size="icon-sm" variant="ghost" onClick={() => setHelpOpen(true)} aria-label="Help for this page (?)" title="Help">
+              <HelpCircle aria-hidden />
+            </Button>
             <Button asChild variant="signal" size="sm" className="mr-1 hidden sm:inline-flex">
               <Link href="/app/trips/new">
                 <Plus /> New trip
@@ -125,6 +161,11 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
         {children}
         <p className="mt-24 text-center text-[11px] text-muted-foreground">Documentation support, not legal advice.</p>
       </main>
+
+      <CommandPalette onHelp={() => setHelpOpen(true)} />
+      <Suspense>
+        <HelpPanel open={helpOpen} onOpenChange={setHelpOpen} />
+      </Suspense>
 
       {/* Mobile tab bar */}
       <nav

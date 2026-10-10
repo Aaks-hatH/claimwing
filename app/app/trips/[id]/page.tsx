@@ -18,10 +18,12 @@ import { OverviewPanel } from "@/components/trips/overview-panel";
 import { BaggageList } from "@/components/baggage/baggage-list";
 import { ClaimPanel } from "@/components/claim/claim-panel";
 import { flightStatusKey } from "@/components/trips/trip-row";
+import { RipplePanel } from "@/components/ripple/ripple-panel";
+import { NextActions } from "@/components/ripple/next-actions";
 
 export const metadata: Metadata = { title: "Trip" };
 
-const TAB_IDS: TabId[] = ["overview", "flight", "baggage", "claim"];
+const TAB_IDS: TabId[] = ["overview", "flight", "ripple", "baggage", "claim"];
 
 export default async function TripPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
   const [{ id }, sp] = await Promise.all([params, searchParams]);
@@ -82,6 +84,7 @@ export default async function TripPage({ params, searchParams }: { params: Promi
               </div>
             </div>
           ),
+          ripple: <RipplePanel tripId={trip.id} nextActions={<NextActions trip={trip} outcome={outcome} eligibility={eligibility} bags={bags} claims={claims} />} />,
           baggage: <BaggageList trip={trip} bags={bags} />,
           claim: <ClaimPanel trip={trip} outcome={outcome} eligibility={eligibility} bags={bags} claims={claims} />,
         }}

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Archive, Copy, Download, RefreshCw, Save, Sparkles, Trash2, Wand2 } from "lucide-react";
+import { Archive, Copy, Download, Eye, RefreshCw, Save, Sparkles, Trash2, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 import type { ClaimView } from "@/lib/dal";
 import { formatMoney } from "@/lib/format";
@@ -90,6 +90,7 @@ export function ClaimEditor({
     document.body.appendChild(a);
     a.click();
     a.remove();
+    toast.success(kind === "pdf" ? "Evidence packet generated. Check your downloads." : "Original files packaged with SHA-256 hashes. Check your downloads.");
     setTimeout(() => router.refresh(), 4000);
   }
 
@@ -97,7 +98,7 @@ export function ClaimEditor({
     <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <div className="space-y-6">
         {demo && <Alert tone="warning" title="This claim uses a demo replay. Don't send it to an airline." />}
-        <Card>
+        <Card id="claim-letter" className="scroll-mt-28">
           <CardHeader className="flex-row flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle>Claim letter</CardTitle>
@@ -163,6 +164,11 @@ export function ClaimEditor({
           </CardHeader>
           <CardContent className="space-y-2">
             {dirty && <p className="text-xs text-warning">Save the letter first so the export includes your edits.</p>}
+            <Button className="w-full" variant="outline" asChild>
+              <a href={`/api/claims/${claim.id}/pdf?preview=1`} target="_blank" rel="noopener" aria-disabled={dirty} onClick={(e) => dirty && e.preventDefault()}>
+                <Eye /> Preview the PDF
+              </a>
+            </Button>
             <Button className="w-full" onClick={() => setExportKind("pdf")} disabled={dirty}>
               <Download /> Download evidence PDF
             </Button>

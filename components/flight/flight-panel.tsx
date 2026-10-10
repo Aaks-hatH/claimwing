@@ -13,6 +13,7 @@ import { rightsChecklist } from "@/lib/rules/rights";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, Skeleton } from "@/components/ui/primitives";
 import { Alert, Badge, StatusBadge, type StatusKey } from "@/components/ui/feedback";
+import { ChangeFlash } from "@/components/ui/change-flash";
 import { AltitudeChart } from "./altitude-chart";
 import { cn } from "@/lib/utils";
 
@@ -145,7 +146,9 @@ export function FlightPanel({
         </div>
         <CardContent className="flex flex-wrap items-center gap-x-6 gap-y-3 pt-4">
           <div className="flex items-center gap-2">
-            <StatusBadge status={statusKey} />
+            <ChangeFlash value={statusKey} announce={`Flight status changed`}>
+              <StatusBadge status={statusKey} />
+            </ChangeFlash>
             {state.active && (
               <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
                 <Radio className={cn("size-3.5", polling ? "animate-pulse text-primary" : "")} aria-hidden />
@@ -201,7 +204,7 @@ export function FlightPanel({
             <TimeRow label="Scheduled" value={formatLocal(trip.scheduledDeparture, tz.o)} />
             <TimeRow
               label="Actual"
-              value={actualDep ? formatLocal(actualDep.time, tz.o) : "—"}
+              value={actualDep ? formatLocal(actualDep.time, tz.o) : "Not recorded yet"}
               source={actualDep ? `${actualDep.label} · ${actualDep.source}` : undefined}
             />
           </CardContent>
@@ -218,11 +221,13 @@ export function FlightPanel({
             {out?.actualArrival ? (
               <TimeRow label="Actual" value={formatLocal(out.actualArrival, tz.d)} source={out.delaySource ?? undefined} />
             ) : (
-              <TimeRow
-                label="Estimated"
-                value={state.estimatedArrival ? formatLocal(state.estimatedArrival, tz.d) : "—"}
-                source={state.estimatedArrivalSource ?? undefined}
-              />
+              <ChangeFlash value={state.estimatedArrival} className="block w-full" announce="Estimated arrival updated">
+                <TimeRow
+                  label="Estimated"
+                  value={state.estimatedArrival ? formatLocal(state.estimatedArrival, tz.d) : "Not available yet"}
+                  source={state.estimatedArrivalSource ?? undefined}
+                />
+              </ChangeFlash>
             )}
           </CardContent>
         </Card>
@@ -233,7 +238,7 @@ export function FlightPanel({
           <div>
             <p className="text-xs font-medium text-muted-foreground">{delay !== null ? "Arrival delay" : "Expected arrival delay"}</p>
             <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight">
-              {delay !== null ? formatDuration(delay) : estDelay !== null ? formatDuration(estDelay) : "—"}
+              {delay !== null ? formatDuration(delay) : estDelay !== null ? formatDuration(estDelay) : "Not known yet"}
             </p>
             <p className="mt-1 max-w-xl text-xs text-muted-foreground">
               {delay !== null
@@ -297,7 +302,7 @@ export function FlightPanel({
                   <span className="font-medium capitalize">{e.label}</span>
                   <span className="text-muted-foreground">
                     {e.source}
-                    {e.note ? ` — ${e.note}` : ""}
+                    {e.note ? `: ${e.note}` : ""}
                   </span>
                   <span className="tabular-nums">{formatUtc(e.time)}</span>
                 </li>

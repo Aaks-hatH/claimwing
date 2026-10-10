@@ -30,8 +30,8 @@ const s = StyleSheet.create({
 });
 
 const fmt = (d: Date | string | null | undefined, tz?: string | null) =>
-  d ? DateTime.fromJSDate(new Date(d)).setZone(tz ?? "UTC").toFormat("d LLL yyyy, HH:mm ZZZZ") : "—";
-const utc = (d: Date | string | null | undefined) => (d ? DateTime.fromJSDate(new Date(d)).toUTC().toFormat("yyyy-LL-dd HH:mm:ss 'UTC'") : "—");
+  d ? DateTime.fromJSDate(new Date(d)).setZone(tz ?? "UTC").toFormat("d LLL yyyy, HH:mm ZZZZ") : "Not recorded";
+const utc = (d: Date | string | null | undefined) => (d ? DateTime.fromJSDate(new Date(d)).toUTC().toFormat("yyyy-LL-dd HH:mm:ss 'UTC'") : "Not recorded");
 
 function KV({ items }: { items: Array<[string, React.ReactNode]> }) {
   return (
@@ -156,7 +156,7 @@ export function ClaimDocument({ ctx, photos, letter, generatedAt }: { ctx: NonNu
         </Text>
         {t.demoMode && (
           <View style={[s.box, { borderColor: C.warn }]}>
-            <Text style={{ color: C.warn, fontFamily: "Helvetica-Bold" }}>Demo replay — this packet is built from a stored demonstration flight, not live data. Do not submit it.</Text>
+            <Text style={{ color: C.warn, fontFamily: "Helvetica-Bold" }}>Demo replay: this packet is built from a stored demonstration flight, not live data. Do not submit it.</Text>
           </View>
         )}
         <View style={s.box}>
@@ -164,14 +164,14 @@ export function ClaimDocument({ ctx, photos, letter, generatedAt }: { ctx: NonNu
             items={[
               ["Passenger", t.passengerName],
               ["Contact", ctx.user.email],
-              ["Booking reference", t.bookingRef || "—"],
+              ["Booking reference", t.bookingRef || "Not entered"],
               ["Flight date", t.flightDate],
               ["Scheduled departure", fmt(t.scheduledDeparture, tzO)],
               ["Scheduled arrival", fmt(t.scheduledArrival, tzD)],
               ...(ctx.includeFlight
                 ? ([
                     ["Actual arrival", out?.actualArrival ? `${fmt(out.actualArrival, tzD)} (${out.delaySource})` : "Not recorded"],
-                    ["Arrival delay", out?.delayMinutes != null ? formatDuration(out.delayMinutes) : "—"],
+                    ["Arrival delay", out?.delayMinutes != null ? formatDuration(out.delayMinutes) : "Not recorded"],
                   ] as Array<[string, string]>)
                 : []),
             ]}
@@ -220,10 +220,10 @@ export function ClaimDocument({ ctx, photos, letter, generatedAt }: { ctx: NonNu
             items={[
               ["Scheduled arrival", `${fmt(t.scheduledArrival, tzD)} · ${utc(t.scheduledArrival)}`],
               ["Actual arrival used", out?.actualArrival ? `${fmt(out.actualArrival, tzD)} · ${utc(out.actualArrival)}` : "Not recorded"],
-              ["Source of that time", out?.delaySource ?? "—"],
-              ["Arrival delay", out?.delayMinutes != null ? `${formatDuration(out.delayMinutes)} (${out.delayMinutes} minutes)` : "—"],
+              ["Source of that time", out?.delaySource ?? "Not recorded"],
+              ["Arrival delay", out?.delayMinutes != null ? `${formatDuration(out.delayMinutes)} (${out.delayMinutes} minutes)` : "Not recorded"],
               ["Disruption", out?.disruption ?? "delay"],
-              ["Reason given", `${CAUSES[(out?.cause ?? "unknown") as keyof typeof CAUSES]?.label ?? "Unknown"}${out?.causeNote ? ` — ${out.causeNote}` : ""}`],
+              ["Reason given", `${CAUSES[(out?.cause ?? "unknown") as keyof typeof CAUSES]?.label ?? "Unknown"}${out?.causeNote ? ` (${out.causeNote})` : ""}`],
             ]}
           />
           <Text style={[s.small, { marginTop: 4 }]}>
@@ -240,7 +240,7 @@ export function ClaimDocument({ ctx, photos, letter, generatedAt }: { ctx: NonNu
                 <Text style={{ width: 150, fontFamily: "Helvetica-Bold" }}>{ev.label}</Text>
                 <Text style={{ flex: 1, color: C.muted }}>
                   {ev.source}
-                  {ev.note ? ` — ${ev.note}` : ""}
+                  {ev.note ? `: ${ev.note}` : ""}
                 </Text>
               </View>
             ))
@@ -337,14 +337,14 @@ export function ClaimDocument({ ctx, photos, letter, generatedAt }: { ctx: NonNu
             <KV
               items={[
                 ["Contents", b.bag.contentsCategory],
-                ["Estimated value", b.bag.estimatedValue?.amount != null ? formatMoney(b.bag.estimatedValue.amount, b.bag.estimatedValue.currency ?? "USD") : "—"],
+                ["Estimated value", b.bag.estimatedValue?.amount != null ? formatMoney(b.bag.estimatedValue.amount, b.bag.estimatedValue.currency ?? "USD") : "Not entered"],
                 ["Received", fmt(b.bag.receivedAt, tzD)],
                 ["Reported missing", fmt(b.bag.reportedMissingAt, tzD)],
                 ["Delivered", fmt(b.bag.deliveredAt, tzD)],
                 ["Receipts enclosed", String(b.bag.receipts?.length ?? 0)],
                 [
                   "Liability limit",
-                  b.eligibility ? `${b.eligibility.limitSdr.toLocaleString("en")} SDR${b.eligibility.limitLocal ? ` (about ${b.eligibility.limitLocal.toLocaleString("en")} ${b.eligibility.limitCurrency ?? ""})` : ""}` : "—",
+                  b.eligibility ? `${b.eligibility.limitSdr.toLocaleString("en")} SDR${b.eligibility.limitLocal ? ` (about ${b.eligibility.limitLocal.toLocaleString("en")} ${b.eligibility.limitCurrency ?? ""})` : ""}` : "Not available",
                 ],
               ]}
             />
@@ -379,7 +379,7 @@ export function ClaimDocument({ ctx, photos, letter, generatedAt }: { ctx: NonNu
               : []),
             ...ctx.evidence.map((ev) => [`${ev.label}`, `${ev.source}, recorded ${utc(ev.recordedAt)}`] as [string, string]),
             ...(ctx.weather ? ([["Weather", [ctx.weather.departure?.sourceUrl, ctx.weather.arrival?.sourceUrl].filter(Boolean).join(" ")]] as Array<[string, string]>) : []),
-            ["Regulation text", [...new Set((e?.results ?? []).filter((r) => r.applies).flatMap((r) => r.citations.map((c) => c.url).filter(Boolean)))].join(" ") || "—"],
+            ["Regulation text", [...new Set((e?.results ?? []).filter((r) => r.applies).flatMap((r) => r.citations.map((c) => c.url).filter(Boolean)))].join(" ") || "None"],
           ]}
         />
         <Text style={[s.small, { marginTop: 10 }]}>

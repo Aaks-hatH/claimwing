@@ -1,5 +1,5 @@
 export function formatMoney(amount: number | null | undefined, currency: string | null | undefined) {
-  if (amount === null || amount === undefined || !currency) return "—";
+  if (amount === null || amount === undefined || !currency) return "Not set";
   try {
     return new Intl.NumberFormat("en", { style: "currency", currency, maximumFractionDigits: amount % 1 === 0 ? 0 : 2 }).format(amount);
   } catch {
@@ -17,12 +17,12 @@ export function formatDistance(km: number, units: "metric" | "imperial" = "metri
 }
 
 export function formatAltitude(m: number | null | undefined, units: "metric" | "imperial" = "imperial") {
-  if (m === null || m === undefined) return "—";
+  if (m === null || m === undefined) return "Unknown";
   return units === "imperial" ? `${Math.round(m / 0.3048).toLocaleString("en")} ft` : `${Math.round(m).toLocaleString("en")} m`;
 }
 
 export function formatSpeed(ms: number | null | undefined, units: "metric" | "imperial" = "imperial") {
-  if (ms === null || ms === undefined) return "—";
+  if (ms === null || ms === undefined) return "Unknown";
   return units === "imperial" ? `${Math.round(ms / 0.514444)} kt` : `${Math.round(ms * 3.6)} km/h`;
 }
 

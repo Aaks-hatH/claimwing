@@ -220,7 +220,7 @@ function evaluateCompensationRegime(
   /* ---- No disruption ---- */
   if (input.disruption === "none") {
     explanation.push("No disruption is recorded for this flight.");
-    return { ...base, status: "not_eligible", amount: null, minAmount: null, kind: "none", ruleApplied: "—", explanation };
+    return { ...base, status: "not_eligible", amount: null, minAmount: null, kind: "none", ruleApplied: "None", explanation };
   }
 
   /* ---- Delay at final destination (Article 7 as interpreted in Sturgeon) ---- */
@@ -285,7 +285,7 @@ function evaluateUs(input: FlightInput): RegimeResult {
     citations,
   };
   if (!applies) {
-    return { ...base, status: "not_eligible", amount: null, minAmount: null, currency: null, kind: "none", ruleApplied: "—", explanation: [base.coverage] };
+    return { ...base, status: "not_eligible", amount: null, minAmount: null, currency: null, kind: "none", ruleApplied: "None", explanation: [base.coverage] };
   }
 
   if (input.disruption === "denied_boarding") {

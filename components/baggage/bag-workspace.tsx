@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/overla
 import { CaptureWizard } from "./capture-wizard";
 import { CompareView } from "./compare-view";
 import { BagDetails } from "./bag-details";
+import { cn } from "@/lib/utils";
 
 type Mode = "before" | "after" | "compare" | "details";
 
@@ -39,7 +40,46 @@ export function BagWorkspace({
 
   const count = (stage: string) => photos.filter((p) => p.stage === stage).length;
 
+  const before = count("before");
+  const after = count("after");
+  const pending = markers.filter((m) => !m.confirmed && !m.dismissed).length;
+  const confirmed = markers.filter((m) => m.confirmed).length;
+  const damaged = bag.status === "arrived_damaged";
+  const steps: Array<{ label: string; state: "done" | "todo" | "attention" | "na"; hint: string; mode: Mode }> = [
+    { label: "Check-in photos", state: before ? "done" : "todo", hint: before ? `${before} taken` : "Before you hand the bag over", mode: "before" },
+    { label: "Arrival photos", state: after ? "done" : damaged ? "attention" : "todo", hint: after ? `${after} taken` : "Same angles at the carousel", mode: "after" },
+    { label: "Align and compare", state: before && after ? "done" : "na", hint: before && after ? "Use Differences to see what changed" : "Needs both sets of photos", mode: "compare" },
+    { label: "Review findings", state: pending ? "attention" : confirmed ? "done" : before && after ? "todo" : "na", hint: pending ? `${pending} suggestion${pending === 1 ? "" : "s"} to confirm or dismiss` : confirmed ? `${confirmed} confirmed` : "Confirm what is damage", mode: "compare" },
+    { label: "Report and export", state: bag.pirReference ? "done" : damaged ? "attention" : "na", hint: bag.pirReference ? `Report ${bag.pirReference}` : "Airline report and deadlines", mode: "details" },
+  ];
+
   return (
+    <>
+    <nav aria-label="Baggage damage steps" className="mb-6 overflow-x-auto">
+      <ol className="flex min-w-max gap-2">
+        {steps.map((st, i) => (
+          <li key={st.label}>
+            <button
+              type="button"
+              onClick={() => go(st.mode)}
+              className={cn(
+                "flex w-44 flex-col items-start gap-0.5 rounded-2xl border px-3 py-2.5 text-left transition-colors hover:bg-secondary",
+                st.mode === mode && "border-foreground",
+              )}
+            >
+              <span className="flex items-center gap-1.5 text-xs font-medium">
+                <span className={cn("grid size-4 place-items-center rounded-full text-[10px]", st.state === "done" ? "bg-success text-white" : st.state === "attention" ? "bg-warning text-white" : "border text-muted-foreground")} aria-hidden>
+                  {st.state === "done" ? "✓" : st.state === "attention" ? "!" : i + 1}
+                </span>
+                {st.label}
+                <span className="sr-only">: {st.state === "done" ? "done" : st.state === "attention" ? "needs attention" : st.state === "na" ? "not available yet" : "to do"}</span>
+              </span>
+              <span className="text-[11px] leading-snug text-muted-foreground">{st.hint}</span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </nav>
     <Tabs value={mode} onValueChange={(v) => go(v as Mode)}>
       <TabsList aria-label="Bag sections">
         <TabsTrigger value="before">
@@ -100,5 +140,6 @@ export function BagWorkspace({
         <BagDetails trip={trip} bag={bag} />
       </TabsContent>
     </Tabs>
+    </>
   );
 }

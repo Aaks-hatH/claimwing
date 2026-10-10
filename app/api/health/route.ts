@@ -9,8 +9,8 @@ import { scheduleProvider } from "@/lib/providers/schedule";
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/health — configuration and database check (no secrets).
- * GET /api/health?deep=1 — signed-in only: also makes one real call to each flight data source.
+ * GET /api/health: configuration and database check (no secrets).
+ * GET /api/health?deep=1: signed-in only; also makes one real call to each flight data source.
  */
 export async function GET(req: Request) {
   const deep = new URL(req.url).searchParams.get("deep") === "1";

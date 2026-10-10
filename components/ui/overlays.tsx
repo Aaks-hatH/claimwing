@@ -212,7 +212,7 @@ export function TabsTrigger({ className, ...props }: React.ComponentProps<typeof
   );
 }
 export function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Content>) {
-  return <TabsPrimitive.Content className={cn("pt-6 outline-none", className)} {...props} />;
+  return <TabsPrimitive.Content className={cn("pt-6 outline-none data-[state=active]:animate-in data-[state=active]:fade-in-0 data-[state=active]:slide-in-from-bottom-1 data-[state=active]:duration-300", className)} {...props} />;
 }
 
 /* ---------- Switch ---------- */

@@ -9,16 +9,18 @@ export const maxDuration = 60;
 
 /** The combined evidence packet as one PDF. */
 export const GET = withUser<{ id: string }>(
-  async (_req, { params, user }) => {
+  async (req, { params, user }) => {
+    const inline = new URL(req.url).searchParams.get("preview") === "1";
     const ctx = await loadClaimContext(user, params.id);
     if (!ctx) throw notFound("Claim not found");
     const pdf = await renderClaimPdf(ctx, ctx.claim.letterText || templateLetter(ctx));
-    await Claim.updateOne({ _id: ctx.claim._id, userId: user.oid }, { $set: { lastExportAt: new Date() } });
+    // A preview isn't an export, so it doesn't change the claim's export time.
+    if (!inline) await Claim.updateOne({ _id: ctx.claim._id, userId: user.oid }, { $set: { lastExportAt: new Date() } });
     const name = `ClaimWing-${ctx.trip.flightNumber}-${ctx.trip.flightDate}${ctx.trip.demoMode ? "-DEMO" : ""}.pdf`;
     return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${name}"`,
+        "Content-Disposition": `${inline ? "inline" : "attachment"}; filename="${name}"`,
         "Cache-Control": "private, no-store",
       },
     });

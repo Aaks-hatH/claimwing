@@ -9,7 +9,7 @@ const USER_AGENT = "ClaimWing/1.0 (flight delay documentation; contact via app)"
 
 /* ---------------------------- airplanes.live ---------------------------- */
 /**
- * https://airplanes.live/api-guide/ — free, no key, 1 request/second, non-commercial use.
+ * https://airplanes.live/api-guide/ (free, no key, 1 request/second, non-commercial use).
  * Supports lookups by hex (ICAO24) and callsign, so it can find a flight without a schedule API.
  */
 type AirplanesLiveAc = {
@@ -76,7 +76,7 @@ export const AirplanesLiveProvider: FlightDataProvider = {
 
 /* ------------------------------- OpenSky ------------------------------- */
 /**
- * https://opensky-network.org/api — OAuth2 client credentials (optional).
+ * https://opensky-network.org/api (OAuth2 client credentials, optional).
  * Anonymous: 400 credits/day per IP; standard account: 4,000/day.
  * An icao24 query costs 1 credit. Non-commercial use.
  */

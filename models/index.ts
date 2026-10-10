@@ -32,6 +32,14 @@ export interface UserDoc {
     notifyDeadlines?: boolean;
     homeCurrency?: string;
     sdrRate?: number;
+    /** Share structured flight observations with other passengers on the same flight. */
+    communityReports?: boolean;
+  };
+  /** First-run guidance. Stored per user so it never reappears on another device. */
+  guidance?: {
+    onboardingCompletedAt?: Date | null;
+    onboardingSkippedAt?: Date | null;
+    dismissedHints?: string[];
   };
   createdAt: Date;
   updatedAt: Date;
@@ -50,6 +58,12 @@ const userSchema = new Schema<UserDoc>(
       notifyDeadlines: { type: Boolean, default: true },
       homeCurrency: { type: String, default: "USD" },
       sdrRate: { type: Number, default: 1.36 },
+      communityReports: { type: Boolean, default: true },
+    },
+    guidance: {
+      onboardingCompletedAt: Date,
+      onboardingSkippedAt: Date,
+      dismissedHints: { type: [String], default: [] },
     },
   }),
   { timestamps: true },
@@ -72,6 +86,14 @@ export interface TripTracking {
   finalizedAt?: Date | null;
   lastError?: string | null;
 }
+/** The aircraft a data provider assigned to this dated flight, and every earlier assignment. */
+export interface TripAircraft {
+  registration?: string | null;
+  model?: string | null;
+  source?: string | null;
+  seenAt?: Date | null;
+  history?: Array<{ registration: string; source: string; firstSeenAt: Date }>;
+}
 export interface TripDoc {
   _id: Types.ObjectId;
   userId: Types.ObjectId;
@@ -90,6 +112,7 @@ export interface TripDoc {
   demoMode: boolean;
   replay?: { file?: string | null; startedAt?: Date | null; speed?: number | null } | null;
   tracking?: TripTracking;
+  aircraft?: TripAircraft;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -124,10 +147,19 @@ const tripSchema = new Schema<TripDoc>(
       finalizedAt: Date,
       lastError: String,
     },
+    aircraft: {
+      registration: String,
+      model: String,
+      source: String,
+      seenAt: Date,
+      history: { type: [new Schema(def({ registration: String, source: String, firstSeenAt: Date }), { _id: false })], default: [] },
+    },
   }),
   { timestamps: true },
 );
 tripSchema.index({ userId: 1, scheduledDeparture: -1 });
+// Who follows a dated flight (used to authorize access to its shared passenger reports).
+tripSchema.index({ flightNumber: 1, flightDate: 1, origin: 1 });
 tripSchema.index({ "tracking.finalizedAt": 1, scheduledDeparture: 1 });
 export const Trip = model<TripDoc>("Trip", tripSchema);
 
@@ -375,7 +407,7 @@ export interface MarkerDoc {
   angle: Angle;
   rect: Rect;
   note: string;
-  source: "user" | "ai";
+  source: "user" | "ai" | "comparison";
   confirmed: boolean;
   dismissed: boolean;
   createdAt: Date;
@@ -392,7 +424,7 @@ const markerSchema = new Schema<MarkerDoc>(
       h: { type: Number, min: 0, max: 1, required: true },
     },
     note: { type: String, maxlength: 500, default: "" },
-    source: { type: String, enum: ["user", "ai"], default: "user" },
+    source: { type: String, enum: ["user", "ai", "comparison"], default: "user" },
     confirmed: { type: Boolean, default: true },
     dismissed: { type: Boolean, default: false },
   }),
@@ -492,3 +524,80 @@ const rateLimitSchema = new Schema<RateLimitDoc>(
 );
 rateLimitSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 export const RateLimit = model<RateLimitDoc>("RateLimit", rateLimitSchema);
+
+/* ---------------- Flight Ripple: passenger reports ---------------- */
+export const FLIGHT_REPORT_TYPES = [
+  "boarding_not_started", "boarding_started", "gate_changed", "delay_announced", "doors_closed", "departed",
+  "deplaning", "cancellation_announced", "incoming_aircraft_at_gate", "incoming_aircraft_not_at_gate", "landed", "bags_arriving",
+] as const;
+export interface FlightReportDoc {
+  _id: Types.ObjectId;
+  /** Dated flight key, e.g. "BA117:2026-10-10:LHR". */
+  flightKey: string;
+  /** Owner, for rate limits, deletion and export. Never returned to other users. */
+  userId: Types.ObjectId;
+  /** Pseudonymous id: an HMAC of the user and the flight, so it differs on every flight. */
+  contributor: string;
+  type: (typeof FLIGHT_REPORT_TYPES)[number];
+  /** Production data only ever stores passenger reports; simulations never touch this collection. */
+  source: "passenger";
+  observedAt?: Date | null;
+  value?: string | number | null;
+  note?: string | null;
+  moderation: "accepted" | "flagged" | "rejected";
+  flags: string[];
+  eligibility: number;
+  /** Set when the author turns off community sharing; withdrawn reports are excluded from aggregates. */
+  withdrawn: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+const flightReportSchema = new Schema<FlightReportDoc>(
+  def({
+    flightKey: { type: String, required: true, maxlength: 40 },
+    userId: { type: Schema.Types.ObjectId, required: true },
+    contributor: { type: String, required: true, maxlength: 64 },
+    type: { type: String, enum: FLIGHT_REPORT_TYPES, required: true },
+    source: { type: String, enum: ["passenger"], default: "passenger" },
+    observedAt: Date,
+    value: Schema.Types.Mixed,
+    note: { type: String, maxlength: 140 },
+    moderation: { type: String, enum: ["accepted", "flagged", "rejected"], default: "accepted" },
+    flags: { type: [String], default: [] },
+    eligibility: { type: Number, min: 0, max: 1, default: 1 },
+    withdrawn: { type: Boolean, default: false },
+  }),
+  { timestamps: true },
+);
+flightReportSchema.index({ flightKey: 1, createdAt: -1 });
+flightReportSchema.index({ userId: 1, createdAt: -1 });
+flightReportSchema.index({ flightKey: 1, contributor: 1, type: 1, createdAt: -1 });
+export const FlightReport = model<FlightReportDoc>("FlightReport", flightReportSchema);
+
+/* ---------------- Flight Ripple: versioned prediction records ---------------- */
+export interface RipplePredictionDoc {
+  _id: Types.ObjectId;
+  flightKey: string;
+  computedAt: Date;
+  kind: "ml" | "fallback" | "unknown";
+  modelVersion?: string | null;
+  /** Hash of the inputs, so a new record is only written when something changed. */
+  inputsHash: string;
+  /** The full typed result (see lib/ripple/engine.ts), including sources and freshness. */
+  result: unknown;
+  expiresAt: Date;
+}
+const ripplePredictionSchema = new Schema<RipplePredictionDoc>(
+  def({
+    flightKey: { type: String, required: true, maxlength: 40 },
+    computedAt: { type: Date, required: true },
+    kind: { type: String, enum: ["ml", "fallback", "unknown"], required: true },
+    modelVersion: String,
+    inputsHash: { type: String, required: true },
+    result: Schema.Types.Mixed,
+    expiresAt: { type: Date, required: true },
+  }),
+);
+ripplePredictionSchema.index({ flightKey: 1, computedAt: -1 });
+ripplePredictionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+export const RipplePrediction = model<RipplePredictionDoc>("RipplePrediction", ripplePredictionSchema);

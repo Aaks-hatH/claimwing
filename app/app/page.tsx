@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Plane, Plus } from "lucide-react";
+import { FlaskConical, Plane, Plus } from "lucide-react";
+import { TourCard } from "@/components/onboarding/tour-card";
 import { env } from "@/lib/env";
+import { nowMs } from "@/lib/time";
 import { requirePageUser, sdrOf } from "@/lib/session";
 import { dashboardData } from "@/lib/dal";
 import { ensureDeadlineReminders } from "@/lib/deadlines";
@@ -21,6 +23,7 @@ export default async function DashboardPage() {
   if (d.tripCount === 0) {
     return (
       <>
+        <TourCard className="mb-8" />
         <PageHeader eyebrow="Welcome" title={`Hello, ${first}.`} description="Add a flight before you travel. ClaimWing tracks it live and keeps the evidence for you." />
         <EmptyState
           icon={Plane}
@@ -34,6 +37,11 @@ export default async function DashboardPage() {
                 </Link>
               </Button>
               <DemoTripButton enabled={env.demoMode()} />
+              <Button asChild variant="ghost">
+                <Link href="/demo">
+                  <FlaskConical /> Explore the Demo Center
+                </Link>
+              </Button>
             </div>
           }
         />
@@ -42,5 +50,5 @@ export default async function DashboardPage() {
     );
   }
 
-  return <DashboardView d={d} first={first} demoEnabled={env.demoMode()} />;
+  return <DashboardView d={d} first={first} demoEnabled={env.demoMode()} now={nowMs()} />;
 }

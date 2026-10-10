@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { RippleScenario } from "./ripple-scenario";
 import { BagScenario } from "./bag-scenario";
 import { ClaimScenario } from "./claim-scenario";
+import { ALGOS } from "./how";
 
 export type ScenarioCard = { id: string; title: string; summary: string; expected: string; kind: "ripple" | "bag" | "claim"; highlight?: number };
 
@@ -50,7 +51,17 @@ export function DemoCenter({ scenarios }: { scenarios: ScenarioCard[] }) {
       </nav>
 
       <div className="min-w-0 space-y-5">
-        <h2 className="text-3xl">{current.title}</h2>
+        <header>
+          <h2 className="text-3xl">{current.title}</h2>
+          <p className="mt-1 text-base text-muted-foreground">{current.summary}</p>
+          <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Algorithms">
+            {(ALGOS[current.id] ?? []).map((a) => (
+              <li key={a} className="rounded-full border bg-card px-2.5 py-1 text-xs font-medium">
+                {a}
+              </li>
+            ))}
+          </ul>
+        </header>
         {current.kind === "ripple" && <RippleScenario key={current.id} id={current.id} highlight={current.highlight} />}
         {current.kind === "bag" && <BagScenario key="bag" />}
         {current.kind === "claim" && <ClaimScenario key="claim" />}

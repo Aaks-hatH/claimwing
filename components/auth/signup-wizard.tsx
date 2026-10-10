@@ -246,7 +246,7 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
 
       <div className="onboarding-heading">
         <h2 id="signup-title">{stageTitle}</h2>
-        <p>{stage === "flight" ? "We’ll find the schedule first. No password before you know your flight is here." : stage === "passenger" ? "We’ll attach the evidence to the right passenger and booking." : stage === "account" ? "A private account keeps the flight timeline and evidence together." : stage === "saving" ? "Creating your private space and adding the trip you just found." : "Your account has been created; we’re helping the flight catch up."}</p>
+        <p>{stage === "flight" ? "Find your flight first." : stage === "passenger" ? "We’ll attach the evidence to the right passenger and booking." : stage === "account" ? "A private account keeps the flight timeline and evidence together." : stage === "saving" ? "Creating your private space and adding the trip you just found." : "Your account has been created; we’re helping the flight catch up."}</p>
       </div>
 
       {stage !== "saving" && stage !== "recovery" && (
@@ -311,7 +311,7 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
                 <div className="space-y-2"><Label htmlFor="manual-arrival-time">Arrival time</Label><Input id="manual-arrival-time" type="time" value={manual.arrivalTime} onChange={(e) => setManual({ ...manual, arrivalTime: e.target.value })} /></div>
               </div>
               <Button type="submit" variant="outline" className="w-full">Use these flight details <ArrowRight size={16} aria-hidden /></Button>
-              <p className="wizard-helper">Times are local at each airport. We’ll keep your original details alongside any flight data we find later.</p>
+              <p className="wizard-helper">Local times.</p>
             </form>
           )}
           <p className="wizard-private-note"><ShieldCheck size={15} aria-hidden /> Your flight details stay private to your account.</p>

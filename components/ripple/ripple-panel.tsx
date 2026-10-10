@@ -8,7 +8,6 @@ import type { RippleResponse } from "@/lib/ripple/service";
 import type { RippleResult } from "@/lib/ripple/engine";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/primitives";
-import { Hint } from "@/components/help/guidance";
 import { RippleView } from "./ripple-view";
 
 type Loaded = RippleResponse & { fetchedAt: number };
@@ -18,10 +17,10 @@ async function api<T>(url: string, init?: RequestInit): Promise<T> {
   try {
     res = await fetch(url, { ...init, headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) }, cache: "no-store" });
   } catch {
-    throw new Error("You seem to be offline. Check your connection and try again.");
+    throw new Error("Offline");
   }
   const body = await res.json().catch(() => ({}));
-  if (res.status === 401) throw new Error("Your session has ended. Sign in again to continue.");
+  if (res.status === 401) throw new Error("Signed out");
   if (!res.ok) throw new Error((body as { error?: string }).error ?? `Something went wrong (${res.status}).`);
   return body as T;
 }
@@ -119,9 +118,6 @@ export function RipplePanel({ tripId, nextActions }: { tripId: string; nextActio
 
   return (
     <div className="space-y-4">
-      <Hint id="ripple-intro" title="What Flight Ripple shows">
-        It combines live flight data, the aircraft flying in before yours, and reports from other passengers to estimate how late you&apos;ll be. Everything is labelled as observed, reported or predicted.
-      </Hint>
       <RippleView
         result={data.result}
         changes={data.changes}
@@ -138,7 +134,7 @@ export function RipplePanel({ tripId, nextActions }: { tripId: string; nextActio
         legAction={(k) => (data.ownTrips[k] && data.ownTrips[k] !== tripId ? { href: `/app/trips/${data.ownTrips[k]}?tab=ripple`, label: "Open your trip for this flight" } : null)}
         onSubmitReport={async (input) => {
           await api(`/api/ripple/${tripId}/reports`, { method: "POST", body: JSON.stringify(input) });
-          toast.success("Observation shared. Thanks for helping others on this flight.");
+          toast.success("Shared");
           await load();
         }}
         onDeleteReport={async (id) => {

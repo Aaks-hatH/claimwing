@@ -101,7 +101,7 @@ export function ControlBar({ p, labels, title }: { p: Player; labels: string[]; 
       <div className="flex flex-wrap items-center gap-2">
         <Button size="sm" onClick={p.toggle} aria-label={p.playing ? "Pause" : p.index > 0 && !p.done ? "Resume" : "Play"} className="min-w-24">
           {p.playing ? <Pause aria-hidden /> : <Play aria-hidden />}
-          {p.playing ? "Pause" : p.index > 0 && !p.done ? "Resume" : "Play"}
+          {p.playing ? "Pause" : "Play"}
         </Button>
         <Button size="icon-sm" variant="outline" onClick={p.prev} disabled={p.index === 0} aria-label="Previous event">
           <ChevronLeft aria-hidden />
@@ -109,14 +109,13 @@ export function ControlBar({ p, labels, title }: { p: Player; labels: string[]; 
         <Button size="icon-sm" variant="outline" onClick={p.next} disabled={p.done} aria-label="Next event">
           <ChevronRight aria-hidden />
         </Button>
-        <Button size="sm" variant="ghost" onClick={p.restart} aria-label="Restart from the beginning and play">
-          <SkipBack aria-hidden /> Restart
+        <Button size="icon-sm" variant="ghost" onClick={p.restart} aria-label="Restart from the beginning and play">
+          <SkipBack aria-hidden />
         </Button>
-        <Button size="sm" variant="ghost" onClick={p.reset} aria-label="Reset to the starting state">
-          <RotateCcw aria-hidden /> Reset
+        <Button size="icon-sm" variant="ghost" onClick={p.reset} aria-label="Reset to the starting state">
+          <RotateCcw aria-hidden />
         </Button>
         <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
-          Speed
           <select value={p.speed} onChange={(e) => p.setSpeed(Number(e.target.value))} className="rounded-lg border bg-background px-2 py-1 text-xs text-foreground">
             {SPEEDS.map((s) => (
               <option key={s} value={s}>
@@ -143,7 +142,8 @@ export function ControlBar({ p, labels, title }: { p: Player; labels: string[]; 
                   i === p.index ? "border-foreground bg-foreground text-background" : i < p.index ? "bg-secondary text-foreground" : "text-muted-foreground hover:bg-muted",
                 )}
               >
-                <span className="font-mono">{i + 1}</span> {l}
+                <span className="font-mono">{i + 1}</span>
+                <span className="sr-only">{l}</span>
               </button>
             </li>
           ))}

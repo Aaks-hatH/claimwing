@@ -25,7 +25,7 @@ export function TourCard({ className }: { className?: string }) {
             <Sparkles className="mt-0.5 size-5 shrink-0 text-signal" aria-hidden />
             <div>
               <p className="font-medium">New here? Take the 2-minute tour</p>
-              <p className="mt-1 text-sm text-muted-foreground">Add a flight, see how forecasts and passenger reports work, and learn what to photograph.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Add a flight.</p>
             </div>
           </div>
           <div className="flex shrink-0 gap-2">

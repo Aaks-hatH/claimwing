@@ -11,14 +11,14 @@ import { ControlBar, usePlayer } from "./player";
 
 const W = 480;
 const H = 360;
-const STEPS = ["Check-in photo", "Carousel photo", "Align", "Compare", "Review findings", "Export"];
+const STEPS = ["Check-in", "Carousel", "Align", "Compare", "Review", "Export"];
 const NARRATION = [
-  "At check-in the passenger photographs the bag. ClaimWing keeps the original file untouched with its timestamp and a SHA-256 hash.",
-  "At the carousel, the same angle again. The camera guide overlays the first photo, but hand-held photos never line up perfectly.",
-  "ClaimWing tries small shifts of the second photo and keeps the one where the two match best, so framing differences don't look like damage.",
-  "The difference heatmap shows where the photos differ. Drag the split or switch views. A difference isn't automatically damage: shadows and straps differ too.",
-  "Each region is a candidate, not a finding. Confirm what is real damage and reject the rest. Only confirmed marks go into the evidence.",
-  "Before exporting, a checklist makes sure the packet is complete and says what the photos can and can't show.",
+  "Photo at check-in. Original is kept with a hash.",
+  "Photo at the carousel.",
+  "Photos are aligned.",
+  "Heatmap shows differences.",
+  "Confirm or reject each region.",
+  "Check, then export.",
 ];
 
 /** Deterministic synthetic suitcase photos. `damaged` adds a crack, a dent and scuffs; the second photo is also slightly shifted. */
@@ -156,11 +156,11 @@ export function BagScenario() {
   const showHeat = step >= 3 && (view === "heatmap" || view === "split");
   const confirmed = useMemo(() => Object.entries(verdicts).filter(([, v]) => v === "confirmed").map(([k]) => Number(k)), [verdicts]);
   const checklist = [
-    { ok: true, label: "Check-in photo with original timestamp and hash" },
-    { ok: true, label: "Carousel photo of the same angle" },
-    { ok: Boolean(analysis), label: `Photos aligned (shift of ${analysis ? `${Math.abs(analysis.dx * 3)} px, ${Math.abs(analysis.dy * 3)} px` : "pending"})` },
-    { ok: confirmed.length > 0, label: `${confirmed.length} damage mark${confirmed.length === 1 ? "" : "s"} confirmed by you` },
-    { ok: analysis ? analysis.regions.every((_, i) => verdicts[i] && verdicts[i] !== "candidate") : false, label: "Every candidate reviewed (confirmed or rejected)" },
+    { ok: true, label: "Check-in photo" },
+    { ok: true, label: "Carousel photo" },
+    { ok: Boolean(analysis), label: `Aligned` },
+    { ok: confirmed.length > 0, label: `${confirmed.length} confirmed` },
+    { ok: analysis ? analysis.regions.every((_, i) => verdicts[i] && verdicts[i] !== "candidate") : false, label: "All reviewed" },
   ];
 
   function exportJson() {
@@ -187,17 +187,17 @@ export function BagScenario() {
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={step} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-3xl border border-signal/30 bg-info-soft/60 p-5" aria-live="polite">
           <p className="flex items-center gap-2 text-xs font-medium text-signal">
-            <FlaskConical className="size-3.5" aria-hidden /> Simulated photos, step {step + 1} of {STEPS.length}
+            <FlaskConical className="size-3.5" aria-hidden /> {step + 1}/{STEPS.length}
           </p>
           <p className="mt-1 font-display text-xl">{STEPS[step]}</p>
-          <p className="mt-1 max-w-[70ch] text-sm leading-relaxed text-muted-foreground">{NARRATION[step]}</p>
+          <p className="mt-1 max-w-[50ch] text-base">{NARRATION[step]}</p>
         </motion.div>
       </AnimatePresence>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="rounded-3xl border bg-card p-4 sm:p-5">
           {step >= 3 && (
-            <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="Comparison view">
+            <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="View">
               {(["split", "heatmap", "before", "after"] as const).map((v) => (
                 <button
                   key={v}
@@ -206,20 +206,20 @@ export function BagScenario() {
                   onClick={() => setView(v)}
                   className={cn("rounded-full border px-3 py-1 text-xs capitalize", view === v ? "border-foreground bg-foreground text-background" : "hover:bg-muted")}
                 >
-                  {v === "split" ? "Split view" : v === "heatmap" ? "Difference heatmap" : v === "before" ? "Check-in only" : "Carousel only"}
+                  {v === "split" ? "Split" : v === "heatmap" ? "Heatmap" : v === "before" ? "Before" : "After"}
                 </button>
               ))}
             </div>
           )}
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-muted">
-            <canvas ref={beforeRef} width={W} height={H} className="absolute inset-0 h-full w-full" aria-label="Simulated check-in photo of a hard-shell suitcase" role="img" />
+            <canvas ref={beforeRef} width={W} height={H} className="absolute inset-0 h-full w-full" aria-label="Check-in photo" role="img" />
             <motion.canvas
               ref={afterRef}
               width={W}
               height={H}
               className="absolute inset-0 h-full w-full"
               role="img"
-              aria-label="Simulated carousel photo of the same suitcase with damage"
+              aria-label="Carousel photo"
               animate={{ opacity: step === 0 || view === "before" ? 0 : 1, x: step === 2 && analysis ? [0, -analysis.dx * 2, -analysis.dx * 2] : 0 }}
               transition={{ duration: step === 2 ? 1.2 : 0.3 }}
               style={{ clipPath: step >= 3 && view === "split" ? `inset(0 0 0 ${split}%)` : step === 1 ? "inset(0 0 0 0)" : step === 2 ? "inset(0 0 0 50%)" : undefined }}
@@ -260,20 +260,14 @@ export function BagScenario() {
                   max={100}
                   value={split}
                   onChange={(e) => setSplit(Number(e.target.value))}
-                  aria-label="Split position between the check-in and carousel photos"
+                  aria-label="Split position"
                   className="absolute inset-0 h-full w-full cursor-ew-resize opacity-0"
                 />
               </>
             )}
-            <span className="absolute left-2 top-2 rounded bg-white/85 px-2 py-0.5 text-[11px] font-medium text-[#0a1e4a]">Check-in, 06:12</span>
-            {step >= 1 && view !== "before" && <span className="absolute right-2 top-2 rounded bg-[#0a1e4a]/85 px-2 py-0.5 text-[11px] font-medium text-white">Carousel, 17:48</span>}
+            <span className="absolute left-2 top-2 rounded bg-white/85 px-2 py-0.5 text-[11px] font-medium text-[#0a1e4a]">Before 06:12</span>
+            {step >= 1 && view !== "before" && <span className="absolute right-2 top-2 rounded bg-[#0a1e4a]/85 px-2 py-0.5 text-[11px] font-medium text-white">After 17:48</span>}
           </div>
-          {step === 2 && analysis && (
-            <p className="mt-3 text-sm text-muted-foreground">
-              Best match found by shifting the carousel photo {Math.abs(analysis.dx * 3)} px {analysis.dx > 0 ? "left" : "right"} and {Math.abs(analysis.dy * 3)} px {analysis.dy > 0 ? "up" : "down"}.
-            </p>
-          )}
-          {step >= 3 && <p className="mt-3 text-xs text-muted-foreground">Keyboard: focus the photo and use the arrow keys to move the split.</p>}
         </div>
 
         <aside className="space-y-4">
@@ -282,7 +276,7 @@ export function BagScenario() {
               Findings
             </h3>
             {step < 4 ? (
-              <p className="mt-2 text-sm text-muted-foreground">Candidates appear after the comparison. {analysis ? `${analysis.regions.length} found so far.` : ""}</p>
+              <p className="mt-2 text-sm text-muted-foreground">{analysis ? analysis.regions.length : 0}</p>
             ) : (
               <ul className="mt-3 space-y-2">
                 {analysis?.regions.map((r, i) => {
@@ -292,18 +286,18 @@ export function BagScenario() {
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-medium">Region {i + 1}</span>
                         <Badge tone={v === "confirmed" ? "success" : v === "rejected" ? "neutral" : "warning"}>
-                          {v === "confirmed" ? "Confirmed by you" : v === "rejected" ? "Rejected" : "Suggested by comparison"}
+                          {v === "confirmed" ? "Damage" : v === "rejected" ? "Rejected" : "Review"}
                         </Badge>
                       </div>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Difference strength {Math.round(r.score * 100)} of 100, {Math.round(r.area * 1000) / 10}% of the photo
+                        {Math.round(r.score * 100)} / 100
                       </p>
                       <div className="mt-2 flex gap-2">
                         <Button size="sm" variant={v === "confirmed" ? "default" : "outline"} onClick={() => setVerdicts((x) => ({ ...x, [i]: "confirmed" }))} onFocus={() => setSelected(i)}>
-                          <Check aria-hidden /> Damage
+                          <Check aria-hidden />
                         </Button>
                         <Button size="sm" variant={v === "rejected" ? "default" : "outline"} onClick={() => setVerdicts((x) => ({ ...x, [i]: "rejected" }))} onFocus={() => setSelected(i)}>
-                          <X aria-hidden /> Not damage
+                          <X aria-hidden />
                         </Button>
                       </div>
                     </li>
@@ -315,7 +309,7 @@ export function BagScenario() {
           {step >= 5 && (
             <section className="rounded-3xl border bg-card p-5" aria-labelledby="bag-check">
               <h3 id="bag-check" className="text-xl">
-                Before you export
+                Export
               </h3>
               <ul className="mt-3 space-y-2 text-sm">
                 {checklist.map((c) => (
@@ -330,11 +324,9 @@ export function BagScenario() {
                   </li>
                 ))}
               </ul>
-              <p className="mt-3 text-xs leading-relaxed text-muted-foreground">The photos show the bag at two moments. They don&apos;t prove who caused the change, and the packet says so.</p>
               <Button className="mt-3 w-full" onClick={exportJson} disabled={!checklist.every((c) => c.ok)}>
-                <Download aria-hidden /> Export findings (simulated)
+                <Download aria-hidden /> Export
               </Button>
-              {!checklist.every((c) => c.ok) && <p className="mt-2 text-xs text-muted-foreground">Review every candidate and confirm at least one to export.</p>}
             </section>
           )}
         </aside>

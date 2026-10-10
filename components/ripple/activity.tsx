@@ -20,7 +20,7 @@ export function ActivityFeed({ reports, now }: { reports: AggregateResult; now: 
     return (
       <div className="rounded-2xl border border-dashed p-5 text-center text-sm text-muted-foreground">
         <Users className="mx-auto mb-2 size-5" aria-hidden />
-        No observations yet. If you&apos;re at the airport or on board, your report helps everyone on this flight.
+        None yet
       </div>
     );
   }
@@ -48,7 +48,7 @@ export function ActivityFeed({ reports, now }: { reports: AggregateResult; now: 
               <p className="mt-1 text-xs text-muted-foreground">
                 {SOURCE_LABEL[c.source]} · {c.contributorsLabel} · last {ago(c.lastAt, now)}
               </p>
-              {c.level === "contested" && <p className="mt-1 text-xs text-warning">Other reports disagree with this, so it counts for less.</p>}
+              {c.level === "contested" && <p className="mt-1 text-xs text-warning">Contested</p>}
             </motion.li>
           ))}
         </AnimatePresence>
@@ -95,7 +95,7 @@ export function ReportForm({ onSubmit, disabledReason, compact = false }: { onSu
     e.preventDefault();
     if (!type || pending) return;
     setError(null);
-    if (kind === "minutes" && value && !/^\d+$/.test(value)) return setError("Enter the announced delay as a number of minutes.");
+    if (kind === "minutes" && value && !/^\d+$/.test(value)) return setError("Enter minutes");
     setPending(true);
     try {
       await onSubmit({
@@ -109,7 +109,7 @@ export function ReportForm({ onSubmit, disabledReason, compact = false }: { onSu
       setNote("");
       setWhen("0");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Your report wasn't sent. Check your connection and try again.");
+      setError(err instanceof Error ? err.message : "Not sent. Try again.");
     } finally {
       setPending(false);
     }
@@ -168,11 +168,8 @@ export function ReportForm({ onSubmit, disabledReason, compact = false }: { onSu
       )}
       <Button type="submit" disabled={!type || pending} className="w-full">
         {pending ? <Loader2 className="animate-spin" aria-hidden /> : <Send aria-hidden />}
-        {pending ? "Sharing" : "Share observation"}
+        {pending ? "Sharing" : "Share"}
       </Button>
-      <p className="text-xs leading-relaxed text-muted-foreground">
-        Others following this flight see a summary like &ldquo;2 people, 4 min ago&rdquo;, never your name, email or booking.
-      </p>
     </form>
   );
 }

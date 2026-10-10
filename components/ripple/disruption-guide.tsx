@@ -28,9 +28,9 @@ export function DisruptionGuide({ r, mode }: { r: RippleResult; mode: "live" | "
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-xl">
           <DialogHeader>
-            <DialogTitle>Understanding this forecast</DialogTitle>
+            <DialogTitle>Details</DialogTitle>
             <DialogDescription>
-              Step {step + 1} of {STEPS.length}: {STEPS[step]}
+              {step + 1}/{STEPS.length} {STEPS[step]}
             </DialogDescription>
           </DialogHeader>
           <div className="min-h-56 text-sm leading-relaxed">
@@ -38,8 +38,7 @@ export function DisruptionGuide({ r, mode }: { r: RippleResult; mode: "live" | "
               <motion.div key={step} initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2 }} className="space-y-3">
                 {step === 0 && (
                   <>
-                    <p>ClaimWing keeps three kinds of information apart, because only recorded times count for compensation.</p>
-                    <Group title="Observed (recorded by flight data)" items={by("observed").map((f) => f.detail)} empty="Nothing recorded yet." />
+                                        <Group title="Observed (recorded by flight data)" items={by("observed").map((f) => f.detail)} empty="Nothing recorded yet." />
                     <Group title="Reported by passengers" items={by("reported").map((f) => f.detail)} empty="No corroborated reports." />
                     <Group title="Predicted" items={by("predicted").map((f) => f.detail)} empty="No predictions yet." />
                   </>
@@ -47,19 +46,16 @@ export function DisruptionGuide({ r, mode }: { r: RippleResult; mode: "live" | "
                 {step === 1 && (
                   <>
                     {r.rotation.confidence === "unknown" ? (
-                      <p>ClaimWing doesn&apos;t know which aircraft is operating this flight yet, so it can&apos;t say whether a late incoming flight will affect you. {r.rotation.reasons[0]}</p>
+                      <p>Aircraft unknown.</p>
                     ) : incoming ? (
                       <p>
                         Your aircraft, {r.rotation.registration}, flies in as {incoming.flightNumber} from {incoming.origin}. Its arrival is{" "}
                         {incoming.arrivalDelay ? `${incoming.arrivalDelay.state} at ${rangeText(incoming.arrivalDelay)}` : "not estimated yet"}.
-                        {r.rotation.confidence === "planned" ? " This is the airline's current plan and can still change." : ""}
+                        {r.rotation.confidence === "planned" ? " (planned)" : ""}
                       </p>
                     ) : (
-                      <p>Your aircraft, {r.rotation.registration}, has no earlier flight listed, so it may already be at the airport.</p>
+                      <p>{r.rotation.registration}: no earlier flight.</p>
                     )}
-                    <p className="text-muted-foreground">
-                      Flights are linked only when a data provider names the same aircraft. See <Term id="rotation">aircraft rotation</Term>.
-                    </p>
                   </>
                 )}
                 {step === 2 && (
@@ -67,14 +63,14 @@ export function DisruptionGuide({ r, mode }: { r: RippleResult; mode: "live" | "
                     {link?.step ? (
                       <p>{link.step.explanation}</p>
                     ) : (
-                      <p>There isn&apos;t enough information to work out the <Term id="turnaround">turnaround</Term> before your flight.</p>
+                      <p>No <Term id="turnaround">turnaround</Term> data.</p>
                     )}
                     {strong.length ? (
                       <p>
-                        Passengers report: {strong.map((c) => `${c.sentence.toLowerCase()} (${c.contributorsLabel}, ${c.levelLabel.toLowerCase()})`).join("; ")}.
+                        {strong.map((c) => `${c.sentence.toLowerCase()} (${c.contributorsLabel}, ${c.levelLabel.toLowerCase()})`).join("; ")}.
                       </p>
                     ) : (
-                      <p className="text-muted-foreground">No corroborated passenger reports yet. Single reports are shown but don&apos;t change the forecast.</p>
+                      <p className="text-muted-foreground">No corroborated reports.</p>
                     )}
                   </>
                 )}
@@ -87,10 +83,10 @@ export function DisruptionGuide({ r, mode }: { r: RippleResult; mode: "live" | "
                 )}
                 {step === 4 && (
                   <ul className="list-disc space-y-1.5 pl-5">
-                    {r.horizon.stage === "predeparture" && <li>Stay near the gate: forecasts can change quickly, and boarding can start sooner than expected.</li>}
-                    {(r.expectedArrivalDelay.range?.mid ?? 0) >= 120 && <li>Ask the airline for meals and refreshments; at 2+ hours they&apos;re usually owed on EU and UK flights. Keep receipts.</li>}
-                    {mode === "live" && <li>Report what you see at the gate to help others, and correct anything that looks wrong.</li>}
-                    <li>Compensation depends on the recorded arrival time, which ClaimWing captures automatically. You don&apos;t need to do anything for that.</li>
+                    {r.horizon.stage === "predeparture" && <li>Stay near the gate.</li>}
+                    {(r.expectedArrivalDelay.range?.mid ?? 0) >= 120 && <li>Ask for meals. Keep receipts.</li>}
+                    {mode === "live" && <li>Report what you see.</li>}
+                    <li>Claims use the recorded arrival.</li>
                   </ul>
                 )}
               </motion.div>

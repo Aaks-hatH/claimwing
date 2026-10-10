@@ -104,16 +104,16 @@ function report(s: SimState, type: ReportType, who: string, minutesAgo = 0, valu
   s.reports.push({ id: `sim-${reportSeq}`, type, source: "simulation", contributor: `sim-passenger-${who}`, createdAt: t, observedAt: t, moderation: "accepted", value });
 }
 
-const MILD = { windKmh: 18, visibilityKm: 16, precipMm: 0, tempC: 9, severe: false, summary: "Partly cloudy at JFK, light wind, good visibility (simulated)." };
+const MILD = { windKmh: 18, visibilityKm: 16, precipMm: 0, tempC: 9, severe: false, summary: "Clear, light wind." };
 
 /* --------------------------------- scenarios --------------------------------- */
 
 const CASCADE: SimEvent[] = [
-  { at: "16:30", label: "Morning check", narration: "Three hours before departure. The aircraft for your flight, N901SM, is due in from Boston with 55 minutes to turn around. The trained model gives a base risk from route history and weather.", spotlight: "overview" },
+  { at: "16:30", label: "Morning check", narration: "3 h to departure. Inbound plane has 55 min to turn.", spotlight: "overview" },
   {
     at: "18:35",
     label: "Incoming leaves late",
-    narration: "The incoming flight from Boston pushes back 35 minutes late. Its new arrival estimate cuts the turnaround at JFK to about 20 minutes, less than an A320 normally needs.",
+    narration: "Inbound leaves 35 min late. Turn shrinks to about 20 min.",
     spotlight: "rotation",
     apply: (s) => {
       const l = find(s, "B69101");
@@ -125,7 +125,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "19:05",
     label: "Holding over JFK",
-    narration: "Air traffic control puts the incoming flight into a hold. Its estimate slips to 70 minutes late. The knock-on delay now passes through your flight to the aircraft's later legs to Orlando and back.",
+    narration: "Inbound holds. Now 70 min late. Delay reaches later legs.",
     spotlight: "ripple",
     apply: (s) => {
       find(s, "B69101").estimatedArrival = Z("20:30");
@@ -134,7 +134,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "19:20",
     label: "Passengers report no aircraft",
-    narration: "Two people at gate B24 independently report that there's no aircraft at the gate yet. Two independent, recent reports count as corroborated.",
+    narration: "Two passengers: no aircraft at gate. Corroborated.",
     spotlight: "reports",
     apply: (s) => {
       report(s, "incoming_aircraft_not_at_gate", "a", 2);
@@ -145,7 +145,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "19:35",
     label: "A conflicting report",
-    narration: "One passenger reports boarding has started, contradicting two others. ClaimWing doesn't pick a side: the reports are marked contested and count for less.",
+    narration: "One report says boarding started. Reports now contested.",
     spotlight: "reports",
     apply: (s) => {
       report(s, "boarding_started", "c", 0);
@@ -154,7 +154,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "19:50",
     label: "Delay announced",
-    narration: "Three passengers report a gate announcement of a 75-minute delay. Corroborated reports now narrow the forecast range.",
+    narration: "Three passengers: 75 min delay announced. Range narrows.",
     spotlight: "why",
     apply: (s) => {
       report(s, "delay_announced", "a", 1, 75);
@@ -165,7 +165,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "20:28",
     label: "Incoming lands",
-    narration: "The Boston flight reaches the gate 68 minutes late. The aircraft's lateness is now observed, not estimated. It agrees with the announced delay, so the forecast holds.",
+    narration: "Inbound lands 68 min late. Delay is now observed.",
     spotlight: "rotation",
     apply: (s) => {
       const l = find(s, "B69101");
@@ -177,7 +177,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "20:55",
     label: "Boarding",
-    narration: "Four passengers report boarding has started. The older 'not started' reports have faded with time.",
+    narration: "Four passengers: boarding started. Old reports fade.",
     spotlight: "reports",
     apply: (s) => {
       report(s, "boarding_started", "a", 1);
@@ -189,7 +189,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "21:25",
     label: "Your flight departs",
-    narration: "Your flight pushes back 70 minutes late. This is an en-route update now: the model knows the real departure delay and becomes much more confident.",
+    narration: "Departs 70 min late. Model is now confident.",
     spotlight: "overview",
     apply: (s) => {
       const l = find(s, "B69102");
@@ -201,7 +201,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "21:45",
     label: "Aircraft swap downstream",
-    narration: "The airline moves the Orlando to New York leg to a spare aircraft. N901SM's later legs change, so ClaimWing drops the old link instead of assuming it still holds. B69103 is no longer at risk from your delay.",
+    narration: "Later leg gets a spare plane. Old link dropped.",
     spotlight: "ripple",
     apply: (s) => {
       const l = find(s, "B69103");
@@ -214,7 +214,7 @@ const CASCADE: SimEvent[] = [
   {
     at: "00:20",
     label: "Arrived",
-    narration: "Your flight reaches the gate in Orlando 70 minutes late. This is the recorded outcome. Under US rules a delay gives no cash compensation, which ClaimWing checks separately, never from the forecast.",
+    narration: "Arrived 70 min late. Recorded outcome.",
     spotlight: "overview",
     apply: (s) => {
       const l = find(s, "B69102");
@@ -226,15 +226,15 @@ const CASCADE: SimEvent[] = [
 ];
 
 const CONFLICT: SimEvent[] = [
-  { at: "19:10", label: "No reports yet", narration: "No aircraft data in this scenario, so only passenger reports can move the forecast. With nothing reported, there isn't enough data.", spotlight: "overview", apply: (s) => ((s.targetReg = null), (s.aircraftLookup = "not_configured")) },
-  { at: "19:20", label: "One report", narration: "A single passenger says a 90-minute delay was announced. One report is shown as unverified and does not change the forecast.", spotlight: "reports", apply: (s) => report(s, "delay_announced", "a", 0, 90) },
-  { at: "19:26", label: "Corroborated", narration: "Two more people report the same announcement. Independent, recent and matching: the forecast now uses it.", spotlight: "why", apply: (s) => (report(s, "delay_announced", "b", 0, 90), report(s, "delay_announced", "c", 0, 90)) },
-  { at: "19:30", label: "Same person again", narration: "Passenger A taps the same report three more times. Repeats from one person count once, so nothing changes.", spotlight: "reports", apply: (s) => (report(s, "delay_announced", "a", 0, 90), report(s, "delay_announced", "a", 0, 90)) },
-  { at: "19:40", label: "Contradiction", narration: "Two others report doors closed, which can't be true at the same time as 'boarding not started'. Both claims are marked contested and weigh less.", spotlight: "reports", apply: (s) => (report(s, "boarding_not_started", "a", 0), report(s, "boarding_not_started", "b", 0), report(s, "doors_closed", "d", 0), report(s, "doors_closed", "e", 0)) },
+  { at: "19:10", label: "No reports yet", narration: "No data yet.", spotlight: "overview", apply: (s) => ((s.targetReg = null), (s.aircraftLookup = "not_configured")) },
+  { at: "19:20", label: "One report", narration: "One report. Unverified. No change.", spotlight: "reports", apply: (s) => report(s, "delay_announced", "a", 0, 90) },
+  { at: "19:26", label: "Corroborated", narration: "Three matching reports. Forecast updates.", spotlight: "why", apply: (s) => (report(s, "delay_announced", "b", 0, 90), report(s, "delay_announced", "c", 0, 90)) },
+  { at: "19:30", label: "Same person again", narration: "Repeat taps count once.", spotlight: "reports", apply: (s) => (report(s, "delay_announced", "a", 0, 90), report(s, "delay_announced", "a", 0, 90)) },
+  { at: "19:40", label: "Contradiction", narration: "Reports conflict. Both marked contested.", spotlight: "reports", apply: (s) => (report(s, "boarding_not_started", "a", 0), report(s, "boarding_not_started", "b", 0), report(s, "doors_closed", "d", 0), report(s, "doors_closed", "e", 0)) },
   {
     at: "20:20",
     label: "Official data resolves it",
-    narration: "Flight data confirms the aircraft left the gate at 20:18. Official observations outrank passenger reports, and the forecast becomes an en-route update.",
+    narration: "Official data: left gate 20:18. It outranks reports.",
     spotlight: "quality",
     apply: (s) => {
       s.aircraftLookup = "simulated";
@@ -251,7 +251,7 @@ const SWAP: SimEvent[] = [
   {
     at: "19:05",
     label: "Late aircraft",
-    narration: "Your aircraft, N901SM, is held over JFK and expected 70 minutes late. With 55 minutes scheduled on the ground, a knock-on delay looks likely.",
+    narration: "Your plane is 70 min late. Knock-on delay likely.",
     spotlight: "rotation",
     apply: (s) => {
       const l = find(s, "B69101");
@@ -263,7 +263,7 @@ const SWAP: SimEvent[] = [
   {
     at: "19:15",
     label: "Swap announced",
-    narration: "The airline swaps your flight onto N907SM, a spare aircraft already parked at JFK. The late Boston flight is no longer linked to yours, so its delay stops counting against you.",
+    narration: "Spare plane assigned. Delay no longer counts.",
     spotlight: "why",
     apply: (s) => {
       s.prevReg = s.targetReg;
@@ -279,14 +279,14 @@ const SWAP: SimEvent[] = [
   {
     at: "19:40",
     label: "Aircraft at the gate",
-    narration: "Passengers confirm an aircraft is at the gate. Risk falls back toward the base level from history and weather.",
+    narration: "Plane at gate. Risk drops.",
     spotlight: "reports",
     apply: (s) => (report(s, "incoming_aircraft_at_gate", "a", 0), report(s, "incoming_aircraft_at_gate", "b", 0)),
   },
   {
     at: "19:50",
     label: "Assignment unclear",
-    narration: "The provider's latest data doesn't list your flight on any aircraft. ClaimWing shows the rotation as unknown instead of keeping an assumption it can't support.",
+    narration: "Plane unknown. Rotation hidden.",
     spotlight: "rotation",
     apply: (s) => {
       find(s, "B69102").registration = null;
@@ -298,11 +298,11 @@ const SWAP: SimEvent[] = [
 ];
 
 const STALE: SimEvent[] = [
-  { at: "18:00", label: "All sources up", narration: "Schedule data, aircraft data and weather are all fresh.", spotlight: "quality", apply: (s) => ((s.providerUpdatedAt = Z("17:58")), (find(s, "B69101").estimatedArrival = Z("19:30"))) },
+  { at: "18:00", label: "All sources up", narration: "All data fresh.", spotlight: "quality", apply: (s) => ((s.providerUpdatedAt = Z("17:58")), (find(s, "B69101").estimatedArrival = Z("19:30"))) },
   {
     at: "18:50",
     label: "Provider outage",
-    narration: "The schedule provider stops answering. ClaimWing keeps the last good data, says how old it is, and lowers its confidence instead of treating old estimates as current.",
+    narration: "Schedule data down. Showing last good data.",
     spotlight: "quality",
     apply: (s) => {
       s.providerErrors = ["Schedule provider: HTTP 503 (simulated outage)"];
@@ -312,7 +312,7 @@ const STALE: SimEvent[] = [
   {
     at: "19:30",
     label: "Aircraft data missing",
-    narration: "The aircraft lookup also fails. The rotation becomes unknown, and the ripple chain disappears rather than showing links that can't be checked.",
+    narration: "Aircraft data down. Rotation hidden.",
     spotlight: "rotation",
     apply: (s) => {
       s.aircraftLookup = "error";
@@ -323,7 +323,7 @@ const STALE: SimEvent[] = [
   {
     at: "19:45",
     label: "Back online",
-    narration: "Data returns. Freshness timestamps update and confidence recovers.",
+    narration: "Data back. Confidence recovers.",
     spotlight: "overview",
     apply: (s) => {
       s.providerErrors = [];
@@ -339,33 +339,33 @@ const STALE: SimEvent[] = [
 export const SCENARIOS: Array<ScenarioMeta & { events: SimEvent[] }> = [
   {
     id: "cascade",
-    title: "Flight Ripple cascade",
-    summary: "An incoming flight is delayed, the turnaround shrinks, and the delay ripples through three legs flown by the same aircraft.",
-    expected: "Risk rises step by step as the incoming flight slips, passenger reports corroborate and conflict, and a downstream swap removes a link.",
+    title: "Cascade",
+    summary: "A late plane delays later flights.",
+    expected: "",
     focusFlight: "B69102",
     events: CASCADE,
   },
   {
     id: "reports",
-    title: "Conflicting passenger reports",
-    summary: "Passenger observations arrive one by one: unverified, corroborated, repeated, contradicted, then settled by official data.",
-    expected: "Only independent, recent, consistent reports move the forecast. Duplicates count once; contradictions are marked contested.",
+    title: "Reports",
+    summary: "Passenger reports vs official data.",
+    expected: "",
     focusFlight: "B69102",
     events: CONFLICT,
   },
   {
     id: "swap",
-    title: "Aircraft swap",
-    summary: "Your late aircraft is replaced by a spare, then the assignment disappears from the data.",
-    expected: "Risk drops after the swap, and the rotation becomes unknown when the data no longer supports it.",
+    title: "Swap",
+    summary: "A spare plane replaces yours.",
+    expected: "",
     focusFlight: "B69102",
     events: SWAP,
   },
   {
     id: "stale",
-    title: "Missing or stale data",
-    summary: "The schedule provider and aircraft lookup go down, then recover.",
-    expected: "ClaimWing labels old data, lowers confidence and removes unsupported links instead of inventing information.",
+    title: "Stale data",
+    summary: "Data goes down, then returns.",
+    expected: "",
     focusFlight: "B69102",
     events: STALE,
   },

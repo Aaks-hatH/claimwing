@@ -19,11 +19,11 @@ export function RippleScenario({ id, highlight }: { id: string; highlight?: numb
     let alive = true;
     fetch(`/api/demo/scenarios/${id}`)
       .then(async (r) => {
-        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error ?? "The scenario couldn't load.");
+        if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error ?? "Could not load.");
         return r.json();
       })
       .then((d) => alive && setData(d))
-      .catch((e) => alive && setError(e instanceof Error ? e.message : "The scenario couldn't load."));
+      .catch((e) => alive && setError(e instanceof Error ? e.message : "Could not load."));
     return () => {
       alive = false;
     };
@@ -34,7 +34,7 @@ export function RippleScenario({ id, highlight }: { id: string; highlight?: numb
       <div role="alert" className="rounded-3xl border bg-card p-8 text-center text-sm">
         <p className="font-medium">{error}</p>
         <Button className="mt-4" variant="outline" onClick={() => window.location.reload()}>
-          Try again
+          Retry
         </Button>
       </div>
     );
@@ -42,7 +42,7 @@ export function RippleScenario({ id, highlight }: { id: string; highlight?: numb
   if (!data) {
     return (
       <div className="flex items-center justify-center gap-2 rounded-3xl border bg-card p-16 text-sm text-muted-foreground" aria-busy="true">
-        <Loader2 className="size-4 animate-spin" aria-hidden /> Building the simulation
+        <Loader2 className="size-4 animate-spin" aria-hidden />
       </div>
     );
   }
@@ -75,10 +75,9 @@ function Loaded({ data, highlight }: { data: Built; highlight?: number }) {
       <div className="flex flex-wrap items-center gap-2">
         {highlight !== undefined && p.index !== highlight && (
           <Button size="sm" variant="signal" onClick={() => p.goto(highlight)}>
-            <Sparkles aria-hidden /> Jump to the key moment
+            <Sparkles aria-hidden /> Key moment
           </Button>
         )}
-        {data.model && <span className="text-xs text-muted-foreground">Trained model {data.model.version} runs on these simulated inputs where it covers the flight.</span>}
       </div>
       <RippleView
         result={f.result}
@@ -100,10 +99,10 @@ function Loaded({ data, highlight }: { data: Built; highlight?: number }) {
               aria-live="polite"
             >
               <p className="flex items-center gap-2 text-xs font-medium text-signal">
-                <FlaskConical className="size-3.5" aria-hidden /> Simulated, step {p.index + 1} of {data.frames.length}, {new Date(f.at).toISOString().slice(11, 16)} UTC
+                <FlaskConical className="size-3.5" aria-hidden /> {p.index + 1}/{data.frames.length} · {new Date(f.at).toISOString().slice(11, 16)} UTC
               </p>
               <p className="mt-1 font-display text-xl">{f.label}</p>
-              <p className="mt-1 max-w-[70ch] text-sm leading-relaxed text-muted-foreground">{f.narration}</p>
+              <p className="mt-1 max-w-[50ch] text-base">{f.narration}</p>
             </motion.div>
           </AnimatePresence>
         }

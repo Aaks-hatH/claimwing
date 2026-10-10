@@ -299,13 +299,13 @@ export function TripForm({
                 <option value="uk">A UK airline</option>
                 <option value="other">Another airline</option>
               </NativeSelect>
-              <p className="text-xs text-muted-foreground">For codeshares, what matters is the airline that actually flew the plane.</p>
+              <p className="text-xs text-muted-foreground">Operating airline.</p>
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="icao24">Aircraft transponder (ICAO24, optional)</Label>
               <Input id="icao24" placeholder="e.g. 400f00" className="font-mono" aria-invalid={!!e.icao24} {...register("icao24")} />
               <FieldError message={e.icao24?.message} />
-              <p className="text-xs text-muted-foreground">Normally found automatically. Set it only if tracking picks the wrong plane.</p>
+              <p className="text-xs text-muted-foreground">Only if tracking is wrong.</p>
             </div>
           </CardContent>
         )}

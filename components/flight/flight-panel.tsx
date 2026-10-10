@@ -121,13 +121,13 @@ export function FlightPanel({
             </Button>
           }
         >
-          This flight is a stored replay running about 90× faster than real time, so times shown are on the replay clock. Nothing here comes from a live source.
+          Replay at 90x. Not live.
         </Alert>
       )}
 
       {showAlert && (
-        <Alert tone="warning" icon={AlertTriangle} title={`Your flight may qualify for compensation. Expected about ${formatDuration(estDelay)} late.`}>
-          Keep your boarding pass and receipts, and ask the airline in writing for the reason. Below is what you&apos;re owed while you wait.
+        <Alert tone="warning" icon={AlertTriangle} title={`May qualify. About ${formatDuration(estDelay)} late.`}>
+          Keep your boarding pass and receipts.
         </Alert>
       )}
 
@@ -137,10 +137,10 @@ export function FlightPanel({
           {state.track.length === 0 && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 m-3 rounded-lg border bg-background/90 p-3 text-sm backdrop-blur">
               {state.active
-                ? "Waiting for the aircraft to appear on live tracking. Position data usually starts at pushback or takeoff."
+                ? "Waiting for position data."
                 : new Date(trip.scheduledDeparture).getTime() > new Date(state.now).getTime()
-                  ? "Live tracking starts 3 hours before departure."
-                  : "No position data was recorded for this flight."}
+                  ? "Tracking starts 3 h before departure."
+                  : "No position data."}
             </div>
           )}
         </div>
@@ -187,7 +187,7 @@ export function FlightPanel({
         </CardContent>
         {(offline || state.errors.length > 0) && (
           <div className="border-t px-5 py-3 text-xs text-muted-foreground">
-            {offline ? "Can't reach the server right now. We'll keep trying." : `Data source note: ${state.errors.join("; ")}`}
+            {offline ? "Offline" : state.errors.join("; ")}
           </div>
         )}
       </Card>
@@ -238,14 +238,9 @@ export function FlightPanel({
           <div>
             <p className="text-xs font-medium text-muted-foreground">{delay !== null ? "Arrival delay" : "Expected arrival delay"}</p>
             <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight">
-              {delay !== null ? formatDuration(delay) : estDelay !== null ? formatDuration(estDelay) : "Not known yet"}
+              {delay !== null ? formatDuration(delay) : estDelay !== null ? formatDuration(estDelay) : "-"}
             </p>
-            <p className="mt-1 max-w-xl text-xs text-muted-foreground">
-              {delay !== null
-                ? `Measured against the scheduled arrival. Source: ${out?.delaySource}.`
-                : "We'll measure the final delay when the flight arrives."}{" "}
-              Airlines measure arrival when the doors open, which can be a few minutes after touchdown, so every time below shows where it came from.
-            </p>
+            <p className="mt-1 text-xs text-muted-foreground">{delay !== null ? out?.delaySource : ""}</p>
           </div>
           {delay !== null && <StatusBadge status={delay >= 15 ? "delayed" : "on_time"} className="self-start sm:self-center" />}
         </CardContent>
@@ -281,7 +276,7 @@ export function FlightPanel({
         <Card>
           <CardHeader>
             <CardTitle>Altitude profile</CardTitle>
-            <CardDescription>From live position reports, times in UTC.</CardDescription>
+            
           </CardHeader>
           <CardContent>
             <AltitudeChart track={state.track} units={units} />
@@ -292,7 +287,7 @@ export function FlightPanel({
       <Card>
         <CardHeader>
           <CardTitle>Time evidence</CardTitle>
-          <CardDescription>Every time we recorded, with its source. Airlines sometimes dispute delay times, so keep this.</CardDescription>
+          
         </CardHeader>
         <CardContent className="p-0">
           {out?.evidence.length ? (

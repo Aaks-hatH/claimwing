@@ -41,7 +41,6 @@ export function DemoCenter({ scenarios }: { scenarios: ScenarioCard[] }) {
                     <span className="block text-sm font-medium">
                       {i + 1}. {s.title}
                     </span>
-                    <span className="mt-0.5 block text-xs leading-snug text-muted-foreground">{s.summary}</span>
                   </span>
                 </button>
               </li>
@@ -51,14 +50,7 @@ export function DemoCenter({ scenarios }: { scenarios: ScenarioCard[] }) {
       </nav>
 
       <div className="min-w-0 space-y-5">
-        <header className="rounded-3xl border bg-card p-5 sm:p-6">
-          <h2 className="text-3xl">{current.title}</h2>
-          <p className="mt-2 max-w-[70ch] text-sm leading-relaxed text-muted-foreground">{current.summary}</p>
-          <p className="mt-3 text-sm">
-            <span className="font-medium">What to expect: </span>
-            <span className="text-muted-foreground">{current.expected}</span>
-          </p>
-        </header>
+        <h2 className="text-3xl">{current.title}</h2>
         {current.kind === "ripple" && <RippleScenario key={current.id} id={current.id} highlight={current.highlight} />}
         {current.kind === "bag" && <BagScenario key="bag" />}
         {current.kind === "claim" && <ClaimScenario key="claim" />}

@@ -67,7 +67,7 @@ export function OutcomeEditor({ trip, outcome, manualArrival, manualDeparture }:
     <Card>
       <CardHeader>
         <CardTitle>What happened</CardTitle>
-        <CardDescription>Tell us what the airline told you. Times you enter here are marked as entered by you.</CardDescription>
+        
       </CardHeader>
       <CardContent className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
@@ -109,7 +109,7 @@ export function OutcomeEditor({ trip, outcome, manualArrival, manualDeparture }:
         )}
         {disruption === "denied_boarding" && (
           <div className="space-y-1.5">
-            <Label htmlFor="voluntary">Did you volunteer to give up your seat?</Label>
+            <Label htmlFor="voluntary">Gave up seat voluntarily?</Label>
             <NativeSelect id="voluntary" value={voluntary} onChange={(e) => setVoluntary(e.target.value)}>
               <option value="">Choose</option>
               <option value="no">No, I was refused boarding</option>
@@ -119,17 +119,17 @@ export function OutcomeEditor({ trip, outcome, manualArrival, manualDeparture }:
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="manualDep">Actual departure you saw (local, optional)</Label>
+          <Label htmlFor="manualDep">Departed (local)</Label>
           <Input id="manualDep" type="datetime-local" value={dep} onChange={(e) => setDep(e.target.value)} />
           <p className="text-xs text-muted-foreground">{trip.origin.iata} time zone</p>
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="manualArr">Doors opened at the gate (local, optional)</Label>
+          <Label htmlFor="manualArr">Doors opened (local)</Label>
           <Input id="manualArr" type="datetime-local" value={arr} onChange={(e) => setArr(e.target.value)} />
           <p className="text-xs text-muted-foreground">{trip.destination.iata} time zone. This is the time that counts legally.</p>
         </div>
         <div className="space-y-1.5 sm:col-span-2">
-          <Label htmlFor="causeNote">Notes (what staff said, announcements)</Label>
+          <Label htmlFor="causeNote">Notes</Label>
           <Textarea id="causeNote" rows={3} maxLength={1000} value={causeNote} onChange={(e) => setCauseNote(e.target.value)} placeholder="e.g. Captain announced a hydraulic fault at 09:40." />
         </div>
       </CardContent>

@@ -56,21 +56,17 @@ export function ClaimPanel({
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_22rem]">
       <div className="space-y-6">
-        {trip.demoMode && <Alert tone="info" title="Demo replay">Results here come from a stored demonstration flight. Don&apos;t submit this claim.</Alert>}
+        {trip.demoMode && <Alert tone="info" title="Demo. Do not submit." />}
         {!outcome?.actualArrival && outcome?.disruption !== "cancellation" && outcome?.disruption !== "denied_boarding" && (
-          <Alert tone="info" title="No arrival time yet">
-            The delay is measured when the flight arrives. You can also enter the time the doors opened on the Flight tab.
-          </Alert>
+          <Alert tone="info" title="No arrival time yet" />
         )}
         {applicable.length === 0 && (
           <Card>
             <CardContent className="flex gap-3 p-5 text-sm">
               <Scale className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />
               <div>
-                <p className="font-medium">No regime we check covers this flight</p>
-                <p className="text-muted-foreground">
-                  We check EU261, UK261 and US DOT rules. Other countries have their own rules (for example Canada&apos;s APPR or Brazil&apos;s ANAC), which we don&apos;t assess yet.
-                </p>
+                <p className="font-medium">No rules cover this flight</p>
+                <p className="text-muted-foreground">EU261, UK261, US DOT only.</p>
               </div>
             </CardContent>
           </Card>
@@ -157,7 +153,7 @@ export function ClaimPanel({
         <Card>
           <CardHeader>
             <CardTitle>Start a claim</CardTitle>
-            <CardDescription>Builds a letter and an evidence packet from what you&apos;ve recorded. Nothing is sent to the airline.</CardDescription>
+            
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-1.5">

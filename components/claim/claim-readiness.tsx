@@ -17,12 +17,12 @@ export function ClaimReadiness({ r }: { r: Readiness }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 id="readiness-title" className="text-2xl">
-            Claim readiness
+            Readiness
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">{missing ? `${missing} thing${missing === 1 ? "" : "s"} to add before you send it.` : "Everything required is in place. Preview the packet, then download it."}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{missing ? `${missing} missing` : "Ready"}</p>
         </div>
         <p className="text-sm tabular-nums text-muted-foreground">
-          {r.done} of {r.required} required
+          {r.done}/{r.required}
         </p>
       </div>
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted" role="progressbar" aria-valuemin={0} aria-valuemax={r.required} aria-valuenow={r.done} aria-label="Required items completed">

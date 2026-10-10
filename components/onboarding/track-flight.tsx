@@ -156,7 +156,7 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
                   <Input id="tf-date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground">Use the local date on your boarding pass. A flight number repeats every day, so the date picks your exact flight.</p>
+              <p className="text-xs text-muted-foreground">Local date on your boarding pass.</p>
               {error && <p role="alert" className="rounded-xl bg-danger-soft px-3 py-2 text-sm text-danger">{error}</p>}
               <Button type="submit" disabled={busy} className="w-full sm:w-auto">
                 {busy ? <Loader2 className="animate-spin" aria-hidden /> : <Search aria-hidden />} Find my flight
@@ -281,13 +281,13 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
                 <p className="text-sm font-medium">Useful next steps</p>
                 <ul className="mt-2 grid gap-2 sm:grid-cols-3">
                   <li>
-                    <Link href={`/app/trips/${tripId}?tab=baggage`} className="block rounded-xl border p-3 text-sm hover:bg-muted">Photograph your bag before check-in</Link>
+                    <Link href={`/app/trips/${tripId}?tab=baggage`} className="block rounded-xl border p-3 text-sm hover:bg-muted">Photograph your bag</Link>
                   </li>
                   <li>
-                    <Link href={`/app/trips/${tripId}?tab=ripple`} className="block rounded-xl border p-3 text-sm hover:bg-muted">See the full Flight Ripple forecast</Link>
+                    <Link href={`/app/trips/${tripId}?tab=ripple`} className="block rounded-xl border p-3 text-sm hover:bg-muted">See forecast</Link>
                   </li>
                   <li>
-                    <Link href={`/app/trips/${tripId}?tab=flight`} className="block rounded-xl border p-3 text-sm hover:bg-muted">Know your rights if it&apos;s delayed</Link>
+                    <Link href={`/app/trips/${tripId}?tab=flight`} className="block rounded-xl border p-3 text-sm hover:bg-muted">Your rights</Link>
                   </li>
                 </ul>
               </div>

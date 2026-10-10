@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SCENARIOS } from "@/lib/ripple/sim/scenarios";
 import { DemoCenter, type ScenarioCard } from "@/components/demo/demo-center";
 
-export const metadata: Metadata = { title: "Demo Center", description: "Repeatable, simulated walkthroughs of ClaimWing's Flight Ripple, evidence and claim features." };
+export const metadata: Metadata = { title: "Demo", description: "Simulated ClaimWing walkthroughs." };
 
 const HIGHLIGHT: Record<string, number> = { cascade: 5, reports: 2, swap: 1, stale: 2 };
 
@@ -19,16 +19,16 @@ export default async function DemoPage() {
     ...SCENARIOS.map((s) => ({ id: s.id, title: s.title, summary: s.summary, expected: s.expected, kind: "ripple" as const, highlight: HIGHLIGHT[s.id] })),
     {
       id: "bag",
-      title: "Baggage damage investigation",
-      summary: "Two photos of the same bag are aligned and compared; candidate damage regions are found and you confirm or reject each one.",
-      expected: "A difference heatmap and candidate regions from a real in-browser comparison. Only regions you confirm are exported.",
+      title: "Bag damage",
+      summary: "Compare two photos of one bag.",
+      expected: "Heatmap. Confirm or reject each region.",
       kind: "bag",
     },
     {
       id: "claim",
-      title: "Claim preparation",
-      summary: "A simulated disruption moves from estimates to a recorded arrival, through evidence, eligibility, a letter and a verified export.",
-      expected: "Eligibility from the real rules engine using recorded facts only, missing items you can fix, and SHA-256 verification that detects edits.",
+      title: "Claim",
+      summary: "From delay to a verified claim.",
+      expected: "Eligibility, letter, verified export.",
       kind: "claim",
     },
   ];
@@ -40,23 +40,20 @@ export default async function DemoPage() {
           <div className="flex items-center gap-3">
             <Logo href={signedIn ? "/app" : "/"} />
             <span className="hidden items-center gap-1.5 rounded-full border border-warning/30 bg-warning-soft px-2.5 py-1 text-xs font-medium text-warning sm:inline-flex">
-              <FlaskConical className="size-3.5" aria-hidden /> Demo Center: simulated data
+              <FlaskConical className="size-3.5" aria-hidden /> Simulated
             </span>
           </div>
           <Button asChild size="sm" variant="outline">
-            <Link href={signedIn ? "/app" : "/"}>{signedIn ? "Back to my trips" : "Back to ClaimWing"}</Link>
+            <Link href={signedIn ? "/app" : "/"}>{signedIn ? "My trips" : "Home"}</Link>
           </Button>
         </div>
       </header>
       <main className="mx-auto max-w-7xl px-4 pb-24 pt-8 md:px-8">
         <div className="mb-8 max-w-3xl">
           <p className="inline-flex items-center gap-1.5 rounded-full border border-warning/30 bg-warning-soft px-2.5 py-1 text-xs font-medium text-warning sm:hidden">
-            <FlaskConical className="size-3.5" aria-hidden /> Simulated data
+            <FlaskConical className="size-3.5" aria-hidden /> Simulated
           </p>
-          <h1 className="mt-3 text-4xl sm:text-5xl">Demo Center</h1>
-          <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-            Repeatable scenarios that run ClaimWing&apos;s real algorithms on invented flights, passengers and photos. Nothing here touches real flight data or anyone&apos;s account, and no external service needs to be online. Press Play, step through events, or jump straight to the key moment.
-          </p>
+          <h1 className="mt-3 text-4xl sm:text-5xl">Demo</h1>
         </div>
         <Suspense>
           <DemoCenter scenarios={scenarios} />

@@ -98,7 +98,7 @@ export function OverviewPanel({
           <CardContent>
             {bags.length === 0 ? (
               <p className="text-sm text-muted-foreground">
-                No bags documented. Photograph checked bags at check-in so you can prove any damage later.
+                No bags yet.
               </p>
             ) : (
               <ul className="space-y-2">

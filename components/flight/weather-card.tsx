@@ -36,7 +36,7 @@ export function WeatherCard({ tripId, weather, canFetch }: { tripId: string; wea
       <CardHeader className="flex-row items-start justify-between gap-4">
         <div>
           <CardTitle>Weather context</CardTitle>
-          <CardDescription>Airlines often cite weather. This shows what weather models recorded at both airports.</CardDescription>
+          
         </div>
         {canFetch && (
           <Button size="sm" variant="outline" onClick={fetchWx} loading={busy}>

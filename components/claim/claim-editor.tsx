@@ -74,7 +74,7 @@ export function ClaimEditor({
       setPreviousText(text);
       setText(b.text);
       setSource(b.source);
-      toast.success(mode === "polish" ? "Polished. Review it before saving; no facts were changed." : "Letter rebuilt from your latest facts.");
+      toast.success(mode === "polish" ? "Polished" : "Rebuilt");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong");
     } finally {
@@ -90,19 +90,19 @@ export function ClaimEditor({
     document.body.appendChild(a);
     a.click();
     a.remove();
-    toast.success(kind === "pdf" ? "Evidence packet generated. Check your downloads." : "Original files packaged with SHA-256 hashes. Check your downloads.");
+    toast.success(kind === "pdf" ? "Done" : "Done");
     setTimeout(() => router.refresh(), 4000);
   }
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_20rem]">
       <div className="space-y-6">
-        {demo && <Alert tone="warning" title="This claim uses a demo replay. Don't send it to an airline." />}
+        {demo && <Alert tone="warning" title="Demo. Do not send." />}
         <Card id="claim-letter" className="scroll-mt-28">
           <CardHeader className="flex-row flex-wrap items-start justify-between gap-3">
             <div>
               <CardTitle>Claim letter</CardTitle>
-              <CardDescription>Built only from the facts you recorded. Fill in anything in [BRACKETS] before sending.</CardDescription>
+              <CardDescription>Fill in [BRACKETS].</CardDescription>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button size="sm" variant="outline" onClick={() => letter("template")} loading={busy === "template"}>
@@ -160,10 +160,10 @@ export function ClaimEditor({
         <Card>
           <CardHeader>
             <CardTitle>Export</CardTitle>
-            <CardDescription>One PDF with everything, or a ZIP of your untouched original files.</CardDescription>
+            
           </CardHeader>
           <CardContent className="space-y-2">
-            {dirty && <p className="text-xs text-warning">Save the letter first so the export includes your edits.</p>}
+            {dirty && <p className="text-xs text-warning">Save first.</p>}
             <Button className="w-full" variant="outline" asChild>
               <a href={`/api/claims/${claim.id}/pdf?preview=1`} target="_blank" rel="noopener" aria-disabled={dirty} onClick={(e) => dirty && e.preventDefault()}>
                 <Eye /> Preview the PDF
@@ -182,7 +182,7 @@ export function ClaimEditor({
         <Card>
           <CardHeader>
             <CardTitle>Status</CardTitle>
-            <CardDescription>Update this yourself as things happen. ClaimWing never sends anything to the airline.</CardDescription>
+            
           </CardHeader>
           <CardContent className="space-y-4">
             <form
@@ -270,7 +270,7 @@ export function ClaimEditor({
         open={exportKind !== null}
         onOpenChange={(o) => !o && setExportKind(null)}
         title={exportKind === "zip" ? "Download your original files?" : "Download the evidence PDF?"}
-        description="The file is created on our server and downloaded to this device only. Check what it contains before you share it:"
+        description="Check before sharing:"
         confirmLabel="Download"
         onConfirm={() => {
           if (exportKind) download(exportKind);
@@ -281,7 +281,7 @@ export function ClaimEditor({
           {manifest.map((m, i) => (
             <li key={i}>{m}</li>
           ))}
-          {exportKind === "zip" && <li>Original photos exactly as uploaded, including any embedded location data, and an evidence.json file with SHA-256 hashes</li>}
+          {exportKind === "zip" && <li>Original photos (with location data) and evidence.json</li>}
         </ul>
       </ConfirmDialog>
 
@@ -289,7 +289,7 @@ export function ClaimEditor({
         open={confirmDelete}
         onOpenChange={setConfirmDelete}
         title="Delete this claim?"
-        description="The letter and status history are deleted. Your trip, photos and flight evidence stay."
+        description="Letter and history are deleted."
         confirmLabel="Delete claim"
         destructive
         onConfirm={async () => {

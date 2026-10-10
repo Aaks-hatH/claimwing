@@ -1,0 +1,128 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource-variable/inter";
+@import "leaflet/dist/leaflet.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.208 0.042 265.755);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.208 0.042 265.755);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.208 0.042 265.755);
+  --primary: oklch(0.457 0.24 277.023);
+  --primary-foreground: oklch(0.984 0.003 247.858);
+  --secondary: oklch(0.968 0.007 247.896);
+  --secondary-foreground: oklch(0.279 0.041 260.031);
+  --muted: oklch(0.968 0.007 247.896);
+  --muted-foreground: oklch(0.488 0.04 256.788);
+  --accent: oklch(0.962 0.018 272.314);
+  --accent-foreground: oklch(0.359 0.144 278.697);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.929 0.013 255.508);
+  --input: oklch(0.869 0.022 252.894);
+  --ring: oklch(0.511 0.262 276.966);
+  --success: oklch(0.527 0.154 150.069);
+  --success-soft: oklch(0.962 0.044 156.743);
+  --warning: oklch(0.555 0.163 48.998);
+  --warning-soft: oklch(0.973 0.071 103.193);
+  --danger: oklch(0.505 0.213 27.518);
+  --danger-soft: oklch(0.971 0.013 17.38);
+  --info-soft: oklch(0.962 0.018 272.314);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: oklch(0.155 0.03 264.695);
+  --foreground: oklch(0.968 0.007 247.896);
+  --card: oklch(0.19 0.035 265);
+  --card-foreground: oklch(0.968 0.007 247.896);
+  --popover: oklch(0.19 0.035 265);
+  --popover-foreground: oklch(0.968 0.007 247.896);
+  --primary: oklch(0.673 0.182 276.935);
+  --primary-foreground: oklch(0.155 0.03 264.695);
+  --secondary: oklch(0.25 0.035 264);
+  --secondary-foreground: oklch(0.968 0.007 247.896);
+  --muted: oklch(0.25 0.035 264);
+  --muted-foreground: oklch(0.72 0.03 257);
+  --accent: oklch(0.28 0.07 277);
+  --accent-foreground: oklch(0.93 0.03 273);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(0.3 0.03 264);
+  --input: oklch(0.35 0.03 264);
+  --ring: oklch(0.673 0.182 276.935);
+  --success: oklch(0.765 0.177 163.223);
+  --success-soft: oklch(0.3 0.06 160);
+  --warning: oklch(0.828 0.189 84.429);
+  --warning-soft: oklch(0.32 0.06 75);
+  --danger: oklch(0.704 0.191 22.216);
+  --danger-soft: oklch(0.3 0.08 25);
+  --info-soft: oklch(0.28 0.07 277);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info-soft: var(--info-soft);
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-ring;
+  }
+  /* Leaflet sits under dialogs and the mobile tab bar. */
+  .leaflet-pane,
+  .leaflet-top,
+  .leaflet-bottom {
+    z-index: 1 !important;
+  }
+  .leaflet-container {
+    font-family: inherit;
+    background: var(--muted);
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}

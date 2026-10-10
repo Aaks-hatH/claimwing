@@ -7,6 +7,7 @@ import type { SimFrame, ScenarioMeta } from "@/lib/ripple/sim/scenarios";
 import { RippleView } from "@/components/ripple/ripple-view";
 import { Button } from "@/components/ui/button";
 import { ControlBar, usePlayer } from "./player";
+import { HowCard, RIPPLE_HOW } from "./how";
 
 type Built = { meta: ScenarioMeta; frames: SimFrame[]; airports: Record<string, { tz: string; city: string | null; name: string }>; model: { version: string } | null };
 
@@ -103,6 +104,7 @@ function Loaded({ data, highlight }: { data: Built; highlight?: number }) {
               </p>
               <p className="mt-1 font-display text-xl">{f.label}</p>
               <p className="mt-1 max-w-[50ch] text-base">{f.narration}</p>
+              <HowCard how={RIPPLE_HOW[`${data.meta.id}:${f.label}`]} />
             </motion.div>
           </AnimatePresence>
         }

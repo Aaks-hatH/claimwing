@@ -1,31 +1,26 @@
-"use client";
-
-import { Bar, BarChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-
 const LABEL: Record<string, string> = {
   draft: "Draft",
   ready: "Ready",
   sent: "Filed",
-  awaiting_reply: "Awaiting",
+  awaiting_reply: "Awaiting reply",
   paid: "Paid",
   rejected: "Rejected",
 };
 
+/** Claims by status as thin bars. Plain markup, so it is crisp, accessible and needs no chart library. */
 export function ClaimsChart({ data }: { data: Array<{ status: string; count: number }> }) {
-  const rows = data.map((d) => ({ name: LABEL[d.status] ?? d.status, count: d.count }));
+  const max = Math.max(1, ...data.map((d) => d.count));
   return (
-    <div className="h-48" role="img" aria-label={rows.map((r) => `${r.name}: ${r.count}`).join(", ")}>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={rows} layout="vertical" margin={{ left: 8, right: 16, top: 4, bottom: 4 }}>
-          <XAxis type="number" allowDecimals={false} hide />
-          <YAxis type="category" dataKey="name" width={70} tickLine={false} axisLine={false} tick={{ fontSize: 12, fill: "var(--muted-foreground)" }} />
-          <Tooltip
-            cursor={{ fill: "var(--muted)" }}
-            contentStyle={{ background: "var(--popover)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
-          />
-          <Bar dataKey="count" fill="var(--primary)" radius={[0, 4, 4, 0]} barSize={14} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <ul className="space-y-4" aria-label="Claims by status">
+      {data.map((d) => (
+        <li key={d.status} className="grid grid-cols-[7.5rem_1fr_1.5rem] items-center gap-3 text-sm">
+          <span className={d.count ? "text-foreground" : "text-muted-foreground"}>{LABEL[d.status] ?? d.status}</span>
+          <span className="h-1 overflow-hidden rounded-full bg-secondary" aria-hidden>
+            <span className="block h-full rounded-full bg-signal transition-[width] duration-700" style={{ width: `${(d.count / max) * 100}%` }} />
+          </span>
+          <span className="text-right font-mono text-xs tabular-nums text-muted-foreground">{d.count}</span>
+        </li>
+      ))}
+    </ul>
   );
 }

@@ -62,8 +62,8 @@ function Suitcase({ damaged, sheen }: { damaged?: boolean; sheen: string }) {
 function Marker({ x, y, n }: { x: number; y: number; n: number }) {
   return (
     <g>
-      <circle cx={x} cy={y} r="11" fill="var(--signal)" stroke="#1e252d" strokeWidth="2" />
-      <text x={x} y={y + 4} textAnchor="middle" fontSize="12" fontWeight="800" fill="#1e252d">
+      <circle cx={x} cy={y} r="11" fill="var(--signal)" stroke="#ffffff" strokeWidth="2" />
+      <text x={x} y={y + 4} textAnchor="middle" fontSize="12" fontWeight="800" fill="#ffffff">
         {n}
       </text>
     </g>
@@ -123,16 +123,16 @@ export function BagCompare() {
         <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${pos}%)` }}>
           <Scene damaged />
         </div>
-        <span className="absolute left-3 top-3 rounded bg-white/85 px-2 py-1 text-xs font-semibold text-[#1e252d]">
+        <span className="absolute left-3 top-3 rounded bg-white/85 px-2 py-1 text-xs font-semibold text-[#0a1e4a]">
           Check-in, 06:12
         </span>
-        <span className="absolute right-3 top-3 rounded bg-[#1e252d]/85 px-2 py-1 text-xs font-semibold text-white">
+        <span className="absolute right-3 top-3 rounded bg-[#0a1e4a]/85 px-2 py-1 text-xs font-semibold text-white">
           Baggage hall, 17:48
         </span>
         <div className="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 bg-signal" style={{ left: `${pos}%` }} aria-hidden>
-          <span className="absolute top-1/2 left-1/2 flex h-9 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-[3px] rounded bg-signal shadow-[0_1px_2px_rgb(0_0_0/0.25)]">
-            <span className="h-4 w-px bg-[#1e252d]" />
-            <span className="h-4 w-px bg-[#1e252d]" />
+          <span className="absolute top-1/2 left-1/2 flex h-9 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-[3px] rounded-full bg-signal shadow-[0_1px_6px_rgb(11_99_255/0.5)]">
+            <span className="h-4 w-px bg-white" />
+            <span className="h-4 w-px bg-white" />
           </span>
         </div>
         <label htmlFor={id} className="sr-only">

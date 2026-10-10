@@ -19,7 +19,7 @@ import { NotificationBell } from "./notification-bell";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/app", label: "Dashboard", icon: LayoutDashboard, exact: true },
+  { href: "/app", label: "Home", icon: LayoutDashboard, exact: true },
   { href: "/app/trips", label: "Trips", icon: Plane },
   { href: "/app/claims", label: "Claims", icon: FileText },
   { href: "/app/settings", label: "Settings", icon: Settings },
@@ -30,6 +30,7 @@ function useActive() {
   return (href: string, exact?: boolean) => (exact ? path === href : path === href || path.startsWith(href + "/"));
 }
 
+/** A single quiet top bar: wordmark, four words, and your account. No sidebar, so the page can breathe. */
 export function AppShell({ user, children }: { user: { name: string; email: string; image?: string | null }; children: React.ReactNode }) {
   const isActive = useActive();
   const { setTheme } = useTheme();
@@ -41,59 +42,45 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
     .toUpperCase();
 
   return (
-    <div className="app-layout min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
-      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2">
+    <div className="app-layout min-h-dvh">
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-background focus:px-4 focus:py-2">
         Skip to content
       </a>
-      {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r bg-card md:flex">
-        <div className="flex h-14 items-center px-5">
-          <Logo href="/app" />
-        </div>
-        <div className="px-3 pb-3">
-          <Button asChild variant="signal" className="w-full justify-start" size="sm">
-            <Link href="/app/trips/new">
-              <Plus /> New trip
-            </Link>
-          </Button>
-        </div>
-        <nav className="flex-1 space-y-0.5 px-3" aria-label="Main">
-          {NAV.map((item) => {
-            const active = isActive(item.href, item.exact);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                  active &&
-                    "bg-secondary text-foreground before:absolute before:inset-y-1.5 before:-left-3 before:w-[3px] before:rounded-r before:bg-signal",
-                )}
-              >
-                <item.icon className="size-4" aria-hidden />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-        <p className="px-5 pb-4 text-[11px] leading-relaxed text-muted-foreground">
-          Documentation support, not legal advice.
-        </p>
-      </aside>
 
-      <div className="flex min-w-0 flex-col">
-        <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b bg-background/85 px-4 backdrop-blur md:px-8">
-          <div className="md:hidden">
-            <Logo href="/app" />
-          </div>
-          <div className="hidden md:block" />
-          <div className="flex items-center gap-1">
+      <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-md">
+        <div className="mx-auto flex h-20 max-w-5xl items-center justify-between gap-4 px-5 md:px-8">
+          <Logo href="/app" />
+
+          <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+            {NAV.map((item) => {
+              const active = isActive(item.href, item.exact);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "relative rounded-full px-4 py-2 text-sm text-muted-foreground transition-colors hover:text-foreground",
+                    active && "bg-secondary font-medium text-foreground",
+                  )}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="flex items-center gap-1.5">
+            <Button asChild variant="signal" size="sm" className="mr-1 hidden sm:inline-flex">
+              <Link href="/app/trips/new">
+                <Plus /> New trip
+              </Link>
+            </Button>
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
-                  className="ml-1 flex size-8 items-center justify-center overflow-hidden rounded-full border bg-muted text-xs font-semibold"
+                  className="ml-1 flex size-9 items-center justify-center overflow-hidden rounded-full bg-sky text-xs font-medium text-signal transition-colors hover:bg-secondary"
                   aria-label="Account menu"
                 >
                   {user.image ? (
@@ -131,16 +118,17 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-        </header>
+        </div>
+      </header>
 
-        <main id="main" className="mx-auto w-full max-w-6xl flex-1 px-4 pb-28 pt-6 md:px-8 md:pb-12 md:pt-8">
-          {children}
-        </main>
-      </div>
+      <main id="main" className="mx-auto w-full max-w-5xl px-5 pb-32 pt-8 md:px-8 md:pb-24 md:pt-14">
+        {children}
+        <p className="mt-24 text-center text-[11px] text-muted-foreground">Documentation support, not legal advice.</p>
+      </main>
 
       {/* Mobile tab bar */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+        className="fixed inset-x-3 bottom-3 z-40 grid grid-cols-5 rounded-full border bg-background/90 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden"
         aria-label="Main"
       >
         {[NAV[0], NAV[1], { href: "/app/trips/new", label: "New", icon: Plus }, NAV[2], NAV[3]].map((item) => {
@@ -150,12 +138,9 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
               key={item.href}
               href={item.href}
               aria-current={active ? "page" : undefined}
-              className={cn(
-                "relative flex flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted-foreground",
-                active && "text-foreground before:absolute before:inset-x-5 before:top-0 before:h-[3px] before:rounded-b before:bg-signal",
-              )}
+              className={cn("flex flex-col items-center gap-1 py-2.5 text-[10.5px] text-muted-foreground", active && "text-signal")}
             >
-              <item.icon className="size-5" aria-hidden />
+              <item.icon className="size-[18px]" aria-hidden />
               {item.label}
             </Link>
           );

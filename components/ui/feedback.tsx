@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, Info, XCircle, type LucideIcon } from "luc
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs font-medium whitespace-nowrap [&_svg]:size-3",
+  "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap [&_svg]:size-3",
   {
     variants: {
       tone: {
@@ -12,7 +12,7 @@ const badgeVariants = cva(
         success: "border-transparent bg-success-soft text-success",
         warning: "border-transparent bg-warning-soft text-warning",
         danger: "border-transparent bg-danger-soft text-danger",
-        info: "border-transparent bg-info-soft text-accent-foreground",
+        info: "border-transparent bg-info-soft text-signal",
       },
     },
     defaultVariants: { tone: "neutral" },
@@ -112,7 +112,7 @@ export function Alert({
   const t = alertTones[tone];
   const Icon = icon ?? t.icon;
   return (
-    <div role={tone === "danger" ? "alert" : "status"} className={cn("flex gap-3 rounded-lg border p-4 text-sm", t.cls, className)}>
+    <div role={tone === "danger" ? "alert" : "status"} className={cn("flex gap-3 rounded-2xl border p-4 text-sm", t.cls, className)}>
       <Icon className="mt-0.5 size-4 shrink-0" aria-hidden />
       <div className="min-w-0 flex-1 space-y-1">
         {title && <p className="font-medium">{title}</p>}
@@ -137,12 +137,12 @@ export function EmptyState({
   className?: string;
 }) {
   return (
-    <div className={cn("flex flex-col items-center justify-center rounded-lg border border-dashed px-6 py-12 text-center", className)}>
-      <div className="mb-4 flex size-10 items-center justify-center rounded-lg border bg-muted/50">
-        <Icon className="size-5 text-muted-foreground" aria-hidden />
+    <div className={cn("flex flex-col items-center justify-center rounded-3xl border border-dashed px-6 py-20 text-center", className)}>
+      <div className="mb-5 flex size-12 items-center justify-center rounded-full bg-sky">
+        <Icon className="size-5 text-signal" aria-hidden />
       </div>
-      <p className="font-medium">{title}</p>
-      {description && <p className="mt-1 max-w-sm text-sm text-muted-foreground">{description}</p>}
+      <p className="font-display text-2xl">{title}</p>
+      {description && <p className="mt-2 max-w-sm text-sm text-muted-foreground">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </div>
   );
@@ -160,11 +160,11 @@ export function PageHeader({
   eyebrow?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-10 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        {eyebrow && <div className="mb-1 text-sm text-muted-foreground">{eyebrow}</div>}
-        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
-        {description && <p className="mt-1 text-sm text-muted-foreground">{description}</p>}
+        {eyebrow && <div className="eyebrow mb-3 text-[11px] text-muted-foreground">{eyebrow}</div>}
+        <h1 className="text-3xl tracking-tight sm:text-4xl">{title}</h1>
+        {description && <p className="mt-2 max-w-[60ch] text-sm leading-relaxed text-muted-foreground">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>}
     </div>
@@ -190,10 +190,10 @@ export function FieldError({ message }: { message?: string }) {
 
 export function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: React.ReactNode }) {
   return (
-    <div className="rounded-lg border bg-card p-4">
-      <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tabular-nums tracking-tight">{value}</p>
-      {hint && <p className="mt-1 text-xs text-muted-foreground">{hint}</p>}
+    <div>
+      <p className="eyebrow text-[10.5px] text-muted-foreground">{label}</p>
+      <p className="mt-3 font-display text-4xl font-normal tabular-nums tracking-tight">{value}</p>
+      {hint && <p className="mt-2 max-w-[28ch] text-xs leading-relaxed text-muted-foreground">{hint}</p>}
     </div>
   );
 }

@@ -105,11 +105,11 @@ export function ArrivalsBoard() {
   const reasons = primary ? primary.explanation.slice(1, 4) : [result.summary];
 
   return (
-    <div className="overflow-hidden rounded-xl bg-board text-board-ink ring-1 ring-black/20">
+    <div className="overflow-hidden rounded-3xl bg-board text-board-ink">
       {/* Board */}
       <div className="px-3 pb-4 pt-4 sm:px-6 sm:pt-5">
         <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-          <h2 className="text-lg font-bold tracking-tight stretch-semi text-board-ink sm:text-xl">
+          <h2 className="text-xl stretch-semi text-board-ink sm:text-2xl">
             Arrivals, London Heathrow
           </h2>
           <p className="text-[13px] text-board-ink/60">Example flights. Pick one, then set how late it landed.</p>
@@ -137,12 +137,12 @@ export function ArrivalsBoard() {
                   className={cn(
                     "relative col-span-full grid grid-cols-subgrid items-center rounded-md py-1.5 pl-2 pr-1 text-left transition-colors md:pl-3",
                     active ? "bg-white/[0.07]" : "hover:bg-white/[0.04]",
-                    "focus-visible:outline-signal",
+                    "focus-visible:outline-board-accent",
                   )}
                 >
                   <span
                     aria-hidden
-                    className={cn("absolute inset-y-1 left-0 w-[3px] rounded-full", active ? "bg-signal" : "bg-transparent")}
+                    className={cn("absolute inset-y-1 left-0 w-[3px] rounded-full", active ? "bg-board-accent" : "bg-transparent")}
                   />
                   <Flaps className="hidden md:inline-flex" text={clock(r.scheduled)} length={5} startDelay={i * 3} label={`Due ${clock(r.scheduled)}`} />
                   <Flaps text={r.flight} length={6} startDelay={i * 3} label={`${r.airline} ${r.flight}`} />
@@ -151,14 +151,14 @@ export function ArrivalsBoard() {
                     <Flaps className="hidden md:inline-flex" text={r.city} length={12} startDelay={i * 3} label={`from ${r.city}`} />
                   </span>
                   <Flaps
-                    className={late ? "text-signal" : undefined}
+                    className={late ? "text-board-accent" : undefined}
                     text={late ? `LANDED ${clock(r.scheduled + d)}` : "ON TIME"}
                     length={12}
                     startDelay={i * 3}
                     label={late ? `landed ${clock(r.scheduled + d)}, ${lateBy(d)}` : "on time"}
                   />
                   <Flaps
-                    className={owed !== "NONE" ? "text-signal" : "text-board-ink/50"}
+                    className={owed !== "NONE" ? "text-board-accent" : "text-board-ink/50"}
                     text={owed}
                     length={5}
                     startDelay={i * 3}
@@ -171,7 +171,7 @@ export function ArrivalsBoard() {
       </div>
 
       {/* Controls and the rule behind the number */}
-      <div className="grid gap-px bg-border md:grid-cols-[1.1fr_1fr]">
+      <div className="grid gap-px bg-white/10 md:grid-cols-[1.1fr_1fr]">
         <div className="space-y-6 bg-card p-5 text-card-foreground sm:p-6">
           <div>
             <div className="flex items-baseline justify-between gap-4">
@@ -194,7 +194,7 @@ export function ArrivalsBoard() {
                 setDelays((prev) => prev.map((x, i) => (i === selected ? v : x)));
               }}
               aria-valuetext={lateBy(delay)}
-              className="mt-3 h-6 w-full cursor-pointer accent-[var(--primary)]"
+              className="mt-3 h-6 w-full cursor-pointer accent-[var(--signal)]"
             />
             <div className="mt-1 flex justify-between text-[11px] tabular-nums text-muted-foreground" aria-hidden>
               <span>0 h</span>
@@ -211,8 +211,8 @@ export function ArrivalsBoard() {
                 <label
                   key={c}
                   className={cn(
-                    "cursor-pointer rounded-md border px-2.5 py-1.5 text-[13px] transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring",
-                    cause === c ? "border-primary bg-primary text-primary-foreground" : "bg-background hover:bg-muted",
+                    "cursor-pointer rounded-full border px-3 py-1.5 text-[13px] transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring",
+                    cause === c ? "border-signal bg-signal text-signal-foreground" : "bg-background hover:border-signal",
                   )}
                 >
                   <input type="radio" name="cause" value={c} checked={cause === c} onChange={() => setCause(c)} className="sr-only" />
@@ -227,7 +227,7 @@ export function ArrivalsBoard() {
           <p className="text-sm text-muted-foreground">{primary ? primary.regimeName : "No rule we check"}</p>
           <p
             className={cn(
-              "mt-1 text-3xl font-extrabold tracking-tight stretch-display sm:text-4xl",
+              "mt-1 text-3xl stretch-display sm:text-4xl",
               primary?.status === "eligible" && "text-success",
               primary?.status === "needs_review" && "text-warning",
             )}

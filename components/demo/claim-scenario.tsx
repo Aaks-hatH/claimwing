@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/feedback";
 import { Textarea } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
 import { ControlBar, usePlayer } from "./player";
+import { CLAIM_HOW, HowCard } from "./how";
 
 const STEPS = ["Delay", "Arrival", "Evidence", "Eligibility", "Deadlines", "Letter", "Export"];
 const NARRATION = [
@@ -144,6 +145,7 @@ export function ClaimScenario() {
           </p>
           <p className="mt-1 font-display text-xl">{STEPS[step]}</p>
           <p className="mt-1 max-w-[50ch] text-base">{NARRATION[step]}</p>
+          <HowCard how={CLAIM_HOW[step]} />
         </motion.div>
       </AnimatePresence>
 

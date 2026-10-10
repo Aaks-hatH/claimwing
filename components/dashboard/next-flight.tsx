@@ -24,7 +24,7 @@ export function NextFlight({ trip, label = "Next flight" }: { trip: TripView; la
   return (
     <Link
       href={`/app/trips/${trip.id}?tab=flight`}
-      className="group relative block overflow-hidden rounded-[2rem] border bg-gradient-to-b from-sky/70 to-card px-6 py-9 transition-colors hover:border-signal/40 sm:px-12 sm:py-12"
+      className="group relative block overflow-hidden rounded-[2rem] border bg-gradient-to-b from-sky/70 to-card px-6 py-9 transition-[border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-signal/40 sm:px-12 sm:py-12"
     >
       <div className="flex items-center justify-between gap-4">
         <p className="eyebrow text-[11px] text-muted-foreground">{label}</p>
@@ -40,10 +40,10 @@ export function NextFlight({ trip, label = "Next flight" }: { trip: TripView; la
           <p className="mt-3 text-sm text-muted-foreground">{trip.origin.city ?? trip.origin.name}</p>
         </div>
         <div className="relative mb-9 h-10 sm:mb-14" aria-hidden>
-          <svg viewBox="0 0 200 40" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible">
+          <svg viewBox="0 0 200 40" preserveAspectRatio="none" className="arc-draw absolute inset-0 size-full overflow-visible">
             <path d="M0 38 Q100 -18 200 38" fill="none" stroke="var(--signal)" strokeOpacity="0.55" strokeWidth="1.5" strokeDasharray="2 6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
           </svg>
-          <Plane className={`absolute left-1/2 top-0 size-5 -translate-x-1/2 rotate-45 text-signal ${inAir ? "animate-pulse" : ""}`} />
+          <Plane className={`plane-fly absolute size-5 text-signal ${inAir ? "plane-fly-live" : ""}`} />
         </div>
         <div className="text-right">
           <p className="font-display text-6xl font-light leading-none tracking-tight sm:text-8xl">{trip.destination.iata}</p>

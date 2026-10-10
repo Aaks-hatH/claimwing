@@ -8,10 +8,11 @@ import { useTheme } from "next-themes";
 export type TrackPoint = { t: string; lat: number; lon: number; alt: number | null; gs: number | null; trk: number | null; gnd: boolean };
 type Airport = { iata: string; lat: number; lon: number; name: string };
 
-const TILE_URL = process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.basemaps.cartocdn.com/{theme}_all/{z}/{x}/{y}{r}.png";
-const ATTRIBUTION =
-  process.env.NEXT_PUBLIC_MAP_ATTRIBUTION ||
-  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+const TILE_LIGHT = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+const TILE_DARK = "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+/** Optional override. Use {theme} for light/dark, e.g. a MapTiler or Stadia URL with your own key. */
+const CUSTOM_TILE_URL = process.env.NEXT_PUBLIC_MAP_TILE_URL;
+const ATTRIBUTION = process.env.NEXT_PUBLIC_MAP_ATTRIBUTION || 'Tiles &copy; Esri &mdash; Esri, HERE, Garmin, OpenStreetMap contributors';
 
 /** Intermediate points on the great circle, so the planned route curves like a real flight path. */
 function greatCircle(a: Airport, b: Airport, n = 64): [number, number][] {
@@ -76,7 +77,8 @@ export default function FlightMap({ origin, destination, track, label }: { origi
     return pts;
   }, [track]);
   const last = track[track.length - 1];
-  const url = TILE_URL.replace("{theme}", resolvedTheme === "dark" ? "dark" : "light");
+  const dark = resolvedTheme === "dark";
+  const url = CUSTOM_TILE_URL ? CUSTOM_TILE_URL.replace("{theme}", dark ? "dark" : "light") : dark ? TILE_DARK : TILE_LIGHT;
   const c = COLORS[resolvedTheme === "dark" ? "dark" : "light"];
 
   return (
@@ -88,7 +90,7 @@ export default function FlightMap({ origin, destination, track, label }: { origi
       className="h-full w-full"
       attributionControl
     >
-      <TileLayer url={url} attribution={ATTRIBUTION} />
+      <TileLayer url={url} attribution={ATTRIBUTION} maxZoom={16} />
       <FitBounds points={planned} />
       <Polyline positions={planned} pathOptions={{ color: c.muted, weight: 1.5, dashArray: "4 6", opacity: 0.8 }} />
       {line.length > 1 && <Polyline positions={line} pathOptions={{ color: c.primary, weight: 3 }} />}

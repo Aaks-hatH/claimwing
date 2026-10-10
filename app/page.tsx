@@ -99,15 +99,15 @@ export default async function Landing() {
           <div className="relative mx-auto max-w-6xl px-4 pb-24 pt-36 md:px-8 md:pb-32 md:pt-44">
             <div className="grid gap-16 lg:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] lg:items-end">
               <div>
-                <p className="hero-kicker">Flight evidence, in real time</p>
-                <h1 className="hero-title mt-8">
+                <p className="hero-kicker" data-rise style={{ "--rise-delay": "0ms" } as React.CSSProperties}>Flight evidence, in real time</p>
+                <h1 className="hero-title mt-8" data-rise style={{ "--rise-delay": "120ms" } as React.CSSProperties}>
                   Build your claim <em>while the flight is still in the air.</em>
                 </h1>
-                <p className="mt-8 max-w-[46ch] text-[15px] leading-8 text-muted-foreground md:text-base">
+                <p className="mt-8 max-w-[46ch] text-[15px] leading-8 text-muted-foreground md:text-base" data-rise style={{ "--rise-delay": "260ms" } as React.CSSProperties}>
                   ClaimWing follows your flight live, records when it really landed, photographs your bag before and after, and
                   puts it all in one evidence packet for the airline. Free, and documentation, not legal advice.
                 </p>
-                <div className="mt-10 flex flex-wrap gap-3">
+                <div className="mt-10 flex flex-wrap gap-3" data-rise style={{ "--rise-delay": "380ms" } as React.CSSProperties}>
                   <Button asChild variant="signal" size="lg">
                     <Link href={startHref}>Find your flight <ArrowUpRight size={17} aria-hidden /></Link>
                   </Button>
@@ -118,7 +118,7 @@ export default async function Landing() {
                 <p className="mt-6 text-xs text-muted-foreground">No cut of your claim. You choose what to send.</p>
               </div>
 
-              <div className="hero-spotlight" aria-label="Live flight tracking visual">
+              <div className="hero-spotlight" aria-label="Live flight tracking visual" data-rise style={{ "--rise-delay": "300ms" } as React.CSSProperties}>
                 <div className="hero-spotlight-line" aria-hidden />
                 <Plane className="hero-spotlight-plane size-8" aria-hidden />
                 <div className="hero-spotlight-meta">

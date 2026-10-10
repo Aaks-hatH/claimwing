@@ -339,3 +339,53 @@
   .motion-enabled .motion-reveal:not(.motion-visible) { opacity: 1; transform: none; }
 }
 @media print { .no-print, .scroll-progress { display: none !important; } }
+
+/* ------------------------------------------------------------------ */
+/* Motion                                                              */
+/* ------------------------------------------------------------------ */
+@keyframes page-enter { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+@keyframes rise { from { opacity: 0; transform: translate3d(0, 24px, 0); filter: blur(6px); } to { opacity: 1; transform: none; filter: blur(0); } }
+@keyframes arc-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(-20px 0 -20px 0); } }
+@keyframes bar-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes live-ping { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--signal) 50%, transparent); } 100% { box-shadow: 0 0 0 7px transparent; } }
+@keyframes plane-fly {
+  0%   { left: 0%;   top: 95%;   transform: translate(-50%, -50%) rotate(34deg); opacity: 0; }
+  10%  { opacity: 1; }
+  25%  { left: 25%;  top: 42.5%; transform: translate(-50%, -50%) rotate(39deg); }
+  50%  { left: 50%;  top: 25%;   transform: translate(-50%, -50%) rotate(45deg); }
+  75%  { left: 75%;  top: 42.5%; transform: translate(-50%, -50%) rotate(51deg); }
+  90%  { opacity: 1; }
+  100% { left: 100%; top: 95%;   transform: translate(-50%, -50%) rotate(56deg); opacity: 0; }
+}
+@keyframes float-slow { 0%, 100% { transform: translate3d(0, 0, 0); } 50% { transform: translate3d(0, -8px, 0); } }
+
+.page-enter { animation: page-enter 520ms cubic-bezier(.2,.75,.25,1) both; }
+[data-rise] { animation: rise 900ms cubic-bezier(.2,.75,.25,1) var(--rise-delay, 0ms) both; }
+.arc-draw { animation: arc-draw 1600ms cubic-bezier(.4,0,.2,1) 300ms both; }
+.plane-fly { left: 0; top: 95%; transform: translate(-50%, -50%) rotate(45deg); animation: plane-fly 9s linear 600ms infinite; will-change: left, top, transform; }
+.plane-fly-live { animation-duration: 6s; }
+.bar-grow { transform-origin: left; animation: bar-grow 900ms cubic-bezier(.2,.75,.25,1) 200ms both; }
+.live-dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--signal); animation: live-ping 1.6s ease-out infinite; }
+
+/* Small touches: the logo banks on hover, arrows lean into the click. */
+.logo-mark { transition: transform 400ms cubic-bezier(.2,.8,.2,1); }
+a:hover > .logo-mark { transform: rotate(-14deg) scale(1.06); }
+[data-slot="button"] svg.lucide-arrow-right, [data-slot="button"] svg.lucide-arrow-up-right { transition: transform 220ms ease; }
+[data-slot="button"]:hover svg.lucide-arrow-right { transform: translateX(3px); }
+[data-slot="button"]:hover svg.lucide-arrow-up-right { transform: translate(2px, -2px); }
+[data-slot="card"] { transition: border-color 220ms ease, transform 320ms cubic-bezier(.2,.8,.2,1); }
+.app-layout header nav a { transition: color 180ms ease, background-color 260ms ease; }
+
+/* Landing: the hero plane and rings drift as you scroll (progressive enhancement). */
+@supports (animation-timeline: scroll()) {
+  @keyframes hero-parallax { to { transform: translate3d(0, 90px, 0); opacity: 0.2; } }
+  @keyframes hero-plane-scroll { to { transform: translate3d(120px, -80px, 0) rotate(8deg); } }
+  .landing-hero .hero-title { animation: rise 900ms cubic-bezier(.2,.75,.25,1) 120ms both, hero-parallax linear both; animation-timeline: auto, scroll(root); animation-range: normal, 0 70vh; }
+  .hero-spotlight-plane { animation: plane-drift 7s ease-in-out infinite, hero-plane-scroll linear both; animation-timeline: auto, scroll(root); animation-range: normal, 0 80vh; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-rise], .page-enter, .arc-draw, .bar-grow { animation: none !important; }
+  .plane-fly { animation: none !important; left: 50%; top: 25%; }
+  .live-dot { animation: none; }
+}

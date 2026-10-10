@@ -86,7 +86,7 @@ export function DashboardView({ d, first, demoEnabled }: { d: DashboardData; fir
             </Link>
           </div>
           {rows.length ? (
-            <div className="divide-y">
+            <div className="divide-y" data-stagger>
               {rows.map((r) => (
                 <TripRow key={r.trip.id} trip={r.trip} delayMinutes={r.delay} eligibility={r.status} />
               ))}
@@ -100,7 +100,7 @@ export function DashboardView({ d, first, demoEnabled }: { d: DashboardData; fir
           {d.eligibleTrips.length > 0 && (
             <section>
               <h2 className="border-b pb-4 text-2xl">Worth claiming</h2>
-              <ul className="divide-y">
+              <ul className="divide-y" data-stagger>
                 {d.eligibleTrips.slice(0, 4).map((e) => (
                   <li key={e.id}>
                     <Link href={`/app/trips/${e.id}?tab=claim`} className="group block py-4">

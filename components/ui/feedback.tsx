@@ -2,6 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { AlertTriangle, CheckCircle2, Info, XCircle, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CountUp } from "@/components/ui/count-up";
 
 const badgeVariants = cva(
   "inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap [&_svg]:size-3",
@@ -82,6 +83,7 @@ export function StatusBadge({ status, className }: { status: StatusKey; classNam
   const s = STATUS[status] ?? STATUS.unknown;
   return (
     <Badge tone={s.tone} className={className}>
+      {status === "in_air" && <span className="live-dot" aria-hidden />}
       {s.label}
     </Badge>
   );
@@ -192,7 +194,7 @@ export function Stat({ label, value, hint }: { label: string; value: React.React
   return (
     <div>
       <p className="eyebrow text-[10.5px] text-muted-foreground">{label}</p>
-      <p className="mt-3 font-display text-4xl font-normal tabular-nums tracking-tight">{value}</p>
+      <p className="mt-3 font-display text-4xl font-normal tabular-nums tracking-tight">{typeof value === "string" || typeof value === "number" ? <CountUp value={value} /> : value}</p>
       {hint && <p className="mt-2 max-w-[28ch] text-xs leading-relaxed text-muted-foreground">{hint}</p>}
     </div>
   );

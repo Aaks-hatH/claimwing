@@ -9,7 +9,7 @@ import { CAUSES } from "@/lib/rules/config";
 
 export type PdfPhoto = { angle: string; stage: "before" | "after"; data: Buffer; takenAt: Date; exifTakenAt?: Date | null; sha256?: string | null; gps?: { lat: number; lon: number } | null; blurred: boolean };
 
-const C = { ink: "#0f172a", muted: "#64748b", line: "#e2e8f0", primary: "#4f46e5", soft: "#f8fafc", warn: "#b45309", danger: "#b91c1c", ok: "#15803d" };
+const C = { ink: "#1e252d", muted: "#56606b", line: "#d3d9df", primary: "#1e252d", soft: "#f3f5f7", warn: "#b45309", danger: "#b91c1c", ok: "#15803d" };
 
 const s = StyleSheet.create({
   page: { padding: 40, paddingBottom: 56, fontFamily: "Helvetica", fontSize: 9.5, color: C.ink, lineHeight: 1.45 },

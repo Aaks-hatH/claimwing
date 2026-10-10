@@ -39,8 +39,8 @@ function greatCircle(a: Airport, b: Airport, n = 64): [number, number][] {
 }
 
 const COLORS = {
-  light: { primary: "#4f46e5", muted: "#64748b", fg: "#0f172a", bg: "#ffffff" },
-  dark: { primary: "#818cf8", muted: "#94a3b8", fg: "#e2e8f0", bg: "#0f1424" },
+  light: { primary: "#1e252d", muted: "#56606b", fg: "#1e252d", bg: "#ffffff" },
+  dark: { primary: "#ffcd00", muted: "#9ba5b0", fg: "#e8ebee", bg: "#12171c" },
 };
 
 function planeIcon(rotation: number, color: string) {

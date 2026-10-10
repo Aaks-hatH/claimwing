@@ -3,7 +3,7 @@ import { Logo } from "@/components/brand";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col bg-muted/30">
+    <div className="flex min-h-dvh flex-col bg-background">
       <header className="flex h-16 items-center px-6">
         <Logo />
       </header>

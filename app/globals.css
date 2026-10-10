@@ -1,65 +1,84 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/archivo/wdth.css";
 @import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * ClaimWing palette, taken from airport wayfinding signage:
+ *   Apron ink      #1E252D  text, primary actions, the arrivals board
+ *   Concourse      #EDEFF1  page canvas
+ *   Ticket white   #FFFFFF  surfaces
+ *   Wayfinding     #FFCD00  the one accent: logo tile, board flaps, key CTA
+ *   Gate grey      #56606B  secondary text
+ * Red and green appear only with meaning (late / on time).
+ */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.208 0.042 265.755);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.208 0.042 265.755);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.208 0.042 265.755);
-  --primary: oklch(0.457 0.24 277.023);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.279 0.041 260.031);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.488 0.04 256.788);
-  --accent: oklch(0.962 0.018 272.314);
-  --accent-foreground: oklch(0.359 0.144 278.697);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.869 0.022 252.894);
-  --ring: oklch(0.511 0.262 276.966);
-  --success: oklch(0.527 0.154 150.069);
-  --success-soft: oklch(0.962 0.044 156.743);
-  --warning: oklch(0.555 0.163 48.998);
-  --warning-soft: oklch(0.973 0.071 103.193);
-  --danger: oklch(0.505 0.213 27.518);
-  --danger-soft: oklch(0.971 0.013 17.38);
-  --info-soft: oklch(0.962 0.018 272.314);
-  --radius: 0.5rem;
+  --background: #edeff1;
+  --foreground: #1e252d;
+  --card: #ffffff;
+  --card-foreground: #1e252d;
+  --popover: #ffffff;
+  --popover-foreground: #1e252d;
+  --primary: #1e252d;
+  --primary-foreground: #ffffff;
+  --secondary: #e1e5e9;
+  --secondary-foreground: #1e252d;
+  --muted: #e4e7eb;
+  --muted-foreground: #56606b;
+  --accent: #e4e7eb;
+  --accent-foreground: #1e252d;
+  --destructive: #b42318;
+  --border: #d3d9df;
+  --input: #c0c8d0;
+  --ring: #1e252d;
+  --success: #1d7443;
+  --success-soft: #e2f0e7;
+  --warning: #8a5300;
+  --warning-soft: #fff1bf;
+  --danger: #b42318;
+  --danger-soft: #fbe6e3;
+  --info-soft: #e4e7eb;
+  --signal: #ffcd00;
+  --signal-foreground: #1e252d;
+  --board: #1b2128;
+  --board-cell: #2e3843;
+  --board-ink: #f2f4f6;
+  --radius: 0.375rem;
 }
 
 .dark {
-  --background: oklch(0.155 0.03 264.695);
-  --foreground: oklch(0.968 0.007 247.896);
-  --card: oklch(0.19 0.035 265);
-  --card-foreground: oklch(0.968 0.007 247.896);
-  --popover: oklch(0.19 0.035 265);
-  --popover-foreground: oklch(0.968 0.007 247.896);
-  --primary: oklch(0.673 0.182 276.935);
-  --primary-foreground: oklch(0.155 0.03 264.695);
-  --secondary: oklch(0.25 0.035 264);
-  --secondary-foreground: oklch(0.968 0.007 247.896);
-  --muted: oklch(0.25 0.035 264);
-  --muted-foreground: oklch(0.72 0.03 257);
-  --accent: oklch(0.28 0.07 277);
-  --accent-foreground: oklch(0.93 0.03 273);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(0.3 0.03 264);
-  --input: oklch(0.35 0.03 264);
-  --ring: oklch(0.673 0.182 276.935);
-  --success: oklch(0.765 0.177 163.223);
-  --success-soft: oklch(0.3 0.06 160);
-  --warning: oklch(0.828 0.189 84.429);
-  --warning-soft: oklch(0.32 0.06 75);
-  --danger: oklch(0.704 0.191 22.216);
-  --danger-soft: oklch(0.3 0.08 25);
-  --info-soft: oklch(0.28 0.07 277);
+  --background: #12171c;
+  --foreground: #e8ebee;
+  --card: #1a2027;
+  --card-foreground: #e8ebee;
+  --popover: #1a2027;
+  --popover-foreground: #e8ebee;
+  --primary: #ffcd00;
+  --primary-foreground: #1b2128;
+  --secondary: #252d36;
+  --secondary-foreground: #e8ebee;
+  --muted: #212932;
+  --muted-foreground: #9ba5b0;
+  --accent: #252d36;
+  --accent-foreground: #e8ebee;
+  --destructive: #f07563;
+  --border: #2c353f;
+  --input: #3a4450;
+  --ring: #ffcd00;
+  --success: #52c58d;
+  --success-soft: #16301f;
+  --warning: #f5b83d;
+  --warning-soft: #372b0f;
+  --danger: #f07563;
+  --danger-soft: #3b1b17;
+  --info-soft: #252d36;
+  --signal: #ffcd00;
+  --signal-foreground: #1b2128;
+  --board: #0d1115;
+  --board-cell: #222b35;
+  --board-ink: #f2f4f6;
 }
 
 @theme inline {
@@ -88,7 +107,12 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-info-soft: var(--info-soft);
-  --font-sans: "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-signal: var(--signal);
+  --color-signal-foreground: var(--signal-foreground);
+  --color-board: var(--board);
+  --color-board-cell: var(--board-cell);
+  --color-board-ink: var(--board-ink);
+  --font-sans: "Archivo Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -104,7 +128,23 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "cv11", "ss01";
+    font-stretch: 100%;
+  }
+  /* Fine film grain on the canvas only; surfaces sit above it. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.05;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  h1,
+  h2,
+  h3 {
+    font-stretch: 87.5%;
+    text-wrap: balance;
   }
   :focus-visible {
     @apply outline-2 outline-offset-2 outline-ring;
@@ -118,6 +158,40 @@
   .leaflet-container {
     font-family: inherit;
     background: var(--muted);
+  }
+}
+
+/* Archivo's width axis does the typographic work. */
+@utility stretch-display {
+  font-stretch: 75%;
+}
+@utility stretch-semi {
+  font-stretch: 87.5%;
+}
+@utility stretch-board {
+  font-stretch: 62%;
+}
+
+/* One split-flap cell: a dark tile with the hinge line across the middle. */
+@utility flap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.78em;
+  height: 1.42em;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, var(--board-cell) 0 49%, color-mix(in oklab, var(--board-cell) 82%, black) 51% 100%);
+  font-stretch: 62%;
+  font-weight: 700;
+  line-height: 1;
+  &::after {
+    content: "";
+    position: absolute;
+    inset-inline: 0;
+    top: 50%;
+    height: 1px;
+    background: rgb(0 0 0 / 0.55);
   }
 }
 

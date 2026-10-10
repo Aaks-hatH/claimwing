@@ -1,41 +1,79 @@
 import Link from "next/link";
-import { ArrowRight, Camera, Clock, FileCheck2, FileText, MapPinned, Radar, Scale, ShieldCheck } from "lucide-react";
 import { Logo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
+import { ArrivalsBoard } from "@/components/landing/arrivals-board";
+import { BagCompare } from "@/components/landing/bag-compare";
 import { auth } from "@/lib/auth";
 
-const STEPS = [
-  { icon: Radar, title: "Add your flight before you fly", body: "We follow it live from three hours before departure and record every time with its source: schedule data, aircraft position reports, or what you saw." },
-  { icon: Camera, title: "Photograph your bag twice", body: "A guided camera takes the same seven angles at check-in and at baggage claim, with the first photo overlaid so the second lines up." },
-  { icon: FileCheck2, title: "Export one evidence packet", body: "Eligibility under EU, UK and US rules, a claim letter built from your facts, and every photo and time in one PDF you send yourself." },
+const TIMELINE = [
+  {
+    when: "Before you fly",
+    title: "Add the flight and photograph your bag",
+    body: "We start following the flight three hours before departure. A guided camera takes seven angles of your bag at check-in.",
+  },
+  {
+    when: "While it's late",
+    title: "See what the airline owes you now",
+    body: "Once you're expected 2 h 30 min late, you see your rights to meals, calls, a hotel or rerouting while you're still at the gate.",
+  },
+  {
+    when: "After landing",
+    title: "Export one evidence packet",
+    body: "Every recorded time with its source, your photos side by side, the rule that applies, and a claim letter drafted only from what you recorded.",
+  },
 ];
 
-const FEATURES = [
-  { icon: MapPinned, title: "Live tracking with receipts", body: "Map, altitude profile and a timeline where every timestamp names its source, because airlines dispute delay times." },
-  { icon: Clock, title: "Delay alerts while you wait", body: "When your flight is expected 2 h 30 min late, see what the airline owes you right now: meals, calls, hotel, rerouting." },
-  { icon: Scale, title: "Honest eligibility", body: "EU261, UK261, US DOT and the Montreal Convention as tested rules. Close calls are marked Needs review, never guessed." },
-  { icon: Camera, title: "Before and after, side by side", body: "Slider comparison, zoom, and damage markers you draw. Optional AI suggestions stay unconfirmed until you accept them." },
-  { icon: FileText, title: "Letters without invented facts", body: "Drafted only from what you recorded, with [placeholders] for anything missing. AI polish is checked so it can't change a number." },
-  { icon: ShieldCheck, title: "Your data, your call", body: "Originals are kept untouched with SHA-256 hashes. Blur bag tags on exports. Export or delete everything any time." },
+const PACKET: [string, string][] = [
+  ["Scheduled arrival", "07:05"],
+  ["Gate arrival", "10:44, schedule service"],
+  ["Arrival delay", "3 h 39 min"],
+  ["Distance", "5,540 km"],
+  ["Rule", "UK261, Article 7(1)(c)"],
+  ["Estimate", "£260 to £520"],
+  ["Bag photos", "7 at check-in, 7 at the carousel"],
 ];
 
-const FAQ = [
+const RULES = [
+  {
+    name: "EU261",
+    covers: "Flights leaving the EU, EEA or Switzerland on any airline, and flights into them on an EU airline.",
+    get: "€250, €400 or €600 when you arrive 3 hours or more late, depending on distance.",
+  },
+  {
+    name: "UK261",
+    covers: "Flights leaving the UK, and flights into the UK on a UK or EU airline.",
+    get: "£220, £350 or £520 on the same terms.",
+  },
+  {
+    name: "US DOT",
+    covers: "Flights within, to or from the United States.",
+    get: "A refund if the flight is cancelled or significantly changed and you choose not to fly. US law sets no cash payment for delays.",
+  },
+  {
+    name: "Montreal Convention",
+    covers: "Checked bags on international flights.",
+    get: "Up to 1,519 SDR for a damaged, delayed or lost bag. Report damage within 7 days and a delayed bag within 21.",
+  },
+];
+
+const QUESTIONS = [
   ["Is this legal advice?", "No. ClaimWing helps you collect and organise facts. Eligibility results are automated estimates; an airline, regulator or court may decide differently."],
-  ["Does ClaimWing contact the airline for me?", "No. You download the packet and send it yourself, so you stay in control of what is shared. We don't take a cut of any compensation."],
-  ["Which flights are covered?", "We assess EU261 (EU, EEA and Switzerland), UK261, US Department of Transportation rules, and the Montreal Convention for baggage on international flights. Other countries' rules aren't assessed yet."],
-  ["Where does the flight data come from?", "Scheduled and actual times from a flight schedule service when configured, aircraft positions broadcast by the plane (ADS-B, via airplanes.live and the OpenSky Network), and anything you enter. Every time shows its source."],
-  ["What can the photos prove?", "That the bag was in one condition at check-in and another at arrival. They don't prove who caused the damage, and we say so in the packet."],
+  ["Does ClaimWing contact the airline for me?", "No. You download the packet and send it yourself, so you decide what is shared. We don't take a cut of any compensation."],
+  ["Where does the flight data come from?", "Scheduled and actual times from a flight schedule service, positions broadcast by the aircraft itself (ADS-B, via airplanes.live and the OpenSky Network), and anything you enter. Every time shows its source."],
+  ["What can the photos prove?", "That the bag was in one condition at check-in and another at arrival. They don't prove who caused the damage, and the packet says so."],
 ];
 
 export default async function Landing() {
   const session = await auth();
   const signedIn = Boolean(session?.user?.id);
+  const startHref = signedIn ? "/app/trips/new" : "/signup";
+
   return (
     <div className="min-h-dvh">
-      <header className="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 md:px-8">
+      <header className="sticky top-0 z-30 border-b border-transparent bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-8">
           <Logo />
-          <nav className="flex items-center gap-2">
+          <nav className="flex items-center gap-1.5" aria-label="Account">
             {signedIn ? (
               <Button asChild size="sm">
                 <Link href="/app">Open dashboard</Link>
@@ -46,7 +84,7 @@ export default async function Landing() {
                   <Link href="/login">Sign in</Link>
                 </Button>
                 <Button asChild size="sm">
-                  <Link href="/signup">Get started</Link>
+                  <Link href="/signup">Create account</Link>
                 </Button>
               </>
             )}
@@ -55,93 +93,168 @@ export default async function Landing() {
       </header>
 
       <main>
-        <section className="mx-auto max-w-6xl px-4 pb-16 pt-16 md:px-8 md:pt-24">
-          <div className="max-w-3xl">
-            <p className="mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
-              <span className="size-1.5 rounded-full bg-success" aria-hidden /> Live flight tracking · EU261 · UK261 · US DOT · Montreal Convention
+        {/* Hero: the headline, then the board you can play with. */}
+        <section className="mx-auto max-w-6xl px-4 pb-20 pt-12 md:px-8 md:pb-28 md:pt-20">
+          <h1 className="max-w-[16ch] text-[clamp(2.75rem,8vw,6.25rem)] md:max-w-none font-extrabold leading-[0.92] tracking-[-0.025em] stretch-display">
+            Build your claim while the flight is still in the air.
+          </h1>
+          <div className="mt-8 grid gap-8 md:mt-10 md:grid-cols-[minmax(0,34rem)_1fr] md:items-end">
+            <p className="text-lg leading-relaxed text-muted-foreground">
+              ClaimWing follows your flight live, records when it really landed, photographs your bag before and after, and
+              puts it all in one evidence packet for the airline. It&apos;s free, and it&apos;s documentation, not legal advice.
             </p>
-            <h1 className="text-4xl font-semibold tracking-tight text-balance md:text-6xl">The evidence you need when your flight or bag goes wrong.</h1>
-            <p className="mt-5 max-w-2xl text-lg text-muted-foreground text-pretty">
-              ClaimWing tracks your flight live, photographs your bag before and after, and turns it all into one evidence packet for your compensation claim. Every fact has a source.
-            </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <Link href={signedIn ? "/app/trips/new" : "/signup"}>
-                  Add your next flight <ArrowRight />
-                </Link>
+            <div className="flex flex-wrap gap-2 md:justify-end">
+              <Button asChild variant="signal" size="lg" className="h-12 px-6 text-base">
+                <Link href={startHref}>Add your flight</Link>
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href={signedIn ? "/app" : "/login"}>{signedIn ? "Dashboard" : "Sign in"}</Link>
+              <Button asChild variant="outline" size="lg" className="h-12 px-6 text-base">
+                <a href="#bags">See the bag check</a>
               </Button>
             </div>
-            <p className="mt-4 text-xs text-muted-foreground">Free. Documentation support, not legal advice.</p>
+          </div>
+
+          <div className="mt-12 md:mt-16">
+            <ArrivalsBoard />
           </div>
         </section>
 
-        <section className="border-y bg-muted/30">
-          <div className="mx-auto grid max-w-6xl gap-8 px-4 py-14 md:grid-cols-3 md:px-8">
-            {STEPS.map((s, i) => (
-              <div key={s.title}>
-                <div className="mb-4 flex items-center gap-3">
-                  <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground">{i + 1}</span>
-                  <s.icon className="size-5 text-muted-foreground" aria-hidden />
-                </div>
-                <h2 className="font-semibold">{s.title}</h2>
-                <p className="mt-2 text-sm text-muted-foreground">{s.body}</p>
-              </div>
-            ))}
+        {/* Bags */}
+        <section id="bags" className="scroll-mt-20 border-y bg-card">
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-14 md:px-8 md:py-28">
+            <div className="md:pt-4">
+              <h2 className="text-4xl font-extrabold leading-[0.98] tracking-tight stretch-display md:text-5xl">
+                Same bag, same angles, two photos apart.
+              </h2>
+              <p className="mt-6 max-w-[52ch] leading-relaxed text-muted-foreground">
+                At check-in, a guided camera takes seven angles. At the carousel, it overlays the first photo so the second
+                one lines up. Originals are kept untouched with their capture times and SHA-256 hashes.
+              </p>
+              <p className="mt-4 max-w-[52ch] leading-relaxed text-muted-foreground">
+                You mark the damage. AI can suggest marks too, and they stay unconfirmed until you accept them.
+              </p>
+              <p className="mt-8 border-l-2 border-signal pl-4 text-sm leading-relaxed">
+                Drag the yellow handle across the photo. Under the Montreal Convention you have 7 days to report damage, so
+                ClaimWing counts them down for you.
+              </p>
+            </div>
+            <BagCompare />
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-4 py-16 md:px-8">
-          <h2 className="text-2xl font-semibold tracking-tight">Built for the moment airlines push back</h2>
-          <p className="mt-2 max-w-2xl text-muted-foreground">Airlines often dispute arrival times and deny baggage damage. ClaimWing records the facts as they happen.</p>
-          <div className="mt-10 grid gap-px overflow-hidden rounded-lg border bg-border sm:grid-cols-2 lg:grid-cols-3">
-            {FEATURES.map((f) => (
-              <div key={f.title} className="bg-background p-6">
-                <f.icon className="size-5 text-primary" aria-hidden />
-                <h3 className="mt-4 font-medium">{f.title}</h3>
-                <p className="mt-1.5 text-sm text-muted-foreground">{f.body}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="mx-auto max-w-3xl px-4 pb-16 md:px-8">
-          <h2 className="text-2xl font-semibold tracking-tight">Questions</h2>
-          <div className="mt-6 divide-y rounded-lg border">
-            {FAQ.map(([q, a]) => (
-              <details key={q} className="group px-5 py-4">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium">
-                  {q}
-                  <span className="text-muted-foreground transition-transform group-open:rotate-45" aria-hidden>
-                    +
+        {/* The sequence of a trip, and what comes out of it. */}
+        <section className="mx-auto overflow-x-clip max-w-6xl px-4 py-20 md:px-8 md:py-28">
+          <h2 className="max-w-[20ch] text-4xl font-extrabold leading-[0.98] tracking-tight stretch-display md:text-5xl">
+            One trip, three moments, one packet.
+          </h2>
+          <div className="mt-12 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-16">
+            <ol className="relative space-y-10 border-l border-border pl-8">
+              {TIMELINE.map((step, i) => (
+                <li key={step.when} className="relative">
+                  <span
+                    aria-hidden
+                    className="absolute -left-[46px] top-0 flex size-7 items-center justify-center rounded-full border-2 border-background bg-primary text-xs font-bold text-primary-foreground"
+                  >
+                    {i + 1}
                   </span>
-                </summary>
-                <p className="mt-2 text-sm text-muted-foreground">{a}</p>
-              </details>
-            ))}
+                  <p className="text-sm font-medium text-muted-foreground">{step.when}</p>
+                  <h3 className="mt-1 text-xl font-bold tracking-tight">{step.title}</h3>
+                  <p className="mt-2 max-w-[56ch] leading-relaxed text-muted-foreground">{step.body}</p>
+                </li>
+              ))}
+            </ol>
+
+            {/* A page of the packet, as it prints. */}
+            <figure className="relative mx-auto w-full max-w-md lg:mx-0">
+              <div aria-hidden className="absolute inset-0 translate-x-3 translate-y-3 rotate-2 rounded-lg border bg-card" />
+              <div className="relative rounded-lg border bg-card p-6 shadow-[0_1px_0_rgb(0_0_0/0.04)] sm:p-7">
+                <div className="flex items-center justify-between border-b pb-4">
+                  <span className="text-xs font-medium text-muted-foreground">Claim evidence packet, page 1 of 6</span>
+                  <span className="rounded bg-warning-soft px-1.5 py-0.5 text-[11px] font-semibold text-warning">Sample</span>
+                </div>
+                <p className="mt-5 text-2xl font-extrabold leading-tight tracking-tight stretch-semi">
+                  BA178, New York JFK to London Heathrow
+                </p>
+                <dl className="mt-5 divide-y text-sm">
+                  {PACKET.map(([k, v]) => (
+                    <div key={k} className="grid grid-cols-[8.5rem_1fr] gap-3 py-2">
+                      <dt className="text-muted-foreground">{k}</dt>
+                      <dd className="font-medium tabular-nums">{v}</dd>
+                    </div>
+                  ))}
+                </dl>
+                <p className="mt-5 text-xs leading-relaxed text-muted-foreground">
+                  Automated estimate from the facts recorded. Not legal advice.
+                </p>
+              </div>
+            </figure>
           </div>
         </section>
 
-        <section className="border-t bg-muted/30">
-          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 py-14 md:flex-row md:items-center md:px-8">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight">Flying soon? Add the flight now.</h2>
-              <p className="mt-1 text-muted-foreground">It takes a minute, and the evidence starts collecting itself.</p>
+        {/* Rules */}
+        <section className="border-t bg-card">
+          <div className="mx-auto max-w-6xl px-4 py-20 md:px-8 md:py-28">
+            <h2 className="max-w-[20ch] text-4xl font-extrabold leading-[0.98] tracking-tight stretch-display md:text-5xl">
+              The rules we check, in plain terms.
+            </h2>
+            <p className="mt-5 max-w-[60ch] leading-relaxed text-muted-foreground">
+              Close calls, like a delay within 15 minutes of the 3-hour line or a cause the airline may call extraordinary,
+              are marked as needing a closer look rather than guessed.
+            </p>
+            <div className="mt-10">
+              <table className="block w-full border-collapse text-left text-[15px] md:table">
+                <thead className="hidden md:table-header-group">
+                  <tr className="border-b-2 border-foreground text-sm">
+                    <th scope="col" className="w-[11rem] py-3 pr-6 font-semibold">Rule</th>
+                    <th scope="col" className="py-3 pr-6 font-semibold">Covers</th>
+                    <th scope="col" className="py-3 font-semibold">What you can get</th>
+                  </tr>
+                </thead>
+                <tbody className="block md:table-row-group">
+                  {RULES.map((r) => (
+                    <tr key={r.name} className="block border-b py-4 align-top md:table-row md:py-0">
+                      <th scope="row" className="block pb-1 text-lg md:table-cell md:py-4 md:pr-6 font-bold tracking-tight stretch-semi">
+                        {r.name}
+                      </th>
+                      <td className="block pb-2 leading-relaxed text-muted-foreground md:table-cell md:py-4 md:pr-6">{r.covers}</td>
+                      <td className="block leading-relaxed md:table-cell md:py-4">{r.get}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <Button asChild size="lg">
-              <Link href={signedIn ? "/app/trips/new" : "/signup"}>
-                Get started <ArrowRight />
-              </Link>
+          </div>
+        </section>
+
+        {/* Questions */}
+        <section className="mx-auto max-w-6xl px-4 py-20 md:px-8 md:py-28">
+          <h2 className="text-4xl font-extrabold leading-[0.98] tracking-tight stretch-display md:text-5xl">Questions</h2>
+          <dl className="mt-10 divide-y border-y">
+            {QUESTIONS.map(([q, a]) => (
+              <div key={q} className="grid gap-2 py-6 md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] md:gap-10">
+                <dt className="text-lg font-semibold tracking-tight">{q}</dt>
+                <dd className="max-w-[62ch] leading-relaxed text-muted-foreground">{a}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        {/* Close */}
+        <section className="bg-board text-board-ink">
+          <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-20 md:flex-row md:items-end md:justify-between md:px-8 md:py-24">
+            <h2 className="max-w-[18ch] text-4xl font-extrabold leading-[0.98] tracking-tight stretch-display text-board-ink md:text-6xl">
+              Flying soon? Add the flight before anything goes wrong.
+            </h2>
+            <Button asChild variant="signal" size="lg" className="h-12 self-start px-6 text-base md:self-auto">
+              <Link href={startHref}>Add your flight</Link>
             </Button>
           </div>
         </section>
       </main>
 
       <footer className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-xs text-muted-foreground md:flex-row md:items-center md:justify-between md:px-8">
-        <p>
-          ClaimWing is a documentation tool and does not provide legal advice. Flight positions from airplanes.live and the OpenSky Network; weather from Open-Meteo.
+        <p className="max-w-[80ch]">
+          ClaimWing is a documentation tool and does not provide legal advice. Flight positions from airplanes.live and the
+          OpenSky Network; weather from Open-Meteo. Board flights above are examples.
         </p>
         <div className="flex gap-4">
           <Link href="/privacy" className="hover:underline">

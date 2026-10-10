@@ -46,12 +46,12 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
         Skip to content
       </a>
       {/* Desktop sidebar */}
-      <aside className="sticky top-0 hidden h-dvh flex-col border-r bg-muted/30 md:flex">
+      <aside className="sticky top-0 hidden h-dvh flex-col border-r bg-card md:flex">
         <div className="flex h-14 items-center px-5">
           <Logo href="/app" />
         </div>
         <div className="px-3 pb-3">
-          <Button asChild className="w-full justify-start" size="sm">
+          <Button asChild variant="signal" className="w-full justify-start" size="sm">
             <Link href="/app/trips/new">
               <Plus /> New trip
             </Link>
@@ -66,8 +66,9 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                  active && "bg-background text-foreground ring-1 ring-border",
+                  "relative flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                  active &&
+                    "bg-secondary text-foreground before:absolute before:inset-y-1.5 before:-left-3 before:w-[3px] before:rounded-r before:bg-signal",
                 )}
               >
                 <item.icon className="size-4" aria-hidden />
@@ -150,8 +151,8 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted-foreground",
-                active && "text-primary",
+                "relative flex flex-col items-center gap-1 py-2 text-[11px] font-medium text-muted-foreground",
+                active && "text-foreground before:absolute before:inset-x-5 before:top-0 before:h-[3px] before:rounded-b before:bg-signal",
               )}
             >
               <item.icon className="size-5" aria-hidden />

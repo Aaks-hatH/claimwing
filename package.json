@@ -12,7 +12,12 @@
     "seed": "tsx --conditions=react-server scripts/seed.ts",
     "data:build": "tsx scripts/build-reference-data.ts",
     "replay:sample": "tsx scripts/make-sample-replay.ts",
-    "replay:record": "tsx scripts/record-replay.ts"
+    "replay:record": "tsx scripts/record-replay.ts",
+    "ml:train": "cd ml && python3 -m ripple_ml.train --source nycflights13 --data-dir \"${NYC_DATA:?set NYC_DATA to the nycflights13 data folder}\" --out ../data/models/ripple-model.json",
+    "ml:test": "cd ml && python3 -m pytest tests -q",
+    "check:text": "node scripts/check-em-dash.mjs",
+    "db:indexes": "tsx --conditions=react-server scripts/sync-indexes.ts",
+    "test:e2e": "node tests/e2e/ripple.e2e.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.133.0",

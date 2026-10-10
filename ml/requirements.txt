@@ -1,0 +1,6 @@
+# Flight Ripple model training (Python 3.11+). Production inference runs in TypeScript and needs none of this.
+numpy>=2.0
+pandas>=2.2
+scikit-learn>=1.5
+lightgbm>=4.5
+pytest>=8.0

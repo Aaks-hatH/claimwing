@@ -1,0 +1,1394 @@
+{
+  "model_version": "ripple-nycflights13-20261010-d91b4617",
+  "trained_at": "2026-10-10T20:58:26Z",
+  "dataset": {
+    "source": "nycflights13",
+    "description": "BTS on-time performance, 2013 departures from JFK, LGA and EWR (nycflights13 extract, CC0), with hourly weather observed at those airports",
+    "rows": 336776,
+    "first_date": "2013-01-01",
+    "last_date": "2013-12-31",
+    "origins": [
+      "EWR",
+      "JFK",
+      "LGA"
+    ],
+    "carriers": [
+      "9E",
+      "AA",
+      "AS",
+      "B6",
+      "DL",
+      "EV",
+      "F9",
+      "FL",
+      "HA",
+      "MQ",
+      "OO",
+      "UA",
+      "US",
+      "VX",
+      "WN",
+      "YV"
+    ],
+    "cancelled": 8255,
+    "diverted": 1175,
+    "tail_coverage": 0.99254103617835
+  },
+  "model_a": {
+    "split": {
+      "train": [
+        "2013-01-01 10:15:00+00:00",
+        "2013-09-06 17:30:00+00:00",
+        222595
+      ],
+      "calibration": [
+        "2013-09-13 17:40:00+00:00",
+        "2013-11-03 10:45:00+00:00",
+        46201
+      ],
+      "test": [
+        "2013-11-10 11:00:00+00:00",
+        "2014-01-01 04:59:00+00:00",
+        45923
+      ],
+      "embargo_days": 7
+    },
+    "excluded": {
+      "cancelled": 8255,
+      "diverted": 1175
+    },
+    "stages": {
+      "predeparture": {
+        "features": [
+          "month",
+          "dow",
+          "dep_hour",
+          "arr_hour",
+          "distance_km",
+          "sched_block_min",
+          "wx_wind_kmh",
+          "wx_visibility_km",
+          "wx_precip_mm",
+          "wx_temp_c",
+          "carrier_r15",
+          "carrier_r60",
+          "route_r15",
+          "route_r60",
+          "route_logn",
+          "origin_hour_r15",
+          "origin_hour_r60",
+          "flight_r15",
+          "flight_r60",
+          "flight_logn"
+        ],
+        "thresholds": {
+          "15": {
+            "baseline": {
+              "name": "historical route rate",
+              "n": 45923,
+              "positive_rate": 0.2735,
+              "brier": 0.19828,
+              "brier_skill_vs_base_rate": 0.0021,
+              "log_loss": 0.58586,
+              "auc": 0.5435,
+              "ece": 0.0211,
+              "reliability": [
+                {
+                  "bin": "0.1-0.2",
+                  "n": 5228,
+                  "mean_predicted": 0.1869,
+                  "observed_rate": 0.2372
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 34072,
+                  "mean_predicted": 0.2535,
+                  "observed_rate": 0.269
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 5671,
+                  "mean_predicted": 0.338,
+                  "observed_rate": 0.3156
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 892,
+                  "mean_predicted": 0.4315,
+                  "observed_rate": 0.3812
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 60,
+                  "mean_predicted": 0.5351,
+                  "observed_rate": 0.4333
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.4333,
+                "recall": 0.0021,
+                "flagged_share": 0.0013
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.547,
+                "precision": null,
+                "recall": 0.0,
+                "flagged_share": 0.0
+              }
+            },
+            "gbdt_uncalibrated": {
+              "n": 45923,
+              "positive_rate": 0.2735,
+              "brier": 0.18749,
+              "brier_skill_vs_base_rate": 0.0564,
+              "log_loss": 0.55985,
+              "auc": 0.6527,
+              "ece": 0.0373,
+              "reliability": [
+                {
+                  "bin": "0.1-0.2",
+                  "n": 5851,
+                  "mean_predicted": 0.1931,
+                  "observed_rate": 0.1309
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 17260,
+                  "mean_predicted": 0.2377,
+                  "observed_rate": 0.216
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 18155,
+                  "mean_predicted": 0.3338,
+                  "observed_rate": 0.304
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 4271,
+                  "mean_predicted": 0.4486,
+                  "observed_rate": 0.5315
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 386,
+                  "mean_predicted": 0.5044,
+                  "observed_rate": 0.7124
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.7124,
+                "recall": 0.0219,
+                "flagged_share": 0.0084
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.547,
+                "precision": null,
+                "recall": 0.0,
+                "flagged_share": 0.0
+              }
+            },
+            "gbdt_final": {
+              "n": 45923,
+              "positive_rate": 0.2735,
+              "brier": 0.19787,
+              "brier_skill_vs_base_rate": 0.0042,
+              "log_loss": 0.59157,
+              "auc": 0.6524,
+              "ece": 0.1043,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 9142,
+                  "mean_predicted": 0.0755,
+                  "observed_rate": 0.1437
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 27474,
+                  "mean_predicted": 0.158,
+                  "observed_rate": 0.2492
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 7320,
+                  "mean_predicted": 0.2732,
+                  "observed_rate": 0.4384
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1601,
+                  "mean_predicted": 0.3138,
+                  "observed_rate": 0.5715
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 2,
+                  "mean_predicted": 0.5963,
+                  "observed_rate": 1.0
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 361,
+                  "mean_predicted": 0.6093,
+                  "observed_rate": 0.7091
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 23,
+                  "mean_predicted": 0.8333,
+                  "observed_rate": 0.7391
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.7124,
+                "recall": 0.0219,
+                "flagged_share": 0.0084
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.547,
+                "precision": 0.7124,
+                "recall": 0.0219,
+                "flagged_share": 0.0084
+              }
+            },
+            "calibration": {
+              "held_out_log_loss_raw": 0.48638,
+              "held_out_log_loss_isotonic": 0.47593,
+              "used": "isotonic"
+            },
+            "beats_baseline_brier": true,
+            "trees": 15
+          },
+          "60": {
+            "baseline": {
+              "name": "historical route rate",
+              "n": 45923,
+              "positive_rate": 0.0827,
+              "brier": 0.07556,
+              "brier_skill_vs_base_rate": 0.0042,
+              "log_loss": 0.28323,
+              "auc": 0.5808,
+              "ece": 0.0148,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 29225,
+                  "mean_predicted": 0.0797,
+                  "observed_rate": 0.0686
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 16280,
+                  "mean_predicted": 0.1261,
+                  "observed_rate": 0.1047
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 371,
+                  "mean_predicted": 0.2205,
+                  "observed_rate": 0.2075
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 47,
+                  "mean_predicted": 0.3345,
+                  "observed_rate": 0.2979
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": null,
+                "recall": 0.0,
+                "flagged_share": 0.0
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.1655,
+                "precision": 0.1624,
+                "recall": 0.0745,
+                "flagged_share": 0.038
+              }
+            },
+            "gbdt_uncalibrated": {
+              "n": 45923,
+              "positive_rate": 0.0827,
+              "brier": 0.07294,
+              "brier_skill_vs_base_rate": 0.0387,
+              "log_loss": 0.27109,
+              "auc": 0.7026,
+              "ece": 0.0352,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 21521,
+                  "mean_predicted": 0.0666,
+                  "observed_rate": 0.0434
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 19348,
+                  "mean_predicted": 0.1337,
+                  "observed_rate": 0.0833
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 3631,
+                  "mean_predicted": 0.2543,
+                  "observed_rate": 0.2256
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 1423,
+                  "mean_predicted": 0.3312,
+                  "observed_rate": 0.305
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": null,
+                "recall": 0.0,
+                "flagged_share": 0.0
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.1655,
+                "precision": 0.2344,
+                "recall": 0.3554,
+                "flagged_share": 0.1254
+              }
+            },
+            "gbdt_final": {
+              "n": 45923,
+              "positive_rate": 0.0827,
+              "brier": 0.07371,
+              "brier_skill_vs_base_rate": 0.0286,
+              "log_loss": 0.27563,
+              "auc": 0.6997,
+              "ece": 0.0358,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 40237,
+                  "mean_predicted": 0.0343,
+                  "observed_rate": 0.0612
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 5633,
+                  "mean_predicted": 0.1333,
+                  "observed_rate": 0.2317
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 49,
+                  "mean_predicted": 0.4286,
+                  "observed_rate": 0.5306
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 4,
+                  "mean_predicted": 0.5335,
+                  "observed_rate": 1.0
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 1.0,
+                "recall": 0.0011,
+                "flagged_share": 0.0001
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.1655,
+                "precision": 0.566,
+                "recall": 0.0079,
+                "flagged_share": 0.0012
+              }
+            },
+            "calibration": {
+              "held_out_log_loss_raw": 0.19528,
+              "held_out_log_loss_isotonic": 0.16745,
+              "used": "isotonic"
+            },
+            "beats_baseline_brier": true,
+            "trees": 21
+          },
+          "180": {
+            "baseline": {
+              "name": "historical route rate",
+              "n": 45923,
+              "positive_rate": 0.01,
+              "brier": 0.00991,
+              "brier_skill_vs_base_rate": -0.0019,
+              "log_loss": 0.05646,
+              "auc": 0.5726,
+              "ece": 0.0041,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 45923,
+                  "mean_predicted": 0.0141,
+                  "observed_rate": 0.01
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": null,
+                "recall": 0.0,
+                "flagged_share": 0.0
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.02,
+                "precision": 0.0163,
+                "recall": 0.2135,
+                "flagged_share": 0.1307
+              }
+            },
+            "gbdt_uncalibrated": {
+              "n": 45923,
+              "positive_rate": 0.01,
+              "brier": 0.00982,
+              "brier_skill_vs_base_rate": 0.0072,
+              "log_loss": 0.0524,
+              "auc": 0.7275,
+              "ece": 0.0018,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 45696,
+                  "mean_predicted": 0.0082,
+                  "observed_rate": 0.0096
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 179,
+                  "mean_predicted": 0.1352,
+                  "observed_rate": 0.0726
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 27,
+                  "mean_predicted": 0.245,
+                  "observed_rate": 0.1481
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 15,
+                  "mean_predicted": 0.3573,
+                  "observed_rate": 0.2
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 6,
+                  "mean_predicted": 0.4377,
+                  "observed_rate": 0.0
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": null,
+                "recall": 0.0,
+                "flagged_share": 0.0
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.02,
+                "precision": 0.0461,
+                "recall": 0.3159,
+                "flagged_share": 0.0684
+              }
+            },
+            "gbdt_final": {
+              "n": 45923,
+              "positive_rate": 0.01,
+              "brier": 0.00987,
+              "brier_skill_vs_base_rate": 0.0022,
+              "log_loss": 0.05685,
+              "auc": 0.7257,
+              "ece": 0.0066,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 45923,
+                  "mean_predicted": 0.0034,
+                  "observed_rate": 0.01
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": null,
+                "recall": 0.0,
+                "flagged_share": 0.0
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.02,
+                "precision": 0.0602,
+                "recall": 0.098,
+                "flagged_share": 0.0163
+              }
+            },
+            "calibration": {
+              "held_out_log_loss_raw": 0.02379,
+              "held_out_log_loss_isotonic": 0.02134,
+              "used": "isotonic"
+            },
+            "beats_baseline_brier": true,
+            "trees": 232
+          }
+        },
+        "median_delay": {
+          "baseline": {
+            "name": "historical route median",
+            "n": 45923,
+            "mae": 24.46,
+            "median_abs_error": 14.0,
+            "bias": -13.17,
+            "by_actual_delay": [
+              {
+                "actual_delay": "under 15 min",
+                "n": 33363,
+                "mae": 11.11,
+                "bias": 4.42
+              },
+              {
+                "actual_delay": "15-59 min",
+                "n": 8761,
+                "mae": 34.84,
+                "bias": -34.81
+              },
+              {
+                "actual_delay": "60-179 min",
+                "n": 3340,
+                "mae": 99.54,
+                "bias": -99.54
+              },
+              {
+                "actual_delay": "180+ min",
+                "n": 459,
+                "mae": 250.4,
+                "bias": -250.4
+              }
+            ]
+          },
+          "gbdt": {
+            "n": 45923,
+            "mae": 23.88,
+            "median_abs_error": 13.81,
+            "bias": -11.6,
+            "by_actual_delay": [
+              {
+                "actual_delay": "under 15 min",
+                "n": 33363,
+                "mae": 11.13,
+                "bias": 5.78
+              },
+              {
+                "actual_delay": "15-59 min",
+                "n": 8761,
+                "mae": 32.8,
+                "bias": -32.8
+              },
+              {
+                "actual_delay": "60-179 min",
+                "n": 3340,
+                "mae": 97.06,
+                "bias": -97.06
+              },
+              {
+                "actual_delay": "180+ min",
+                "n": 459,
+                "mae": 247.93,
+                "bias": -247.93
+              }
+            ]
+          }
+        }
+      },
+      "enroute": {
+        "features": [
+          "month",
+          "dow",
+          "dep_hour",
+          "arr_hour",
+          "distance_km",
+          "sched_block_min",
+          "wx_wind_kmh",
+          "wx_visibility_km",
+          "wx_precip_mm",
+          "wx_temp_c",
+          "carrier_r15",
+          "carrier_r60",
+          "route_r15",
+          "route_r60",
+          "route_logn",
+          "origin_hour_r15",
+          "origin_hour_r60",
+          "flight_r15",
+          "flight_r60",
+          "flight_logn",
+          "dep_delay"
+        ],
+        "thresholds": {
+          "15": {
+            "baseline": {
+              "name": "rate by departure-delay bucket",
+              "n": 45923,
+              "positive_rate": 0.2735,
+              "brier": 0.1027,
+              "brier_skill_vs_base_rate": 0.4831,
+              "log_loss": 0.34306,
+              "auc": 0.864,
+              "ece": 0.022,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 24024,
+                  "mean_predicted": 0.06,
+                  "observed_rate": 0.0737
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 11208,
+                  "mean_predicted": 0.1636,
+                  "observed_rate": 0.1975
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 3903,
+                  "mean_predicted": 0.4863,
+                  "observed_rate": 0.5468
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 2095,
+                  "mean_predicted": 0.8267,
+                  "observed_rate": 0.853
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 4693,
+                  "mean_predicted": 0.9894,
+                  "observed_rate": 0.9919
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.949,
+                "recall": 0.5129,
+                "flagged_share": 0.1478
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.547,
+                "precision": 0.949,
+                "recall": 0.5129,
+                "flagged_share": 0.1478
+              }
+            },
+            "gbdt_uncalibrated": {
+              "n": 45923,
+              "positive_rate": 0.2735,
+              "brier": 0.09447,
+              "brier_skill_vs_base_rate": 0.5245,
+              "log_loss": 0.31749,
+              "auc": 0.8986,
+              "ece": 0.0219,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 19611,
+                  "mean_predicted": 0.0693,
+                  "observed_rate": 0.0522
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 10433,
+                  "mean_predicted": 0.1401,
+                  "observed_rate": 0.1292
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 3703,
+                  "mean_predicted": 0.2438,
+                  "observed_rate": 0.246
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 2154,
+                  "mean_predicted": 0.347,
+                  "observed_rate": 0.3751
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1426,
+                  "mean_predicted": 0.4477,
+                  "observed_rate": 0.521
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 1117,
+                  "mean_predicted": 0.5458,
+                  "observed_rate": 0.6321
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 783,
+                  "mean_predicted": 0.6478,
+                  "observed_rate": 0.7663
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 737,
+                  "mean_predicted": 0.751,
+                  "observed_rate": 0.8046
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 912,
+                  "mean_predicted": 0.8551,
+                  "observed_rate": 0.8914
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 5047,
+                  "mean_predicted": 0.9691,
+                  "observed_rate": 0.9937
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.8989,
+                "recall": 0.6152,
+                "flagged_share": 0.1872
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.547,
+                "precision": 0.9202,
+                "recall": 0.5855,
+                "flagged_share": 0.174
+              }
+            },
+            "gbdt_final": {
+              "n": 45923,
+              "positive_rate": 0.2735,
+              "brier": 0.09447,
+              "brier_skill_vs_base_rate": 0.5245,
+              "log_loss": 0.31749,
+              "auc": 0.8986,
+              "ece": 0.0219,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 19611,
+                  "mean_predicted": 0.0693,
+                  "observed_rate": 0.0522
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 10433,
+                  "mean_predicted": 0.1401,
+                  "observed_rate": 0.1292
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 3703,
+                  "mean_predicted": 0.2438,
+                  "observed_rate": 0.246
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 2154,
+                  "mean_predicted": 0.347,
+                  "observed_rate": 0.3751
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 1426,
+                  "mean_predicted": 0.4477,
+                  "observed_rate": 0.521
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 1117,
+                  "mean_predicted": 0.5458,
+                  "observed_rate": 0.6321
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 783,
+                  "mean_predicted": 0.6478,
+                  "observed_rate": 0.7663
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 737,
+                  "mean_predicted": 0.751,
+                  "observed_rate": 0.8046
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 912,
+                  "mean_predicted": 0.8551,
+                  "observed_rate": 0.8914
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 5047,
+                  "mean_predicted": 0.9691,
+                  "observed_rate": 0.9937
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.8989,
+                "recall": 0.6152,
+                "flagged_share": 0.1872
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.547,
+                "precision": 0.9202,
+                "recall": 0.5855,
+                "flagged_share": 0.174
+              }
+            },
+            "calibration": {
+              "held_out_log_loss_raw": 0.27474,
+              "held_out_log_loss_isotonic": 0.2946,
+              "used": "none (raw scores were better calibrated on held-out data)"
+            },
+            "beats_baseline_brier": true,
+            "trees": 83
+          },
+          "60": {
+            "baseline": {
+              "name": "rate by departure-delay bucket",
+              "n": 45923,
+              "positive_rate": 0.0827,
+              "brier": 0.02116,
+              "brier_skill_vs_base_rate": 0.7211,
+              "log_loss": 0.08029,
+              "auc": 0.9752,
+              "ece": 0.007,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 41230,
+                  "mean_predicted": 0.0133,
+                  "observed_rate": 0.0104
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 1305,
+                  "mean_predicted": 0.231,
+                  "observed_rate": 0.2966
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 876,
+                  "mean_predicted": 0.5317,
+                  "observed_rate": 0.6256
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 619,
+                  "mean_predicted": 0.8453,
+                  "observed_rate": 0.8885
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 1893,
+                  "mean_predicted": 0.992,
+                  "observed_rate": 0.9958
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.8805,
+                "recall": 0.7852,
+                "flagged_share": 0.0738
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.1655,
+                "precision": 0.7181,
+                "recall": 0.8871,
+                "flagged_share": 0.1022
+              }
+            },
+            "gbdt_uncalibrated": {
+              "n": 45923,
+              "positive_rate": 0.0827,
+              "brier": 0.01916,
+              "brier_skill_vs_base_rate": 0.7475,
+              "log_loss": 0.07104,
+              "auc": 0.9844,
+              "ece": 0.0077,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 40415,
+                  "mean_predicted": 0.0103,
+                  "observed_rate": 0.0066
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 1170,
+                  "mean_predicted": 0.1394,
+                  "observed_rate": 0.147
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 555,
+                  "mean_predicted": 0.2461,
+                  "observed_rate": 0.2829
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 395,
+                  "mean_predicted": 0.3488,
+                  "observed_rate": 0.4633
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 321,
+                  "mean_predicted": 0.4496,
+                  "observed_rate": 0.5421
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 265,
+                  "mean_predicted": 0.5515,
+                  "observed_rate": 0.6679
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 240,
+                  "mean_predicted": 0.6483,
+                  "observed_rate": 0.7458
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 201,
+                  "mean_predicted": 0.7477,
+                  "observed_rate": 0.8109
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 260,
+                  "mean_predicted": 0.8549,
+                  "observed_rate": 0.9231
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 2101,
+                  "mean_predicted": 0.9856,
+                  "observed_rate": 0.9929
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.9276,
+                "recall": 0.7489,
+                "flagged_share": 0.0668
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.1655,
+                "precision": 0.7405,
+                "recall": 0.8952,
+                "flagged_share": 0.1
+              }
+            },
+            "gbdt_final": {
+              "n": 45923,
+              "positive_rate": 0.0827,
+              "brier": 0.02031,
+              "brier_skill_vs_base_rate": 0.7323,
+              "log_loss": 0.07561,
+              "auc": 0.9832,
+              "ece": 0.013,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 41270,
+                  "mean_predicted": 0.0041,
+                  "observed_rate": 0.0093
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 665,
+                  "mean_predicted": 0.1255,
+                  "observed_rate": 0.2376
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 554,
+                  "mean_predicted": 0.259,
+                  "observed_rate": 0.3863
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 276,
+                  "mean_predicted": 0.3491,
+                  "observed_rate": 0.5326
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 224,
+                  "mean_predicted": 0.4005,
+                  "observed_rate": 0.6116
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 416,
+                  "mean_predicted": 0.5522,
+                  "observed_rate": 0.7284
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 135,
+                  "mean_predicted": 0.6732,
+                  "observed_rate": 0.837
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 209,
+                  "mean_predicted": 0.7423,
+                  "observed_rate": 0.9234
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 19,
+                  "mean_predicted": 0.8334,
+                  "observed_rate": 0.8947
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 2155,
+                  "mean_predicted": 0.9857,
+                  "observed_rate": 0.9907
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.941,
+                "recall": 0.7268,
+                "flagged_share": 0.0639
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.1655,
+                "precision": 0.817,
+                "recall": 0.8579,
+                "flagged_share": 0.0869
+              }
+            },
+            "calibration": {
+              "held_out_log_loss_raw": 0.04145,
+              "held_out_log_loss_isotonic": 0.03907,
+              "used": "isotonic"
+            },
+            "beats_baseline_brier": true,
+            "trees": 152
+          },
+          "180": {
+            "baseline": {
+              "name": "rate by departure-delay bucket",
+              "n": 45923,
+              "positive_rate": 0.01,
+              "brier": 0.00199,
+              "brier_skill_vs_base_rate": 0.7986,
+              "log_loss": 0.00736,
+              "auc": 0.9987,
+              "ece": 0.0009,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 45233,
+                  "mean_predicted": 0.0007,
+                  "observed_rate": 0.0005
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 148,
+                  "mean_predicted": 0.1103,
+                  "observed_rate": 0.1081
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 113,
+                  "mean_predicted": 0.2534,
+                  "observed_rate": 0.2743
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 90,
+                  "mean_predicted": 0.4836,
+                  "observed_rate": 0.6667
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 80,
+                  "mean_predicted": 0.7569,
+                  "observed_rate": 0.9125
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 259,
+                  "mean_predicted": 0.9894,
+                  "observed_rate": 0.9923
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.9735,
+                "recall": 0.719,
+                "flagged_share": 0.0074
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.02,
+                "precision": 0.4054,
+                "recall": 0.9804,
+                "flagged_share": 0.0242
+              }
+            },
+            "gbdt_uncalibrated": {
+              "n": 45923,
+              "positive_rate": 0.01,
+              "brier": 0.00191,
+              "brier_skill_vs_base_rate": 0.8072,
+              "log_loss": 0.00689,
+              "auc": 0.999,
+              "ece": 0.001,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 45369,
+                  "mean_predicted": 0.0005,
+                  "observed_rate": 0.0006
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 73,
+                  "mean_predicted": 0.1454,
+                  "observed_rate": 0.3288
+                },
+                {
+                  "bin": "0.2-0.3",
+                  "n": 43,
+                  "mean_predicted": 0.2439,
+                  "observed_rate": 0.3721
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 34,
+                  "mean_predicted": 0.3461,
+                  "observed_rate": 0.4412
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 23,
+                  "mean_predicted": 0.4436,
+                  "observed_rate": 0.4783
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 27,
+                  "mean_predicted": 0.5541,
+                  "observed_rate": 0.7407
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 26,
+                  "mean_predicted": 0.6509,
+                  "observed_rate": 0.8077
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 25,
+                  "mean_predicted": 0.7522,
+                  "observed_rate": 0.88
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 30,
+                  "mean_predicted": 0.8462,
+                  "observed_rate": 1.0
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 273,
+                  "mean_predicted": 0.984,
+                  "observed_rate": 0.9927
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.9554,
+                "recall": 0.793,
+                "flagged_share": 0.0083
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.02,
+                "precision": 0.5379,
+                "recall": 0.9739,
+                "flagged_share": 0.0181
+              }
+            },
+            "gbdt_final": {
+              "n": 45923,
+              "positive_rate": 0.01,
+              "brier": 0.00226,
+              "brier_skill_vs_base_rate": 0.7717,
+              "log_loss": 0.01007,
+              "auc": 0.9873,
+              "ece": 0.0023,
+              "reliability": [
+                {
+                  "bin": "0.0-0.1",
+                  "n": 45425,
+                  "mean_predicted": 0.0001,
+                  "observed_rate": 0.0009
+                },
+                {
+                  "bin": "0.1-0.2",
+                  "n": 100,
+                  "mean_predicted": 0.1216,
+                  "observed_rate": 0.44
+                },
+                {
+                  "bin": "0.3-0.4",
+                  "n": 29,
+                  "mean_predicted": 0.3077,
+                  "observed_rate": 0.5862
+                },
+                {
+                  "bin": "0.4-0.5",
+                  "n": 20,
+                  "mean_predicted": 0.4645,
+                  "observed_rate": 0.75
+                },
+                {
+                  "bin": "0.5-0.6",
+                  "n": 26,
+                  "mean_predicted": 0.5361,
+                  "observed_rate": 0.8077
+                },
+                {
+                  "bin": "0.6-0.7",
+                  "n": 1,
+                  "mean_predicted": 0.6795,
+                  "observed_rate": 1.0
+                },
+                {
+                  "bin": "0.7-0.8",
+                  "n": 34,
+                  "mean_predicted": 0.7083,
+                  "observed_rate": 0.9412
+                },
+                {
+                  "bin": "0.8-0.9",
+                  "n": 46,
+                  "mean_predicted": 0.8765,
+                  "observed_rate": 0.9565
+                },
+                {
+                  "bin": "0.9-1.0",
+                  "n": 242,
+                  "mean_predicted": 0.9915,
+                  "observed_rate": 1.0
+                }
+              ],
+              "at_0_5": {
+                "cutoff": 0.5,
+                "precision": 0.9742,
+                "recall": 0.7407,
+                "flagged_share": 0.0076
+              },
+              "at_2x_base_rate": {
+                "cutoff": 0.02,
+                "precision": 0.8353,
+                "recall": 0.9063,
+                "flagged_share": 0.0108
+              }
+            },
+            "calibration": {
+              "held_out_log_loss_raw": 0.00243,
+              "held_out_log_loss_isotonic": 0.002,
+              "used": "isotonic"
+            },
+            "beats_baseline_brier": false,
+            "trees": 132
+          }
+        },
+        "median_delay": {
+          "baseline": {
+            "name": "departure delay plus historical route recovery",
+            "n": 45923,
+            "mae": 12.9,
+            "median_abs_error": 10.0,
+            "bias": -4.88,
+            "by_actual_delay": [
+              {
+                "actual_delay": "under 15 min",
+                "n": 33363,
+                "mae": 9.62,
+                "bias": 0.07
+              },
+              {
+                "actual_delay": "15-59 min",
+                "n": 8761,
+                "mae": 21.27,
+                "bias": -18.17
+              },
+              {
+                "actual_delay": "60-179 min",
+                "n": 3340,
+                "mae": 22.52,
+                "bias": -17.98
+              },
+              {
+                "actual_delay": "180+ min",
+                "n": 459,
+                "mae": 21.56,
+                "bias": -15.5
+              }
+            ]
+          },
+          "gbdt": {
+            "n": 45923,
+            "mae": 12.47,
+            "median_abs_error": 9.45,
+            "bias": -1.66,
+            "by_actual_delay": [
+              {
+                "actual_delay": "under 15 min",
+                "n": 33363,
+                "mae": 9.82,
+                "bias": 3.5
+              },
+              {
+                "actual_delay": "15-59 min",
+                "n": 8761,
+                "mae": 18.27,
+                "bias": -14.49
+              },
+              {
+                "actual_delay": "60-179 min",
+                "n": 3340,
+                "mae": 20.17,
+                "bias": -14.86
+              },
+              {
+                "actual_delay": "180+ min",
+                "n": 459,
+                "mae": 38.41,
+                "bias": -36.0
+              }
+            ]
+          }
+        }
+      }
+    }
+  },
+  "model_b": {
+    "status": "skipped",
+    "reason": "Only 0 aircraft rotations could be reconstructed. The source must contain both the inbound and the outbound leg of each rotation with tail numbers (the full BTS table does; nycflights13 has departures from New York only)."
+  }
+}

@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/feedback";
 import { cn } from "@/lib/utils";
 import { ControlBar, usePlayer } from "./player";
+import { BAG_HOW, HowCard } from "./how";
 
 const W = 480;
 const H = 360;
@@ -191,6 +192,7 @@ export function BagScenario() {
           </p>
           <p className="mt-1 font-display text-xl">{STEPS[step]}</p>
           <p className="mt-1 max-w-[50ch] text-base">{NARRATION[step]}</p>
+          <HowCard how={BAG_HOW[step]} />
         </motion.div>
       </AnimatePresence>
 

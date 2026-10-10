@@ -6,7 +6,7 @@ export function LogoMark({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={cn("size-6 shrink-0", className)} aria-hidden>
       <rect x="1" y="1" width="22" height="22" rx="4" fill="var(--signal)" />
-      <path d="M5 14.5 17.5 7.5c.9-.5 2 .1 1.9 1.1l-.1.4-9.3 6.6-3.6 3.1-.9-.6 1.6-3.3L5 14.5Z" fill="#1e252d" />
+      <path d="M5 14.5 17.5 7.5c.9-.5 2 .1 1.9 1.1l-.1.4-9.3 6.6-3.6 3.1-.9-.6 1.6-3.3L5 14.5Z" fill="var(--foreground)" />
     </svg>
   );
 }

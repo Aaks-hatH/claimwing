@@ -41,7 +41,7 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
     .toUpperCase();
 
   return (
-    <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
+    <div className="app-layout min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
       <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-background focus:px-3 focus:py-2">
         Skip to content
       </a>

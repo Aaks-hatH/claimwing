@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrivalsBoard } from "@/components/landing/arrivals-board";
 import { BagCompare } from "@/components/landing/bag-compare";
 import { auth } from "@/lib/auth";
+import { ArrowUpRight, Plane, Radio } from "lucide-react";
 
 const TIMELINE = [
   {
@@ -93,28 +94,49 @@ export default async function Landing() {
       </header>
 
       <main>
-        {/* Hero: the headline, then the board you can play with. */}
-        <section className="mx-auto max-w-6xl px-4 pb-20 pt-12 md:px-8 md:pb-28 md:pt-20">
-          <h1 className="max-w-[16ch] text-[clamp(2.75rem,8vw,6.25rem)] md:max-w-none font-extrabold leading-[0.92] tracking-[-0.025em] stretch-display">
-            Build your claim while the flight is still in the air.
-          </h1>
-          <div className="mt-8 grid gap-8 md:mt-10 md:grid-cols-[minmax(0,34rem)_1fr] md:items-end">
-            <p className="text-lg leading-relaxed text-muted-foreground">
-              ClaimWing follows your flight live, records when it really landed, photographs your bag before and after, and
-              puts it all in one evidence packet for the airline. It&apos;s free, and it&apos;s documentation, not legal advice.
-            </p>
-            <div className="flex flex-wrap gap-2 md:justify-end">
-              <Button asChild variant="signal" size="lg" className="h-12 px-6 text-base">
-                <Link href={startHref}>Add your flight</Link>
-              </Button>
-              <Button asChild variant="outline" size="lg" className="h-12 px-6 text-base">
-                <a href="#bags">See the bag check</a>
-              </Button>
-            </div>
-          </div>
+        {/* Intro + product demo: the flight board is the visual, not generic stock art. */}
+        <section className="landing-hero relative overflow-hidden">
+          <div className="relative mx-auto max-w-6xl px-4 pb-14 pt-14 md:px-8 md:pb-20 md:pt-20">
+            <div className="grid gap-9 lg:grid-cols-[minmax(0,1.13fr)_minmax(18rem,0.87fr)] lg:items-end">
+              <div>
+                <p className="hero-kicker">Flight evidence, in real time</p>
+                <h1 className="hero-title mt-6">
+                  Build your claim <em>while the flight is still in the air.</em>
+                </h1>
+                <p className="mt-6 max-w-[48ch] text-[15px] leading-7 text-board-ink/70 md:text-base">
+                  ClaimWing follows your flight live, records when it really landed, photographs your bag before and after, and
+                  puts it all in one evidence packet for the airline. It&apos;s free, and it&apos;s documentation, not legal advice.
+                </p>
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <Button asChild variant="signal" size="lg" className="h-12 px-6 text-base">
+                    <Link href={startHref}>Find your flight <ArrowUpRight size={17} aria-hidden /></Link>
+                  </Button>
+                  <Button asChild variant="outline" size="lg" className="h-12 border-white/20 bg-white/5 px-5 text-base text-white hover:bg-white/10">
+                    <a href="#bags">See the bag check</a>
+                  </Button>
+                </div>
+                <p className="mt-5 flex items-center gap-2 text-xs text-board-ink/55">
+                  <span className="inline-flex size-5 items-center justify-center rounded-full bg-white/10 text-signal"><span aria-hidden>✓</span></span>
+                  No cut of your claim. You choose what to send.
+                </p>
+              </div>
 
-          <div className="mt-12 md:mt-16">
-            <ArrivalsBoard />
+              <div className="hero-spotlight" aria-label="Live flight tracking visual">
+                <div className="hero-spotlight-line" aria-hidden />
+                <div className="hero-spotlight-grid" aria-hidden />
+                <Plane className="hero-spotlight-plane size-8" aria-hidden />
+                <div className="hero-spotlight-meta">
+                  <strong><Radio size={13} aria-hidden /> Flight record active</strong>
+                  <span>01 / 03</span>
+                </div>
+                <p className="relative z-10 mt-4 font-display text-2xl font-bold leading-tight tracking-tight">A clearer picture<br />from gate to claim.</p>
+              </div>
+            </div>
+
+            <div className="mt-12 md:mt-16">
+              <div className="landing-board-caption"><span>Try the evidence engine</span><span>Choose a flight · move the delay · see the rule</span></div>
+              <ArrivalsBoard />
+            </div>
           </div>
         </section>
 

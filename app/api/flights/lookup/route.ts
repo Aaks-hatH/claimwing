@@ -1,10 +1,12 @@
 import { z } from "zod";
-import { HttpError, ok, withUser } from "@/lib/api";
+import { HttpError, errorResponse, ok } from "@/lib/api";
 import { env } from "@/lib/env";
 import { scheduleProvider } from "@/lib/providers/schedule";
 import { cached } from "@/lib/providers/cache";
 import { getAirport, splitFlightNumber } from "@/lib/reference";
 import { utcToLocalParts } from "@/lib/time";
+import { clientIp, rateLimit } from "@/lib/ratelimit";
+import { NextResponse } from "next/server";
 
 const q = z.object({
   flight: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{2}\s?\d{1,4}[A-Z]?$/),
@@ -12,8 +14,15 @@ const q = z.object({
 });
 
 /** Looks up a flight's schedule to pre-fill the new-trip form. Uses the shared cache to save quota. */
-export const GET = withUser(
-  async (req) => {
+export async function GET(req: Request) {
+  try {
+    const limit = await rateLimit("flight-lookup-public", clientIp(req), 30, 60 * 60);
+    if (!limit.ok) {
+      return NextResponse.json(
+        { error: "Too many flight searches from this network. Try again later." },
+        { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
+      );
+    }
     const url = new URL(req.url);
     const parsed = q.safeParse({ flight: url.searchParams.get("flight"), date: url.searchParams.get("date") });
     if (!parsed.success) throw new HttpError(400, "Enter a flight number like BA117 and a date.");
@@ -50,6 +59,7 @@ export const GET = withUser(
       status: info.status,
       provider: env.scheduleProvider(),
     });
-  },
-  { rateLimit: { name: "flight-lookup", limit: 20, windowSeconds: 3600 } },
-);
+  } catch (err) {
+    return errorResponse(err);
+  }
+}

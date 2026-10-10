@@ -115,7 +115,10 @@ export function ControlBar({ p, labels, title }: { p: Player; labels: string[]; 
         <Button size="icon-sm" variant="ghost" onClick={p.reset} aria-label="Reset to the starting state">
           <RotateCcw aria-hidden />
         </Button>
-        <label className="ml-auto flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="ml-auto hidden text-xs text-muted-foreground md:inline" aria-hidden>
+          Space play · ← → step
+        </span>
+        <label className="flex items-center gap-2 text-xs text-muted-foreground">
           <select value={p.speed} onChange={(e) => p.setSpeed(Number(e.target.value))} className="rounded-lg border bg-background px-2 py-1 text-xs text-foreground">
             {SPEEDS.map((s) => (
               <option key={s} value={s}>

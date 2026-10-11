@@ -3,8 +3,8 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { animate, motion, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
-import { ArrowUpRight, Radio } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowUpRight } from "lucide-react";
+import { useIntroDone } from "./intro";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.2, 0.75, 0.25, 1] as const;
@@ -39,10 +39,17 @@ function readout(t: number) {
   };
 }
 
-function RiseWord({ children, delay, className }: { children: React.ReactNode; delay: number; className?: string }) {
+/* A fixed scatter of stars (same on server and client). */
+const STARS = (() => {
+  let s = 7;
+  const next = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  return Array.from({ length: 72 }, () => ({ x: (next() * 100).toFixed(2), y: (next() * 100).toFixed(2), r: (0.5 + next() * 1.1).toFixed(2), o: (0.25 + next() * 0.5).toFixed(2) }));
+})();
+
+function RiseWord({ children, delay, ready }: { children: React.ReactNode; delay: number; ready: boolean }) {
   return (
     <span className="inline-block overflow-hidden pb-[0.12em] pr-[0.1em] align-bottom">
-      <motion.span className={cn("inline-block will-change-transform", className)} initial={{ y: "115%", rotate: 5 }} animate={{ y: 0, rotate: 0 }} transition={{ duration: 1.05, delay, ease: EASE }}>
+      <motion.span className="inline-block will-change-transform" initial={{ y: "115%", rotate: 5 }} animate={ready ? { y: 0, rotate: 0 } : { y: "115%", rotate: 5 }} transition={{ duration: 1.05, delay, ease: EASE }}>
         {children}
       </motion.span>
     </span>
@@ -52,17 +59,16 @@ function RiseWord({ children, delay, className }: { children: React.ReactNode; d
 export function Hero({ startHref }: { startHref: string }) {
   const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
+  const ready = useIntroDone();
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
 
   const titleY = useTransform(scrollYProgress, [0, 1], [0, -110]);
   const titleOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0]);
-  const cloudA = useTransform(scrollYProgress, [0, 1], [0, -180]);
-  const cloudB = useTransform(scrollYProgress, [0, 1], [0, -70]);
-  const cloudC = useTransform(scrollYProgress, [0, 1], [0, 140]);
   const rings = useTransform(scrollYProgress, [0, 1], [1, 1.7]);
+  const starsY = useTransform(scrollYProgress, [0, 1], [0, 120]);
   const cardY = useTransform(scrollYProgress, [0, 1], [0, 60]);
 
-  // Flight progress: glides in on load, then follows the scroll.
+  // Flight progress: glides in once the curtain opens, then follows the scroll.
   const intro = useMotionValue(0);
   const smooth = useSpring(scrollYProgress, { stiffness: 110, damping: 26, mass: 0.4 });
   const planeRef = useRef<SVGGElement>(null);
@@ -88,127 +94,131 @@ export function Hero({ startHref }: { startHref: string }) {
   useMotionValueEvent(intro, "change", apply);
   useEffect(() => {
     apply();
-    if (reduce) return;
-    const c = animate(intro, START, { duration: 2.2, delay: 0.7, ease: EASE });
+    if (reduce || !ready) return;
+    const c = animate(intro, START, { duration: 2.2, delay: 0.5, ease: EASE });
     return () => c.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [reduce]);
+  }, [reduce, ready]);
 
   const start = bez(0);
   const first = readout(0);
+  const fade = (delay: number, y = 18) => ({
+    initial: { opacity: 0, y },
+    animate: ready ? { opacity: 1, y: 0 } : { opacity: 0, y },
+    transition: { duration: 0.9, delay, ease: EASE },
+  });
 
   return (
-    <section ref={ref} className="landing-hero relative overflow-hidden">
-      {/* Sky: soft clouds drifting at different speeds, and rings that widen as you leave. */}
-      <motion.div aria-hidden style={{ y: reduce ? 0 : cloudA }} className="pointer-events-none absolute -left-24 top-24 h-56 w-[34rem] rounded-full bg-white/80 blur-3xl" />
-      <motion.div aria-hidden style={{ y: reduce ? 0 : cloudB }} className="pointer-events-none absolute right-[-8rem] top-10 h-72 w-[40rem] rounded-full bg-white/70 blur-3xl" />
-      <motion.div aria-hidden style={{ y: reduce ? 0 : cloudC }} className="pointer-events-none absolute bottom-0 left-1/3 h-48 w-[36rem] rounded-full bg-white/90 blur-3xl" />
-      <motion.div aria-hidden style={{ scale: reduce ? 1 : rings }} className="pointer-events-none absolute right-[8%] top-[18%] hidden size-[34rem] rounded-full border border-signal/20 lg:block">
-        <span className="absolute inset-10 rounded-full border border-signal/15" />
-        <span className="absolute inset-24 rounded-full border border-signal/10" />
+    <section ref={ref} className="relative overflow-hidden">
+      {/* Night: stars and orbit rings that widen as you leave. */}
+      <motion.svg aria-hidden style={{ y: reduce ? 0 : starsY }} className="pointer-events-none absolute inset-0 h-full w-full" preserveAspectRatio="none">
+        {STARS.map((s, i) => (
+          <circle key={i} cx={`${s.x}%`} cy={`${s.y}%`} r={s.r} fill="#f2f3f0" opacity={s.o} />
+        ))}
+      </motion.svg>
+      <motion.div aria-hidden style={{ scale: reduce ? 1 : rings }} className="pointer-events-none absolute right-[4%] top-[14%] hidden size-[40rem] rounded-full border border-[rgba(242,243,240,0.14)] lg:block">
+        <span className="absolute inset-12 rounded-full border border-[rgba(242,243,240,0.1)]" />
+        <span className="absolute inset-28 rounded-full border border-[rgba(242,243,240,0.07)]" />
       </motion.div>
 
-      <div className="relative mx-auto flex min-h-[100svh] max-w-6xl flex-col justify-center px-4 pb-20 pt-32 md:px-8 md:pt-36">
-        <div className="grid gap-14 lg:grid-cols-[minmax(0,1.3fr)_minmax(19rem,0.8fr)] lg:items-center">
+      <div className="relative mx-auto flex min-h-[100svh] max-w-[90rem] flex-col justify-center px-[var(--sw-gutter)] pb-20 pt-28 md:pt-32">
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,1.25fr)_minmax(20rem,0.75fr)] lg:items-center">
           <motion.div style={reduce ? undefined : { y: titleY, opacity: titleOpacity }}>
-            <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1, ease: EASE }} className="hero-kicker">
-              Live flight record · Free
-            </motion.p>
-
-            <h1 className="hero-title mt-7">
+            <h1 className="sw-h1">
               <span className="block">
-                <RiseWord delay={0.2}>Build</RiseWord> <RiseWord delay={0.28}>your</RiseWord>
+                <RiseWord delay={0.1} ready={ready}>
+                  Build
+                </RiseWord>{" "}
+                <RiseWord delay={0.18} ready={ready}>
+                  your
+                </RiseWord>
               </span>
               <span className="block">
-                <RiseWord delay={0.36}>claim</RiseWord>
+                <RiseWord delay={0.26} ready={ready}>
+                  claim
+                </RiseWord>
               </span>
               <span className="block">
-                <RiseWord delay={0.5} className="accent">
+                <RiseWord delay={0.4} ready={ready}>
                   in the air.
                 </RiseWord>
               </span>
             </h1>
 
-            <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.85, ease: EASE }} className="mt-9 max-w-[30ch] text-lg leading-8 text-muted-foreground md:text-xl">
+            <motion.p {...fade(0.7)} className="sw-lede mt-8">
               Your flight, tracked. One evidence packet, ready when it lands late.
             </motion.p>
 
-            <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 1, ease: EASE }} className="mt-9 flex flex-wrap items-center gap-3">
-              <Button asChild variant="signal" size="lg">
-                <Link href={startHref}>
-                  Start <ArrowUpRight size={17} aria-hidden />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <a href="#board">Try it</a>
-              </Button>
-              <Link href="/demo" className="ml-1 text-sm font-medium underline decoration-signal decoration-2 underline-offset-[6px]">
+            <motion.div {...fade(0.85)} className="mt-8 flex flex-wrap items-center gap-3">
+              <Link href={startHref} className="sw-btn sw-btn-light">
+                Start <ArrowUpRight aria-hidden />
+              </Link>
+              <a href="#board" className="sw-btn sw-btn-outline-light">
+                Try it
+              </a>
+              <Link href="/demo" className="sw-link ml-1 text-[15px]">
                 Watch the demo
               </Link>
             </motion.div>
+            <motion.p {...fade(1)} className="sw-note mt-5">
+              Free. Documentation support, not legal advice.
+            </motion.p>
           </motion.div>
 
-          <motion.div style={reduce ? undefined : { y: cardY }} initial={{ opacity: 0, y: 40, rotate: 2 }} animate={{ opacity: 1, y: 0, rotate: 0 }} transition={{ duration: 1.1, delay: 0.5, ease: EASE }} className="relative">
-            <div className="rounded-[2rem] border border-signal/15 bg-white/70 p-5 shadow-[0_40px_90px_-40px_rgba(11,99,255,0.45)] backdrop-blur-xl sm:p-6" aria-label="Flight tracking, animated as you scroll">
-              <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
-                <strong className="inline-flex items-center gap-1.5 font-semibold text-signal">
-                  <Radio size={13} aria-hidden /> Live
+          <motion.div style={reduce ? undefined : { y: cardY }} initial={{ opacity: 0, y: 40 }} animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }} transition={{ duration: 1.1, delay: 0.4, ease: EASE }} className="relative">
+            <div className="sw-light sw-plate sw-flightcard" aria-label="Flight tracking, animated as you scroll">
+              <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.1em]">
+                <strong className="inline-flex items-center gap-2 font-semibold">
+                  <span className="live-dot" aria-hidden /> Live
                 </strong>
-                <span>BA178 · JFK → LHR</span>
+                <span className="text-[var(--sw-slate)]">BA178 · JFK → LHR</span>
               </div>
 
               <svg viewBox="0 0 400 280" className="mt-2 w-full overflow-visible" aria-hidden>
-                <defs>
-                  <linearGradient id="trail" x1="0" x2="1" y1="0" y2="0">
-                    <stop offset="0" stopColor="#5aa2ff" stopOpacity="0.2" />
-                    <stop offset="1" stopColor="#0b63ff" />
-                  </linearGradient>
-                </defs>
-                <path d={PATH} fill="none" stroke="var(--signal)" strokeOpacity="0.35" strokeWidth="1.5" strokeDasharray="3 7" strokeLinecap="round" />
-                <path ref={trailRef} d={PATH} pathLength={1} fill="none" stroke="url(#trail)" strokeWidth="3.5" strokeLinecap="round" style={{ strokeDasharray: "0 1" }} />
+                <path d={PATH} fill="none" stroke="#5b636b" strokeOpacity="0.55" strokeWidth="1.5" strokeDasharray="3 7" strokeLinecap="round" />
+                <path ref={trailRef} d={PATH} pathLength={1} fill="none" stroke="#1c2024" strokeWidth="3.5" strokeLinecap="butt" style={{ strokeDasharray: "0 1" }} />
                 {[P[0], P[3]].map(([x, y], i) => (
                   <g key={i}>
-                    <circle cx={x} cy={y} r="9" fill="var(--signal)" fillOpacity="0.14" />
-                    <circle cx={x} cy={y} r="4" fill="var(--signal)" />
-                    <text x={x} y={y + 26} textAnchor="middle" className="fill-muted-foreground font-mono" fontSize="11" letterSpacing="1.5">
+                    <rect x={x - 9} y={y - 9} width="18" height="18" fill="#1c2024" fillOpacity="0.12" />
+                    <rect x={x - 4} y={y - 4} width="8" height="8" fill="#1c2024" />
+                    <text x={x} y={y + 28} textAnchor="middle" fill="#5b636b" className="font-mono" fontSize="11" letterSpacing="1.5">
                       {i ? "LHR" : "JFK"}
                     </text>
                   </g>
                 ))}
                 <g ref={planeRef} transform={`translate(${start.x.toFixed(1)} ${start.y.toFixed(1)}) rotate(${start.angle.toFixed(1)})`}>
-                  <circle r="20" fill="var(--signal)" fillOpacity="0.12" />
-                  <path d="M16 0 7 -3 1 -15 -3 -15 0 -3 -9 -4 -12 -9 -15 -9 -13 0 -15 9 -12 9 -9 4 0 3 -3 15 1 15 7 3Z" fill="var(--signal)" />
+                  <path d="M16 0 7 -3 1 -15 -3 -15 0 -3 -9 -4 -12 -9 -15 -9 -13 0 -15 9 -12 9 -9 4 0 3 -3 15 1 15 7 3Z" fill="#1c2024" />
                 </g>
               </svg>
 
-              <dl className="mt-1 grid grid-cols-3 gap-3 border-t border-signal/15 pt-4">
+              <dl className="sw-statrow">
                 <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Delay</dt>
-                  <dd className="mt-1">
-                    <span ref={delayRef} className="font-display text-lg font-bold tabular-nums tracking-tight">
+                  <dt className="sw-stat-label">Delay</dt>
+                  <dd>
+                    <span ref={delayRef} className="sw-stat-value">
                       {first.delay}
                     </span>
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Status</dt>
-                  <dd className="mt-1">
-                    <span ref={statusRef} data-state={first.status} className="font-display text-lg font-bold tracking-tight data-[state=Delayed]:text-warning data-[state=Eligible]:text-success">
+                  <dt className="sw-stat-label">Status</dt>
+                  <dd>
+                    <span ref={statusRef} data-state={first.status} className={cn("sw-stat-value", "data-[state=Delayed]:text-warning data-[state=Eligible]:text-success")}>
                       {first.status}
                     </span>
                   </dd>
                 </div>
                 <div>
-                  <dt className="font-mono text-[10px] uppercase tracking-[0.1em] text-muted-foreground">Claim</dt>
-                  <dd className="mt-1">
-                    <span ref={estRef} style={{ opacity: 0.18 }} className="font-display text-lg font-bold tabular-nums tracking-tight transition-opacity duration-500">
-                      £260–£520
+                  <dt className="sw-stat-label">Claim</dt>
+                  <dd>
+                    <span ref={estRef} style={{ opacity: 0.18 }} className="sw-stat-value transition-opacity duration-500">
+                      £260 to £520
                     </span>
                   </dd>
                 </div>
               </dl>
             </div>
-            <p className="mt-4 text-center font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">Scroll to fly</p>
+            <p className="sw-note mt-4">Scroll to fly the route.</p>
           </motion.div>
         </div>
       </div>

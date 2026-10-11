@@ -62,8 +62,8 @@ function Suitcase({ damaged, sheen }: { damaged?: boolean; sheen: string }) {
 function Marker({ x, y, n }: { x: number; y: number; n: number }) {
   return (
     <g>
-      <circle cx={x} cy={y} r="11" fill="var(--signal)" stroke="#ffffff" strokeWidth="2" />
-      <text x={x} y={y + 4} textAnchor="middle" fontSize="12" fontWeight="800" fill="#ffffff">
+      <circle cx={x} cy={y} r="11" fill="#1c2024" stroke="#f2f3f0" strokeWidth="2" />
+      <text x={x} y={y + 4} textAnchor="middle" fontSize="12" fontWeight="800" fill="#f2f3f0">
         {n}
       </text>
     </g>
@@ -116,21 +116,21 @@ export function BagCompare() {
   const id = useId();
   return (
     <figure>
-      <div className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-xl bg-muted ring-1 ring-border has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-4 has-[input:focus-visible]:outline-ring">
+      <div className="relative aspect-[4/3] w-full select-none overflow-hidden rounded-[2px] bg-muted ring-2 ring-border has-[input:focus-visible]:outline-2 has-[input:focus-visible]:outline-offset-4 has-[input:focus-visible]:outline-ring">
         <div className="absolute inset-0">
           <Scene />
         </div>
         <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${pos}%)` }}>
           <Scene damaged />
         </div>
-        <span className="absolute left-3 top-3 rounded bg-white/85 px-2 py-1 text-xs font-semibold text-[#0a1e4a]">
+        <span className="absolute left-3 top-3 rounded-[2px] bg-[#f2f3f0] px-2 py-1 text-xs font-semibold text-[#1c2024]">
           Check-in, 06:12
         </span>
-        <span className="absolute right-3 top-3 rounded bg-[#0a1e4a]/85 px-2 py-1 text-xs font-semibold text-white">
+        <span className="absolute right-3 top-3 rounded-[2px] bg-[#1c2024] px-2 py-1 text-xs font-semibold text-[#f2f3f0]">
           Baggage hall, 17:48
         </span>
-        <div className="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 bg-signal" style={{ left: `${pos}%` }} aria-hidden>
-          <span className="absolute top-1/2 left-1/2 flex h-9 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-[3px] rounded-full bg-signal shadow-[0_1px_6px_rgb(11_99_255/0.5)]">
+        <div className="pointer-events-none absolute inset-y-0 w-0.5 -translate-x-1/2 bg-[#f2f3f0] shadow-[0_0_0_1px_#1c2024]" style={{ left: `${pos}%` }} aria-hidden>
+          <span className="absolute top-1/2 left-1/2 flex h-9 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center gap-[3px] rounded-[2px] bg-[#1c2024] ring-2 ring-[#f2f3f0]">
             <span className="h-4 w-px bg-white" />
             <span className="h-4 w-px bg-white" />
           </span>

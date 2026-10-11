@@ -1,127 +1,108 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
-import { ArrowUpRight, Menu, X } from "lucide-react";
-import { Logo } from "@/components/brand";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { ArrowUpRight } from "lucide-react";
 
-const LINKS = [
-  { href: "/demo", label: "Demo" },
-  { href: "#board", label: "Try it", id: "board" },
-  { href: "#bags", label: "Bags", id: "bags" },
-  { href: "#rules", label: "Rules", id: "rules" },
-];
+/** The chapters of the home page, in order. Each id must be on a [data-theme] element in app/page.tsx. */
+export const CHAPTERS = [
+  { id: "top", name: "Start" },
+  { id: "board", name: "Try it" },
+  { id: "bags", name: "Bags" },
+  { id: "trip", name: "Trip" },
+  { id: "rules", name: "Rules" },
+  { id: "questions", name: "Questions" },
+  { id: "start", name: "Add flight" },
+] as const;
 
-/** Starts as a bare bar over the sky, then condenses into a floating glass pill once you scroll. */
-export function SiteHeader({ signedIn }: { signedIn: boolean }) {
-  const [scrolled, setScrolled] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [hover, setHover] = useState<string | null>(null);
-  const [active, setActive] = useState<string | null>(null);
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Light up the link for whichever section is crossing the middle of the screen.
-  useEffect(() => {
-    const ids = LINKS.flatMap((l) => (l.id ? [l.id] : []));
-    const els = ids.map((id) => document.getElementById(id)).filter((e): e is HTMLElement => Boolean(e));
-    if (!els.length || !("IntersectionObserver" in window)) return;
-    const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting) setActive(e.target.id);
-          else setActive((cur) => (cur === e.target.id ? null : cur));
-        }),
-      { rootMargin: "-45% 0px -50% 0px" },
-    );
-    els.forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, []);
-
-  const expanded = open;
+function Mark() {
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex justify-center px-3 pt-3 sm:pt-4">
-      <div
-        className={cn(
-          "w-full border transition-[max-width,background-color,box-shadow,border-color,padding,border-radius] duration-500 ease-[cubic-bezier(.2,.75,.25,1)]",
-          expanded ? "rounded-3xl" : "rounded-full",
-          scrolled || expanded ? "max-w-3xl border-border/80 bg-background/75 px-3 shadow-[0_18px_50px_-24px_rgba(10,30,74,0.35)] backdrop-blur-xl" : "max-w-6xl border-transparent bg-transparent px-1 md:px-4",
-        )}
-      >
-        <div className="flex h-14 items-center justify-between gap-2">
-          <Logo />
+    <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" strokeWidth="2.6" aria-hidden>
+      <rect x="2" y="2" width="28" height="28" />
+      <path d="M7.5 9.5 14.2 22.4c.7 1.3 2.4 1.3 3.1 0L26 7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
-          <nav className="hidden items-center gap-0.5 md:flex" aria-label="Sections" onMouseLeave={() => setHover(null)}>
-            {LINKS.map((l) => {
-              const on = active === l.id;
-              const inner = (
-                <>
-                  {hover === l.href && <motion.span layoutId="nav-hover" className="absolute inset-0 -z-10 rounded-full bg-secondary" transition={{ type: "spring", stiffness: 420, damping: 34 }} />}
-                  {l.label}
-                  {on && <motion.span layoutId="nav-dot" className="absolute -bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full bg-signal" />}
-                </>
-              );
-              const cls = cn("relative z-0 rounded-full px-3.5 py-2 text-sm font-medium transition-colors", on || hover === l.href ? "text-foreground" : "text-muted-foreground");
-              return l.href.startsWith("/") ? (
-                <Link key={l.href} href={l.href} className={cls} onMouseEnter={() => setHover(l.href)}>
-                  {inner}
-                </Link>
-              ) : (
-                <a key={l.href} href={l.href} className={cls} onMouseEnter={() => setHover(l.href)}>
-                  {inner}
-                </a>
-              );
-            })}
-          </nav>
+/**
+ * SkyWindow's top bar: transparent over the night chapters, off-white over the light ones,
+ * with a rail that fills as you scroll and one tick per chapter.
+ */
+export function SiteHeader({ signedIn }: { signedIn: boolean }) {
+  const [tone, setTone] = useState<"dark" | "light">("dark");
+  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState(0);
+  const fill = useRef<HTMLSpanElement>(null);
 
-          <div className="flex items-center gap-1.5">
-            {signedIn ? (
-              <Button asChild size="sm" variant="signal">
-                <Link href="/app">
-                  Dashboard <ArrowUpRight aria-hidden />
-                </Link>
-              </Button>
-            ) : (
-              <>
-                <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-                  <Link href="/login">Sign in</Link>
-                </Button>
-                <Button asChild size="sm" variant="signal">
-                  <Link href="/signup">
-                    Get started <ArrowUpRight aria-hidden />
-                  </Link>
-                </Button>
-              </>
-            )}
-            <button type="button" onClick={() => setOpen((v) => !v)} aria-expanded={open} aria-label={open ? "Close menu" : "Open menu"} className="grid size-9 place-items-center rounded-full text-muted-foreground hover:bg-secondary md:hidden">
-              {open ? <X className="size-4" aria-hidden /> : <Menu className="size-4" aria-hidden />}
-            </button>
-          </div>
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      if (fill.current) fill.current.style.transform = `scaleX(${max > 0 ? Math.min(1, Math.max(0, y / max)) : 0})`;
+      let idx = 0;
+      let t: "dark" | "light" = "dark";
+      CHAPTERS.forEach((c, i) => {
+        const el = document.getElementById(c.id);
+        if (!el) return;
+        if (el.getBoundingClientRect().top <= 40) {
+          idx = i;
+          t = el.dataset.theme === "light" ? "light" : "dark";
+        }
+      });
+      setActive(idx);
+      setTone(t);
+    };
+    const onScroll = () => {
+      if (!raf) raf = window.requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (raf) window.cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <header className="sw-bar" data-tone={tone} data-scrolled={scrolled}>
+      <Link href="/" className="sw-brand" aria-label="Vola home">
+        <Mark />
+        vola
+      </Link>
+
+      <nav className="sw-rail" aria-label="Chapters">
+        <div className="sw-rail-track" aria-hidden>
+          <span ref={fill} className="sw-rail-fill" />
         </div>
+        <ol>
+          {CHAPTERS.map((c, i) => (
+            <li key={c.id}>
+              <a href={`#${c.id}`} aria-label={c.name} aria-current={i === active ? "step" : undefined} />
+            </li>
+          ))}
+        </ol>
+        <span className="sw-rail-name" aria-live="polite">
+          {CHAPTERS[active].name}
+        </span>
+      </nav>
 
-        <AnimatePresence initial={false}>
-          {open && (
-            <motion.nav initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: [0.2, 0.75, 0.25, 1] }} className="overflow-hidden md:hidden" aria-label="Sections (mobile)">
-              <ul className="space-y-1 pb-3 pt-1">
-                {[...LINKS, ...(signedIn ? [] : [{ href: "/login", label: "Sign in" }])].map((l) => (
-                  <li key={l.href}>
-                    <Link href={l.href} onClick={() => setOpen(false)} className="stretch-display flex items-center justify-between rounded-2xl px-4 py-3 text-2xl hover:bg-secondary">
-                      {l.label} <ArrowUpRight className="size-4 text-signal" aria-hidden />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </motion.nav>
-          )}
-        </AnimatePresence>
+      <div className="sw-bar-actions">
+        <Link href="/demo" className="sw-btn sw-btn-ghost sm hide-sm">
+          Demo
+        </Link>
+        {!signedIn && (
+          <Link href="/login" className="sw-btn sw-btn-ghost sm hide-sm">
+            Sign in
+          </Link>
+        )}
+        <Link href={signedIn ? "/app" : "/signup"} className="sw-btn sw-btn-primary sm">
+          {signedIn ? "Dashboard" : "Get started"} <ArrowUpRight aria-hidden />
+        </Link>
       </div>
     </header>
   );

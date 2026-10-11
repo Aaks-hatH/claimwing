@@ -1,0 +1,211 @@
+/*
+ * SkyWindow look for the Vola home page.
+ * Everything is scoped to .sw, so the app, auth and legal pages keep their own theme.
+ * Tokens, type and component shapes follow the SkyWindow story (hackPHS): night and off-white chapters,
+ * Archivo, flat plates with a 2px rail, 2px corners, no shadows, a chapter rail in the top bar.
+ */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url(/fonts/Archivo-latin-ext.woff2) format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url(/fonts/Archivo-latin.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Light chapter: tone paper with frame-white plates. */
+.sw,
+.sw-light {
+  --sw-white: #f2f3f0;
+  --sw-ink: #1c2024;
+  --sw-slate: #5b636b;
+  --sw-rail: #cdd1cf;
+  --sw-tone: #e4e6e3;
+  --sw-night: #0b0d10;
+  --sw-smoke: #dd7b2b;
+  --sw-gutter: clamp(20px, 6vw, 96px);
+  --sw-ease: cubic-bezier(0.65, 0, 0.35, 1);
+
+  --background: #e4e6e3;
+  --foreground: #1c2024;
+  --card: #f2f3f0;
+  --card-foreground: #1c2024;
+  --popover: #f2f3f0;
+  --popover-foreground: #1c2024;
+  --primary: #1c2024;
+  --primary-foreground: #f2f3f0;
+  --secondary: #d8dbd8;
+  --secondary-foreground: #1c2024;
+  --muted: #ecedea;
+  --muted-foreground: #5b636b;
+  --accent: #d8dbd8;
+  --accent-foreground: #1c2024;
+  --border: #b9bebb;
+  --input: #b9bebb;
+  --ring: #1c2024;
+  --success: #0b7643;
+  --warning: #825b0c;
+  --danger: #ac3227;
+  --destructive: #ac3227;
+  --signal: #1c2024;
+  --signal-foreground: #f2f3f0;
+  --sky: #d8dbd8;
+  --board: #1c2024;
+  --board-cell: #2a3036;
+  --board-ink: #f2f3f0;
+  --board-accent: #dd7b2b;
+  --radius: 2px;
+
+  color-scheme: light;
+  color: var(--foreground);
+}
+.sw {
+  min-height: 100dvh;
+  background: var(--background);
+  font-family: "Archivo", system-ui, sans-serif;
+  font-stretch: 100%;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Dark chapter: the night. */
+.sw-dark {
+  --background: #0b0d10;
+  --foreground: #f2f3f0;
+  --card: #14181d;
+  --card-foreground: #f2f3f0;
+  --primary: #f2f3f0;
+  --primary-foreground: #1c2024;
+  --secondary: #171c21;
+  --secondary-foreground: #f2f3f0;
+  --muted: #14181d;
+  --muted-foreground: rgba(242, 243, 240, 0.74);
+  --accent: #171c21;
+  --accent-foreground: #f2f3f0;
+  --border: rgba(242, 243, 240, 0.22);
+  --input: rgba(242, 243, 240, 0.4);
+  --ring: #f2f3f0;
+  --success: #58c48b;
+  --warning: #e0a83a;
+  --danger: #f07563;
+  --signal: #f2f3f0;
+  --signal-foreground: #1c2024;
+  color-scheme: dark;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.sw h1,
+.sw h2,
+.sw h3,
+.sw .stretch-display,
+.sw .stretch-semi {
+  font-family: "Archivo", system-ui, sans-serif;
+  font-weight: 680;
+  font-stretch: 100%;
+  letter-spacing: -0.022em;
+}
+.sw .stretch-semi { font-weight: 640; letter-spacing: -0.015em; }
+.sw ::selection { background: rgba(221, 123, 43, 0.35); color: inherit; }
+.sw :focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+body:has(.sw) .scroll-progress { display: none; }
+
+/* ---------- buttons ---------- */
+.sw-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 48px; padding: 0 20px; border-radius: 2px; border: 2px solid transparent;
+  font: 600 16px/1 "Archivo", system-ui, sans-serif; text-decoration: none; white-space: nowrap; cursor: pointer;
+  transition: background 0.18s ease-out, color 0.18s ease-out, border-color 0.18s ease-out;
+}
+.sw-btn.sm { min-height: 40px; padding: 0 14px; font-size: 14px; }
+.sw-btn svg { width: 16px; height: 16px; transition: transform 0.2s ease; }
+.sw-btn:hover svg { transform: translate(2px, -2px); }
+.sw-btn-light { background: #f2f3f0; color: #1c2024; }
+.sw-btn-light:hover { background: #fff; }
+.sw-btn-solid { background: #1c2024; color: #f2f3f0; }
+.sw-btn-solid:hover { background: #000; }
+.sw-btn-outline-light { background: transparent; border-color: rgba(242, 243, 240, 0.4); color: #f2f3f0; }
+.sw-btn-outline-light:hover { border-color: #f2f3f0; }
+.sw-btn-outline { background: transparent; border-color: #b9bebb; color: #1c2024; }
+.sw-btn-outline:hover { border-color: #1c2024; }
+.sw-btn-ghost { background: transparent; border-color: rgba(242, 243, 240, 0.35); color: inherit; }
+.sw-btn-ghost:hover { border-color: currentColor; }
+.sw-link { color: inherit; font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+
+/* ---------- intro curtain (the SkyWindow loader) ---------- */
+.sw-curtain { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; color: #f2f3f0; }
+.sw-curtain-band { position: absolute; left: 0; right: 0; height: 50.5%; background: #0b0d10; transition: transform 1.3s var(--sw-ease); }
+.sw-curtain-band.top { top: 0; }
+.sw-curtain-band.bottom { bottom: 0; }
+.sw-curtain[data-open="true"] .top { transform: translateY(-101%); }
+.sw-curtain[data-open="true"] .bottom { transform: translateY(101%); }
+.sw-curtain-inner { position: relative; display: flex; flex-direction: column; align-items: center; gap: 18px; padding: 24px; text-align: center; max-width: 560px; transition: opacity 0.5s ease; }
+.sw-curtain[data-open="true"] .sw-curtain-inner { opacity: 0; }
+.sw-mark { width: 56px; height: 56px; fill: none; stroke: #f2f3f0; stroke-width: 2.4; }
+.sw-mark rect, .sw-mark path { stroke-dasharray: 120; stroke-dashoffset: 120; animation: sw-draw 1.6s var(--sw-ease) forwards; }
+.sw-mark path { animation-delay: 0.6s; }
+@keyframes sw-draw { to { stroke-dashoffset: 0; } }
+.sw-wordmark { margin: 4px 0 0; font-size: clamp(40px, 7vw, 72px); font-weight: 700; font-stretch: 112%; letter-spacing: -0.02em; line-height: 1; }
+.sw-curtain-q { margin: 0; font-size: 19px; line-height: 1.45; color: rgba(242, 243, 240, 0.74); max-width: 30ch; }
+.sw-curtain-progress { width: 220px; height: 2px; margin-top: 6px; background: rgba(242, 243, 240, 0.16); }
+.sw-curtain-progress span { display: block; height: 100%; background: #f2f3f0; transform: scaleX(0); transform-origin: left; animation: sw-load 1.9s var(--sw-ease) forwards; }
+@keyframes sw-load { to { transform: scaleX(1); } }
+.sw-curtain-what { margin: 0; font-size: 13px; color: rgba(242, 243, 240, 0.6); }
+
+/* ---------- top bar with the chapter rail ---------- */
+.sw-bar {
+  position: fixed; z-index: 40; inset: 0 0 auto 0; height: 64px; display: flex; align-items: center; gap: 24px; padding: 0 var(--sw-gutter);
+  color: #f2f3f0; transition: background 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
+}
+.sw-bar[data-tone="dark"][data-scrolled="true"] { background: rgba(11, 13, 16, 0.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+.sw-bar[data-tone="light"] { background: #f2f3f0; color: #1c2024; box-shadow: 0 2px 0 #cdd1cf; }
+.sw-bar[data-tone="light"] .sw-btn-ghost { border-color: #cdd1cf; }
+.sw-bar .sw-btn-primary { background: #f2f3f0; color: #1c2024; }
+.sw-bar .sw-btn-primary:hover { background: #fff; }
+.sw-bar[data-tone="light"] .sw-btn-primary { background: #1c2024; color: #f2f3f0; }
+.sw-bar[data-tone="light"] .sw-btn-primary:hover { background: #000; }
+.sw-brand { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; font-size: 20px; font-weight: 700; font-stretch: 112%; letter-spacing: -0.02em; text-decoration: none; color: inherit; }
+.sw-brand svg { width: 22px; height: 22px; }
+.sw-rail { position: relative; flex: 1; display: flex; align-items: center; gap: 16px; min-width: 0; }
+.sw-rail-track { width: min(420px, 50%); height: 2px; background: color-mix(in srgb, currentColor 22%, transparent); }
+.sw-rail-fill { display: block; height: 100%; background: currentColor; transform-origin: left; transform: scaleX(0); }
+.sw-rail ol { position: absolute; left: 0; width: min(420px, 50%); margin: 0; padding: 0; list-style: none; display: flex; justify-content: space-between; }
+.sw-rail li a { display: block; position: relative; width: 28px; height: 44px; }
+.sw-rail li a::after { content: ""; position: absolute; left: 50%; top: 50%; width: 2px; height: 10px; background: currentColor; opacity: 0.45; transform: translate(-50%, -50%); transition: height 0.2s ease, opacity 0.2s ease; }
+.sw-rail li a[aria-current="step"]::after { height: 18px; width: 3px; opacity: 1; }
+.sw-rail-name { font-size: 14px; font-weight: 560; white-space: nowrap; }
+.sw-bar-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+
+/* ---------- chapters ---------- */
+.sw-chapter { position: relative; }
+.sw-plate { background: var(--card); color: var(--foreground); box-shadow: 0 0 0 2px var(--sw-rail); border-radius: 0; }
+.sw-readout-label { font-size: 14px; line-height: 1.4; color: var(--muted-foreground); }
+.sw-h1 { font-size: clamp(44px, 7.4vw, 116px); line-height: 1; font-weight: 680; letter-spacing: -0.026em; text-wrap: balance; }
+.sw-lede { font-size: clamp(17px, 1.4vw, 21px); line-height: 1.5; max-width: 40ch; color: rgba(242, 243, 240, 0.74); }
+.sw-note { font-size: 14px; color: rgba(242, 243, 240, 0.58); }
+.sw-flightcard { padding: clamp(20px, 2.4vw, 32px); }
+.sw-statrow { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; margin-top: 8px; padding-top: 16px; border-top: 2px solid var(--sw-tone); }
+.sw-statrow > :last-child { grid-column: 1 / -1; }
+.sw-stat-label { font-size: 13px; color: var(--sw-slate); }
+.sw-stat-value { display: block; margin-top: 4px; font-size: clamp(20px, 2vw, 28px); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.sw-credits { padding-top: 18px; border-top: 2px solid rgba(242, 243, 240, 0.22); font-size: 13px; color: rgba(242, 243, 240, 0.58); }
+
+@media (max-width: 760px) {
+  .sw-bar { gap: 12px; height: 56px; }
+  .sw-rail-name, .sw-rail ol, .sw-bar .hide-sm { display: none; }
+  .sw-rail-track { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sw-mark rect, .sw-mark path { animation: none; stroke-dashoffset: 0; }
+  .sw-curtain-band { transition: none; }
+  .sw-curtain-progress span { animation: none; transform: scaleX(1); }
+}

@@ -112,7 +112,7 @@ export async function pollTrip(tripId: string | Types.ObjectId, userId: string |
     const inFlight = now >= new Date(schedDep.getTime() - 3600_000) && now <= new Date(schedArr.getTime() + 6 * 3600_000);
     const ttl = inFlight ? env.scheduleTtlSeconds() : Math.max(env.scheduleTtlSeconds(), 3600);
     try {
-      schedule = await getScheduleCached(trip.flightNumber, trip.flightDate, trip.origin, trip.destination, ttl);
+      schedule = await getScheduleCached(trip.flightNumber, trip.flightDate, trip.origin, trip.destination, ttl, schedDep);
       tracking.lastScheduleFetchAt = realNow;
     } catch (e) {
       errors.push(e instanceof Error ? e.message : String(e));

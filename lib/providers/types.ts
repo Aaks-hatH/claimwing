@@ -48,7 +48,9 @@ export interface FlightDataProvider {
   readonly kind: "adsb" | "schedule" | "replay";
   getPositionByIcao24?(icao24: string): Promise<PositionReport | null>;
   getPositionByCallsign?(callsign: string): Promise<PositionReport | null>;
-  getSchedule?(flightNumber: string, dateLocal: string, origin?: string, destination?: string): Promise<ScheduleInfo | null>;
+  getSchedule?(flightNumber: string, dateLocal: string, origin?: string, destination?: string, expectedDeparture?: Date): Promise<ScheduleInfo | null>;
+  /** Every leg the provider lists for this flight number and local date, so the user can pick theirs. */
+  getScheduleOptions?(flightNumber: string, dateLocal: string): Promise<ScheduleInfo[]>;
 }
 
 export class ProviderError extends Error {

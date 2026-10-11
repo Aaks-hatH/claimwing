@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, 
 import { Alert, FieldError } from "@/components/ui/feedback";
 import { ReferenceCombobox } from "@/components/ui/combobox";
 import { tripInput } from "@/lib/validation";
+import { FlightPicker, type FlightOption } from "@/components/trips/flight-picker";
+import { DateTime } from "luxon";
 
 type FormValues = {
   airline: string;
@@ -64,6 +66,9 @@ export function TripForm({
 }) {
   const router = useRouter();
   const [lookup, setLookup] = useState<{ busy: boolean; message?: string; tone?: "success" | "info" | "warning" }>({ busy: false });
+  const [options, setOptions] = useState<FlightOption[]>([]);
+  const [picked, setPicked] = useState<number | null>(null);
+  const [searched, setSearched] = useState("");
   const [advanced, setAdvanced] = useState(Boolean(initial?.icao24 || (initial?.operatingCarrierRegion && initial.operatingCarrierRegion !== "auto")));
   const [serverError, setServerError] = useState<string | null>(null);
   const [comboKey, setComboKey] = useState(0);
@@ -92,10 +97,10 @@ export function TripForm({
   const { register, control, handleSubmit, setValue, getValues, formState } = form;
   const e = formState.errors;
 
-  async function findFlight() {
+  async function findFlight(dateOverride?: string) {
     const airline = getValues("airline");
     const number = getValues("flightNumber").replace(/\s+/g, "").toUpperCase();
-    const date = getValues("flightDate");
+    const date = dateOverride ?? getValues("flightDate");
     if (!airline || !number || !date) {
       setLookup({ busy: false, tone: "warning", message: "Pick the airline, flight number and date first." });
       return;
@@ -106,22 +111,39 @@ export function TripForm({
       const res = await fetch(`/api/flights/lookup?flight=${encodeURIComponent(flight)}&date=${date}`);
       const body = await res.json();
       if (!res.ok) throw new Error(body.error ?? "Lookup failed");
-      if (!body.found) {
+      setPicked(null);
+      if (!body.found || !Array.isArray(body.options) || !body.options.length) {
+        setOptions([]);
         setLookup({ busy: false, tone: body.configured ? "warning" : "info", message: body.message });
         return;
       }
-      setValue("origin", body.origin, { shouldValidate: true });
-      setValue("destination", body.destination, { shouldValidate: true });
-      setValue("departureTime", body.departureTime, { shouldValidate: true });
-      setValue("arrivalDate", body.arrivalDate, { shouldValidate: true });
-      setValue("arrivalTime", body.arrivalTime, { shouldValidate: true });
-      if (body.icao24) setValue("icao24", body.icao24);
-      setComboLabels((l) => ({ ...l, origin: body.origin, destination: body.destination }));
-      setComboKey((k) => k + 1);
-      setLookup({ busy: false, tone: "success", message: `Filled in from ${body.source}. Check it matches your booking.` });
+      setSearched(date);
+      setOptions(body.options as FlightOption[]);
+      setLookup({ busy: false });
     } catch (err) {
+      setOptions([]);
       setLookup({ busy: false, tone: "warning", message: err instanceof Error ? err.message : "Lookup failed" });
     }
+  }
+
+  function shiftDay(delta: -1 | 1) {
+    void findFlight(DateTime.fromISO(searched || getValues("flightDate")).plus({ days: delta }).toFormat("yyyy-LL-dd"));
+  }
+
+  function chooseFlight(i: number) {
+    const o = options[i];
+    if (!o) return;
+    setPicked(i);
+    setValue("flightDate", o.flightDate, { shouldValidate: true });
+    setValue("origin", o.origin, { shouldValidate: true });
+    setValue("destination", o.destination, { shouldValidate: true });
+    setValue("departureTime", o.departureTime, { shouldValidate: true });
+    setValue("arrivalDate", o.arrivalDate, { shouldValidate: true });
+    setValue("arrivalTime", o.arrivalTime, { shouldValidate: true });
+    if (o.icao24) setValue("icao24", o.icao24);
+    setComboLabels((l) => ({ ...l, origin: o.origin, destination: o.destination }));
+    setComboKey((k) => k + 1);
+    setLookup({ busy: false, tone: "success", message: `Filled in from ${o.source ?? "the schedule"}. Check it matches your booking.` });
   }
 
   async function onSubmit(v: FormValues) {
@@ -201,9 +223,14 @@ export function TripForm({
             <FieldError message={e.flightDate?.message} />
           </div>
           <div className="sm:col-span-6">
-            <Button type="button" variant="outline" size="sm" onClick={findFlight} loading={lookup.busy}>
+            <Button type="button" variant="outline" size="sm" onClick={() => findFlight()} loading={lookup.busy}>
               {!lookup.busy && <Search />} Find flight details automatically
             </Button>
+            {options.length > 0 && (
+              <div className="mt-4">
+                <FlightPicker flightLabel={`${getValues("airline")}${getValues("flightNumber")}`} date={searched} options={options} selected={picked} onSelect={chooseFlight} onShiftDay={shiftDay} busy={lookup.busy} />
+              </div>
+            )}
             {lookup.message && <Alert className="mt-3" tone={lookup.tone ?? "info"} title={lookup.message} />}
           </div>
           <div className="space-y-1.5 sm:col-span-3">

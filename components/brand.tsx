@@ -1,22 +1,24 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-/** Mark: a paper-plane glyph in a blue roundel. Wordmark is set in the display serif. */
+/** Mark: a swept "V" wing on a blue squircle. The wordmark is set in the display grotesque, lowercase. */
 export function LogoMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" className={cn("logo-mark size-7 shrink-0", className)} aria-hidden>
-      <circle cx="12" cy="12" r="12" fill="var(--signal)" />
-      <path d="M5.2 11.3 18.6 5.6c.7-.3 1.4.4 1.1 1.1l-5.7 13.4c-.3.7-1.3.7-1.6 0l-1.7-4.6-4.6-1.7c-.7-.3-.7-1.3 0-1.5Z" fill="#fff" />
-      <path d="m10.6 14.2 4.4-4.4" stroke="var(--signal)" strokeWidth="1.2" strokeLinecap="round" />
+    <svg viewBox="0 0 32 32" className={cn("logo-mark size-8 shrink-0", className)} aria-hidden>
+      <rect width="32" height="32" rx="10" fill="var(--signal)" />
+      <path d="M7.5 9.5 14.2 22.4c.7 1.3 2.4 1.3 3.1 0L26 7" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="26" cy="7" r="1.6" fill="#fff" />
     </svg>
   );
 }
 
 export function Logo({ className, href = "/" }: { className?: string; href?: string }) {
   return (
-    <Link href={href} className={cn("inline-flex items-center gap-2.5 text-[19px] tracking-tight stretch-semi", className)}>
+    <Link href={href} aria-label="Vola home" className={cn("inline-flex items-center gap-2.5", className)}>
       <LogoMark />
-      <span>Vola</span>
+      <span className="font-display text-[23px] font-bold leading-none tracking-[-0.06em]" style={{ fontStretch: "85%" }}>
+        vola
+      </span>
     </Link>
   );
 }

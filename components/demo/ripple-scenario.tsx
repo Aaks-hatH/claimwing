@@ -6,10 +6,10 @@ import { FlaskConical, Loader2, Sparkles } from "lucide-react";
 import type { SimFrame, ScenarioMeta } from "@/lib/ripple/sim/scenarios";
 import { RippleView } from "@/components/ripple/ripple-view";
 import { Button } from "@/components/ui/button";
-import { ControlBar, usePlayer } from "./player";
+import { ControlBar, usePlayer, type Player } from "./player";
 import { HowCard, RIPPLE_HOW } from "./how";
 
-type Built = { meta: ScenarioMeta; frames: SimFrame[]; airports: Record<string, { tz: string; city: string | null; name: string }>; model: { version: string } | null };
+export type Built = { meta: ScenarioMeta; frames: SimFrame[]; airports: Record<string, { tz: string; city: string | null; name: string }>; model: { version: string } | null };
 
 /** Plays a simulated Flight Ripple scenario through the real interface. */
 export function RippleScenario({ id, highlight }: { id: string; highlight?: number }) {
@@ -47,11 +47,13 @@ export function RippleScenario({ id, highlight }: { id: string; highlight?: numb
       </div>
     );
   }
-  return <Loaded key={id} data={data} highlight={highlight} />;
+  return <RippleSlides key={id} data={data} highlight={highlight} />;
 }
 
-function Loaded({ data, highlight }: { data: Built; highlight?: number }) {
-  const p = usePlayer(data.frames.length, 6000);
+/** Pass `p` to drive the scenario from an outer slideshow (its own controls are then hidden). */
+export function RippleSlides({ data, highlight, p: ext }: { data: Built; highlight?: number; p?: Player }) {
+  const own = usePlayer(data.frames.length, 6000);
+  const p = ext ?? own;
   const f = data.frames[p.index];
   const scrolledFor = useRef(-1);
 
@@ -70,11 +72,13 @@ function Loaded({ data, highlight }: { data: Built; highlight?: number }) {
 
   return (
     <div className="space-y-5">
-      <div className="z-20 lg:sticky lg:top-[4.5rem] space-y-3">
-        <ControlBar p={p} labels={data.frames.map((x) => x.label)} title={data.meta.title} />
-      </div>
+      {!ext && (
+        <div className="z-20 lg:sticky lg:top-[4.5rem] space-y-3">
+          <ControlBar p={p} labels={data.frames.map((x) => x.label)} title={data.meta.title} />
+        </div>
+      )}
       <div className="flex flex-wrap items-center gap-2">
-        {highlight !== undefined && p.index !== highlight && (
+        {!ext && highlight !== undefined && p.index !== highlight && (
           <Button size="sm" variant="signal" onClick={() => p.goto(highlight)}>
             <Sparkles aria-hidden /> Key moment
           </Button>

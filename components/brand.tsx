@@ -16,7 +16,7 @@ export function Logo({ className, href = "/" }: { className?: string; href?: str
   return (
     <Link href={href} aria-label="Vola home" className={cn("inline-flex items-center gap-2.5", className)}>
       <LogoMark />
-      <span className="font-display text-[23px] font-bold leading-none tracking-[-0.06em]" style={{ fontStretch: "85%" }}>
+      <span className="font-display text-[23px] font-bold leading-none tracking-[-0.04em]" style={{ fontStretch: "90%" }}>
         vola
       </span>
     </Link>

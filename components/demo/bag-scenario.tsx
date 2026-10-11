@@ -7,7 +7,7 @@ import { align, diffMap, heatmapRgba, regions, toGray, type Region } from "@/lib
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/feedback";
 import { cn } from "@/lib/utils";
-import { ControlBar, usePlayer } from "./player";
+import { ControlBar, usePlayer, type Player } from "./player";
 import { BAG_HOW, HowCard } from "./how";
 
 const W = 480;
@@ -95,8 +95,12 @@ function paint(ctx: CanvasRenderingContext2D, damaged: boolean) {
 
 type Verdict = "candidate" | "confirmed" | "rejected";
 
-export function BagScenario() {
-  const p = usePlayer(STEPS.length, 6500);
+export const BAG_STEPS = STEPS.length;
+
+/** Pass `p` to drive the scenario from an outer slideshow: controls are hidden and the review plays itself. */
+export function BagScenario({ p: ext }: { p?: Player }) {
+  const own = usePlayer(STEPS.length, 6500);
+  const p = ext ?? own;
   const beforeRef = useRef<HTMLCanvasElement>(null);
   const afterRef = useRef<HTMLCanvasElement>(null);
   const heatRef = useRef<HTMLCanvasElement>(null);
@@ -154,6 +158,23 @@ export function BagScenario() {
   }, [analysis]);
 
   const step = p.index;
+
+  // Slideshow mode: confirm the candidate regions one by one so the viewer sees the review happen.
+  useEffect(() => {
+    if (!ext || step < 4 || !analysis) return;
+    const timers = analysis.regions.map((_, i) =>
+      window.setTimeout(() => {
+        setSelected(i);
+        setVerdicts((v) => (v[i] ? v : { ...v, [i]: "confirmed" }));
+      }, 800 + i * 1100),
+    );
+    const end = window.setTimeout(() => setSelected(null), 800 + analysis.regions.length * 1100);
+    return () => {
+      timers.forEach((t) => window.clearTimeout(t));
+      window.clearTimeout(end);
+    };
+  }, [ext, step, analysis]);
+
   const showHeat = step >= 3 && (view === "heatmap" || view === "split");
   const confirmed = useMemo(() => Object.entries(verdicts).filter(([, v]) => v === "confirmed").map(([k]) => Number(k)), [verdicts]);
   const checklist = [
@@ -182,9 +203,11 @@ export function BagScenario() {
 
   return (
     <div className="space-y-5">
-      <div className="z-20 lg:sticky lg:top-[4.5rem]">
-        <ControlBar p={p} labels={STEPS} title="Baggage damage investigation" />
-      </div>
+      {!ext && (
+        <div className="z-20 lg:sticky lg:top-[4.5rem]">
+          <ControlBar p={p} labels={STEPS} title="Baggage damage investigation" />
+        </div>
+      )}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={step} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-3xl border border-signal/30 bg-info-soft/60 p-5" aria-live="polite">
           <p className="flex items-center gap-2 text-xs font-medium text-signal">

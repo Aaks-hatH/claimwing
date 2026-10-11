@@ -2,7 +2,8 @@ import "server-only";
 import type { Types } from "mongoose";
 import { DateTime } from "luxon";
 import { HttpError } from "./errors";
-import { getAirline, getAirport } from "./reference";
+import { canonicalCarrier, getAirline, getAirport } from "./reference";
+import { parseFlightNumber } from "./flight-number";
 import { localToUtc } from "./time";
 import { tripInput } from "./validation";
 import type { z } from "zod";
@@ -21,19 +22,18 @@ export function tripFieldsFromInput(input: z.output<typeof tripInput>) {
   const hours = (arr.getTime() - dep.getTime()) / 3600_000;
   if (hours <= 0) throw new HttpError(400, "Arrival must be after departure (times are local to each airport).", { field: "arrivalTime" });
   if (hours > 22) throw new HttpError(400, "That flight would last over 22 hours. Check the arrival date and time.", { field: "arrivalDate" });
-  const number = input.flightNumber.replace(/\s+/g, "");
-  let flightNumber: string;
-  if (/^\d{1,4}[A-Z]?$/.test(number)) {
-    flightNumber = `${input.airline}${number.replace(/^0+(?=\d)/, "")}`;
-  } else {
-    const m = number.match(/^([A-Z0-9]{2})(\d{1,4}[A-Z]?)$/);
-    if (!m) throw new HttpError(400, "Enter the flight number, for example 117 or BA117.", { field: "flightNumber" });
-    if (m[1] !== input.airline) throw new HttpError(400, `Flight ${number} doesn't match airline ${input.airline}.`, { field: "flightNumber" });
-    flightNumber = `${m[1]}${m[2].replace(/^0+(?=\d)/, "")}`;
+  // One parser for both forms ("117" with the airline field, or "BA117" / "GEC8225" on its own).
+  const parsed = parseFlightNumber(input.flightNumber, input.airline);
+  if (!parsed.ok) throw new HttpError(400, parsed.message, { field: "flightNumber" });
+  // BA and BAW are the same airline, so compare and store the IATA form whenever we know it.
+  const airline = canonicalCarrier(input.airline);
+  if (canonicalCarrier(parsed.carrier) !== airline) {
+    throw new HttpError(400, `Flight ${parsed.flightNumber} doesn't match airline ${input.airline}. Check the airline and the flight number.`, { field: "flightNumber" });
   }
+  const flightNumber = `${airline}${parsed.number}`;
   return {
-    airline: input.airline,
-    airlineName: getAirline(input.airline)?.name ?? input.airline,
+    airline,
+    airlineName: getAirline(airline)?.name ?? airline,
     flightNumber,
     flightDate: input.flightDate,
     origin: origin.iata,

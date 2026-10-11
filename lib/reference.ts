@@ -1,6 +1,7 @@
 import "server-only";
 import airportsData from "@/data/airports.json";
 import airlinesData from "@/data/airlines.json";
+import { parseFlightNumber } from "./flight-number";
 
 export type Airport = {
   iata: string;
@@ -20,6 +21,7 @@ const airports = airportsData as Airport[];
 const airlines = airlinesData as Airline[];
 const airportByIata = new Map(airports.map((a) => [a.iata, a]));
 const airlineByIata = new Map(airlines.map((a) => [a.iata, a]));
+const airlineByIcao = new Map(airlines.map((a) => [a.icao, a]));
 
 export function getAirport(iata: string | null | undefined): Airport | null {
   if (!iata) return null;
@@ -70,19 +72,51 @@ export function searchAirlines(q: string, limit = 8): Airline[] {
   return out.slice(0, limit).map(([, a]) => a);
 }
 
-/** "BA117" -> { airline: "BA", number: "117" }. Handles numeric airline codes like "3U8888". */
-export function splitFlightNumber(flight: string): { airline: string; number: string } | null {
-  const f = flight.replace(/\s+/g, "").toUpperCase();
-  const m = f.match(/^([A-Z0-9]{2})(\d{1,4}[A-Z]?)$/);
-  if (!m) return null;
-  return { airline: m[1], number: m[2].replace(/^0+(?=\d)/, "") };
+export function getAirlineByIcao(icao: string | null | undefined): Airline | null {
+  if (!icao) return null;
+  return airlineByIcao.get(icao.toUpperCase()) ?? null;
 }
 
-/** ATC callsign candidates for a flight number, e.g. BA117 -> BAW117. */
+/** Finds an airline from either kind of designator ("BA" or "BAW"). */
+export function findAirline(code: string | null | undefined): Airline | null {
+  if (!code) return null;
+  return code.length === 3 ? getAirlineByIcao(code) : getAirline(code);
+}
+
+/**
+ * The airline designator we store and compare on: the IATA code whenever the airline is in our
+ * reference data (so BAW and BA are the same carrier), otherwise the code as given. An airline
+ * we do not know, such as a cargo operator, is kept rather than rejected.
+ */
+export function canonicalCarrier(code: string): string {
+  const c = code.trim().toUpperCase();
+  return c.length === 3 ? (getAirlineByIcao(c)?.iata ?? c) : c;
+}
+
+/** "BA117" -> { airline: "BA", number: "117" }. Handles numeric airline codes ("3U8888") and ICAO codes ("GEC8225"). */
+export function splitFlightNumber(flight: string): { airline: string; number: string } | null {
+  const p = parseFlightNumber(flight);
+  return p.ok ? { airline: p.carrier, number: p.number } : null;
+}
+
+/**
+ * The flight-number spellings worth asking a schedule provider about, best first. Providers index by
+ * IATA code, so a known ICAO code (BAW117) is tried as BA117 before the code the traveller typed.
+ * Unknown airlines are asked about exactly as typed.
+ */
+export function scheduleQueryCandidates(flight: string): string[] {
+  const p = parseFlightNumber(flight);
+  if (!p.ok) return [];
+  const out = [`${canonicalCarrier(p.carrier)}${p.number}`, p.flightNumber];
+  return [...new Set(out)];
+}
+
+/** ATC callsign candidates for a flight number, e.g. BA117 -> BAW117, and GEC8225 -> GEC8225. */
 export function callsignFor(flightNumber: string): string | null {
-  const parts = splitFlightNumber(flightNumber);
-  if (!parts) return null;
-  const airline = getAirline(parts.airline);
+  const parts = parseFlightNumber(flightNumber);
+  if (!parts.ok) return null;
+  if (parts.carrierKind === "icao") return parts.flightNumber;
+  const airline = getAirline(parts.carrier);
   if (!airline) return null;
   return `${airline.icao}${parts.number}`;
 }

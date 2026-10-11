@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, Input, Label, NativeSelect } from "@/components/ui/primitives";
 import { Alert, FieldError } from "@/components/ui/feedback";
 import { ReferenceCombobox } from "@/components/ui/combobox";
+import { isAirlineCode, looksLikeFlightNumber } from "@/lib/flight-number";
 import { tripInput } from "@/lib/validation";
 import { FlightPicker, type FlightOption } from "@/components/trips/flight-picker";
 import { DateTime } from "luxon";
@@ -34,8 +35,8 @@ type FormValues = {
 
 const formSchema = z
   .object({
-    airline: z.string().regex(/^[A-Z0-9]{2}$/, "Pick the airline"),
-    flightNumber: z.string().trim().min(1, "Enter the flight number"),
+    airline: z.string().refine(isAirlineCode, "Pick the airline"),
+    flightNumber: z.string().trim().min(1, "Enter the flight number").refine(looksLikeFlightNumber, "That doesn't look like a flight number. Use digits like 117, or the full number like BA117 or GEC8225."),
     flightDate: z.string().min(1, "Pick the departure date"),
     origin: z.string().regex(/^[A-Z]{3}$/, "Pick the departure airport"),
     destination: z.string().regex(/^[A-Z]{3}$/, "Pick the arrival airport"),

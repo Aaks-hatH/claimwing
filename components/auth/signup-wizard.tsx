@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -8,20 +8,26 @@ import { ArrowLeft, ArrowRight, Check, Clock3, Eye, EyeOff, LoaderCircle, LockKe
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/primitives";
 import { Alert } from "@/components/ui/feedback";
+import { FlightPicker, type FlightOption } from "@/components/trips/flight-picker";
+import { DateTime } from "luxon";
+import { parseFlightNumber } from "@/lib/flight-number";
+import { createLatestGate } from "@/lib/latest-gate";
+
+type LookupStatus = "ok" | "invalid_format" | "invalid_date" | "not_configured" | "service_unavailable" | "not_found" | "incomplete_data" | "rate_limited";
 
 type LookupBody = {
   found?: boolean;
   configured?: boolean;
+  status?: LookupStatus;
   message?: string;
-  source?: string;
-  origin?: string;
-  destination?: string;
-  departureTime?: string;
-  flightDate?: string;
-  arrivalDate?: string;
-  arrivalTime?: string;
-  icao24?: string | null;
+  error?: string;
+  retryable?: boolean;
+  options?: FlightOption[];
+  flight?: { airline?: string; number?: string };
 };
+
+/** A lookup that has not answered by now is treated as a service problem, not left spinning. */
+const LOOKUP_TIMEOUT_MS = 15_000;
 
 type Flight = {
   airline: string;
@@ -40,11 +46,6 @@ type Flight = {
 type Stage = "flight" | "passenger" | "account" | "saving" | "recovery";
 type Notice = { tone: "success" | "warning" | "info"; message: string } | null;
 
-function parseFlightNumber(raw: string) {
-  const match = raw.replace(/\s+/g, "").toUpperCase().match(/^([A-Z0-9]{2})(\d{1,4}[A-Z]?)$/);
-  return match ? { airline: match[1], number: match[2].replace(/^0+(?=\d)/, "") } : null;
-}
-
 function todayLocal() {
   const now = new Date();
   now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -57,7 +58,16 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
   const [flightNumber, setFlightNumber] = useState("");
   const [flightDate, setFlightDate] = useState("");
   const [flight, setFlight] = useState<Flight | null>(null);
+  const [options, setOptions] = useState<FlightOption[]>([]);
+  const [picked, setPicked] = useState<number | null>(null);
+  const [searchedDate, setSearchedDate] = useState("");
   const [lookupBusy, setLookupBusy] = useState(false);
+  // Each search gets a number; only the newest search may update the screen, so a slow answer for
+  // an earlier flight number can never overwrite the one the traveller is looking at now.
+  const lookupGate = useRef(createLatestGate());
+  // The airline and number as the lookup resolved them (a known ICAO code comes back as its IATA code).
+  const [resolved, setResolved] = useState<{ airline: string; number: string } | null>(null);
+  const lookupAbort = useRef<AbortController | null>(null);
   const [notice, setNotice] = useState<Notice>(null);
   const [manualOpen, setManualOpen] = useState(false);
   const [manual, setManual] = useState({ origin: "", destination: "", departureTime: "", arrivalDate: "", arrivalTime: "" });
@@ -75,57 +85,121 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
   const activeStep = stage === "flight" ? 0 : stage === "passenger" ? 1 : 2;
   const parsed = parseFlightNumber(flightNumber);
 
-  async function findFlight(event: FormEvent<HTMLFormElement>) {
+  /** Called whenever the flight number or date changes: drop any result and ignore any search still in flight. */
+  function resetLookup() {
+    lookupGate.current.invalidate();
+    lookupAbort.current?.abort();
+    setLookupBusy(false);
+    setFlight(null);
+    setOptions([]);
+    setPicked(null);
+    setResolved(null);
+    setNotice(null);
+    setError(null);
+  }
+
+  function findFlight(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    void runLookup(flightDate);
+  }
+
+  function shiftDay(delta: -1 | 1) {
+    const next = DateTime.fromISO(searchedDate || flightDate).plus({ days: delta }).toFormat("yyyy-LL-dd");
+    setFlightDate(next);
+    void runLookup(next);
+  }
+
+  function chooseOption(index: number) {
+    const option = options[index];
+    if (!option || !parsed.ok) return;
+    setPicked(index);
+    setFlight({
+      airline: resolved?.airline ?? parsed.carrier,
+      number: resolved?.number ?? parsed.number,
+      flightDate: option.flightDate,
+      origin: option.origin,
+      destination: option.destination,
+      departureTime: option.departureTime,
+      arrivalDate: option.arrivalDate,
+      arrivalTime: option.arrivalTime,
+      icao24: option.icao24,
+      source: option.source ?? undefined,
+      lookupFound: true,
+    });
+  }
+
+  async function runLookup(date: string) {
+    if (lookupBusy) return;
     setError(null);
     setNotice(null);
-    if (!parsed) {
-      setError("Enter a flight number such as BA117 or 3U8888.");
+    if (!parsed.ok) {
+      setError(parsed.message);
       return;
     }
-    if (!flightDate) {
+    if (!date) {
       setError("Choose the date your flight departs.");
       return;
     }
+    lookupAbort.current?.abort();
+    const controller = new AbortController();
+    lookupAbort.current = controller;
+    const seq = lookupGate.current.begin();
+    let timedOut = false;
+    const timer = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, LOOKUP_TIMEOUT_MS);
+    setFlight(null);
+    setOptions([]);
+    setPicked(null);
     setLookupBusy(true);
     try {
-      const fullNumber = `${parsed.airline}${parsed.number}`;
-      const response = await fetch(`/api/flights/lookup?flight=${encodeURIComponent(fullNumber)}&date=${encodeURIComponent(flightDate)}`);
-      const body = (await response.json().catch(() => ({}))) as LookupBody & { error?: string };
-      if (!response.ok) throw new Error(body.error ?? "Flight search is temporarily unavailable. Try entering the details yourself.");
-      if (!body.found || !body.origin || !body.destination || !body.departureTime || !body.arrivalDate || !body.arrivalTime) {
-        setNotice({ tone: body.configured ? "warning" : "info", message: body.message ?? "No schedule match yet. You can still add the flight details manually." });
+      const response = await fetch(`/api/flights/lookup?flight=${encodeURIComponent(parsed.flightNumber)}&date=${encodeURIComponent(date)}`, { signal: controller.signal });
+      const body = (await response.json().catch(() => ({}))) as LookupBody;
+      if (!lookupGate.current.isCurrent(seq)) return;
+      if (!response.ok) {
+        if (body.status === "invalid_format" || body.status === "invalid_date") {
+          setError(body.error ?? body.message ?? "Check the flight number and date.");
+          return;
+        }
+        // Rate limit or a server error: the flight itself was not checked, so say that and keep manual entry open.
+        setNotice({ tone: "warning", message: body.error ?? "Flight search is temporarily unavailable. Try again shortly, or enter the details from your booking." });
         setManualOpen(true);
         return;
       }
-      setFlight({
-        airline: parsed.airline,
-        number: parsed.number,
-        flightDate: body.flightDate ?? flightDate,
-        origin: body.origin,
-        destination: body.destination,
-        departureTime: body.departureTime,
-        arrivalDate: body.arrivalDate,
-        arrivalTime: body.arrivalTime,
-        icao24: body.icao24,
-        source: body.source,
-        lookupFound: true,
-      });
+      const found = Array.isArray(body.options) ? body.options : [];
+      if (!body.found || !found.length) {
+        // not_found, service_unavailable, not_configured and incomplete_data each arrive with their own accurate message.
+        setNotice({ tone: body.status === "not_configured" ? "info" : "warning", message: body.message ?? "We couldn't check this flight. You can still add the flight details manually." });
+        setManualOpen(true);
+        return;
+      }
+      setResolved(body.flight?.airline && body.flight.number ? { airline: body.flight.airline, number: body.flight.number } : null);
+      setSearchedDate(date);
+      setOptions(found);
       setManualOpen(false);
-      setNotice({ tone: "success", message: `Flight found${body.source ? ` · ${body.source}` : ""}. Check the route before continuing.` });
+      setNotice({ tone: "success", message: found.length === 1 ? "We found a matching flight. Check the route before continuing." : `We found ${found.length} matching flights. Pick yours.` });
     } catch (cause) {
-      setNotice({ tone: "warning", message: cause instanceof Error ? cause.message : "Flight search failed. Enter the details yourself." });
+      if (!lookupGate.current.isCurrent(seq)) return;
+      const aborted = cause instanceof DOMException && cause.name === "AbortError";
+      setNotice({
+        tone: "warning",
+        message: aborted && timedOut
+          ? "The flight search is taking too long, so we couldn't check this flight. Try again, or enter the details from your booking."
+          : "We couldn't reach the flight search. Check your connection and try again, or enter the details from your booking.",
+      });
       setManualOpen(true);
     } finally {
-      setLookupBusy(false);
+      clearTimeout(timer);
+      if (lookupGate.current.isCurrent(seq)) setLookupBusy(false);
     }
   }
 
   function useManualFlight(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
-    if (!parsed) {
-      setError("Enter a valid flight number first, such as BA117.");
+    if (!parsed.ok) {
+      setError(parsed.message);
       return;
     }
     if (!flightDate) {
@@ -142,7 +216,7 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
       setError("Enter the scheduled departure and arrival dates and times from your booking.");
       return;
     }
-    setFlight({ airline: parsed.airline, number: parsed.number, flightDate, origin, destination, departureTime: manual.departureTime, arrivalDate: manual.arrivalDate, arrivalTime: manual.arrivalTime, lookupFound: false });
+    setFlight({ airline: parsed.carrier, number: parsed.number, flightDate, origin, destination, departureTime: manual.departureTime, arrivalDate: manual.arrivalDate, arrivalTime: manual.arrivalTime, lookupFound: false });
     setNotice({ tone: "success", message: "Flight details saved. We’ll still track the flight when the trip is added." });
     setManualOpen(false);
   }
@@ -171,8 +245,8 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
           icao24: flight.icao24 ?? "",
         }),
       });
-      const body = (await response.json().catch(() => ({}))) as { trip?: { id?: string }; error?: string };
-      if (!response.ok || !body.trip?.id) throw new Error(body.error ?? "Your account is ready, but we couldn’t save this flight yet.");
+      const body = (await response.json().catch(() => ({}))) as { trip?: { id?: string }; error?: string; issues?: Array<{ message?: string }> };
+      if (!response.ok || !body.trip?.id) throw new Error(body.issues?.[0]?.message ?? body.error ?? "Your account is ready, but we couldn’t save this flight yet.");
       // New accounts get the (skippable) welcome tour once, starting from the flight they just added.
       const destination = callbackUrl === "/app" ? `/app/welcome?trip=${body.trip.id}` : callbackUrl;
       router.push(destination);
@@ -269,12 +343,12 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
             <div className="wizard-field-grid">
               <div className="space-y-2">
                 <Label htmlFor="signup-flight">Flight number</Label>
-                <div className="wizard-flight-input"><Plane size={17} aria-hidden /><Input id="signup-flight" value={flightNumber} onChange={(event) => { setFlightNumber(event.target.value.toUpperCase()); setFlight(null); }} placeholder="BA117" autoCapitalize="characters" autoComplete="off" /></div>
-                <p className="wizard-helper">Airline code plus number, like BA117 or DL30.</p>
+                <div className="wizard-flight-input"><Plane size={17} aria-hidden /><Input id="signup-flight" value={flightNumber} onChange={(event) => { setFlightNumber(event.target.value.toUpperCase()); resetLookup(); }} placeholder="BA117" autoCapitalize="characters" autoComplete="off" spellCheck={false} /></div>
+                <p className="wizard-helper">Airline code plus number, like BA117, DL30 or GEC8225.</p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="signup-flight-date">Departure date</Label>
-                <Input id="signup-flight-date" type="date" value={flightDate} onChange={(event) => { setFlightDate(event.target.value); setFlight(null); }} onFocus={(event) => { if (!event.currentTarget.value) setFlightDate(todayLocal()); }} />
+                <Input id="signup-flight-date" type="date" value={flightDate} onChange={(event) => { setFlightDate(event.target.value); resetLookup(); }} onFocus={(event) => { if (!event.currentTarget.value) setFlightDate(todayLocal()); }} />
                 <p className="wizard-helper">The local date shown on your booking.</p>
               </div>
             </div>
@@ -282,6 +356,10 @@ export function SignupWizard({ callbackUrl }: { callbackUrl: string }) {
               {!lookupBusy && <Search size={17} aria-hidden />} Find my flight <ArrowRight size={17} aria-hidden />
             </Button>
           </form>
+
+          {options.length > 0 && parsed.ok && (
+            <FlightPicker flightLabel={`${resolved?.airline ?? parsed.carrier}${resolved?.number ?? parsed.number}`} date={searchedDate} options={options} selected={picked} onSelect={chooseOption} onShiftDay={shiftDay} busy={lookupBusy} />
+          )}
 
           {flight && (
             <div className="flight-found-card" aria-live="polite">

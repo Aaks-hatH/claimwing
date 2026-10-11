@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { Check, Loader2 } from "lucide-react";
 import { Input } from "./primitives";
 import { cn } from "@/lib/utils";
+import { isAirlineCode } from "@/lib/flight-number";
 
 export type ComboItem = { code: string; label: string; sub?: string; tz?: string | null };
 
@@ -89,7 +90,7 @@ export function ReferenceCombobox({
           setText(e.target.value);
           const raw = e.target.value.trim().toUpperCase();
           // Typing an exact code works without picking from the list.
-          if ((type === "airport" && /^[A-Z]{3}$/.test(raw)) || (type === "airline" && /^[A-Z0-9]{2}$/.test(raw))) onChange(raw);
+          if ((type === "airport" && /^[A-Z]{3}$/.test(raw)) || (type === "airline" && isAirlineCode(raw))) onChange(raw);
           else if (value) onChange("");
         }}
         onFocus={() => items.length && typed.current && setOpen(true)}

@@ -11,11 +11,11 @@ import { Term } from "@/components/help/term";
 import { FlightPicker, type FlightOption } from "@/components/trips/flight-picker";
 import { DateTime } from "luxon";
 import { cn } from "@/lib/utils";
+import { parseFlightNumber } from "@/lib/flight-number";
 
 type Existing = { id: string; flightNumber: string; flightDate: string; origin: { iata: string }; destination: { iata: string } };
 type Flight = { airline: string; number: string; flightDate: string; origin: string; destination: string; departureTime: string; arrivalDate: string; arrivalTime: string; icao24?: string | null; source?: string | null; found: boolean };
 
-const FLIGHT_RE = /^([A-Z0-9]{2})\s?(\d{1,4}[A-Z]?)$/;
 const STEPS = ["Find", "Confirm", "Add", "Status"];
 
 /**
@@ -39,7 +39,7 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
   const [ripple, setRipple] = useState<RippleResponse | null>(null);
   const [rippleError, setRippleError] = useState<string | null>(null);
 
-  const parsed = FLIGHT_RE.exec(number.trim().toUpperCase());
+  const parsed = parseFlightNumber(number);
   const duplicate = flight ? existing.find((t) => t.flightNumber === `${flight.airline}${flight.number}` && t.flightDate === flight.flightDate) : null;
 
   useEffect(() => {
@@ -59,21 +59,21 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
   }, [step, tripId]);
 
   async function search(searchDate: string) {
-    if (!parsed) return setError("Enter a flight number like BA117 or U2 8013.");
+    if (!parsed.ok) return setError(parsed.message);
     if (!searchDate) return setError("Choose the departure date shown on your booking.");
     setError(null);
     setNotice(null);
     setBusy(true);
-    const manual = (d: string) => setFlight({ airline: parsed[1], number: parsed[2], flightDate: d, origin: "", destination: "", departureTime: "", arrivalDate: d, arrivalTime: "", found: false });
+    const manual = (d: string) => setFlight({ airline: parsed.carrier, number: parsed.number, flightDate: d, origin: "", destination: "", departureTime: "", arrivalDate: d, arrivalTime: "", found: false });
     try {
-      const r = await fetch(`/api/flights/lookup?flight=${encodeURIComponent(parsed[1] + parsed[2])}&date=${searchDate}`);
+      const r = await fetch(`/api/flights/lookup?flight=${encodeURIComponent(parsed.flightNumber)}&date=${searchDate}`);
       const b = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(b.error ?? "Flight search is unavailable right now.");
       setDate(searchDate);
       setPicked(null);
       if (b.found && Array.isArray(b.options) && b.options.length) {
         setOptions(b.options as FlightOption[]);
-        setFlight({ airline: parsed[1], number: parsed[2], flightDate: searchDate, origin: "", destination: "", departureTime: "", arrivalDate: searchDate, arrivalTime: "", found: true });
+        setFlight({ airline: b.flight?.airline ?? parsed.carrier, number: b.flight?.number ?? parsed.number, flightDate: searchDate, origin: "", destination: "", departureTime: "", arrivalDate: searchDate, arrivalTime: "", found: true });
       } else {
         setOptions([]);
         setNotice(b.message ?? "No schedule match. Enter the details from your booking.");
@@ -176,7 +176,7 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="tf-number">Flight number</Label>
-                  <Input id="tf-number" value={number} onChange={(e) => setNumber(e.target.value.toUpperCase())} placeholder="BA117" autoComplete="off" aria-invalid={Boolean(number) && !parsed} />
+                  <Input id="tf-number" value={number} onChange={(e) => setNumber(e.target.value.toUpperCase())} placeholder="BA117" autoComplete="off" aria-invalid={Boolean(number.trim()) && !parsed.ok} />
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="tf-date">Departure date</Label>

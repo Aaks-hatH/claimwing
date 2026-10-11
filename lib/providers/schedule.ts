@@ -2,6 +2,7 @@ import "server-only";
 import { DateTime } from "luxon";
 import { env } from "@/lib/env";
 import { getAirport } from "@/lib/reference";
+import { parseFlightNumber } from "@/lib/flight-number";
 import { cached } from "./cache";
 import { ProviderError, type FlightDataProvider, type NormalizedStatus, type ScheduleInfo } from "./types";
 
@@ -26,11 +27,28 @@ type AdbMovement = {
 type AdbFlight = {
   number?: string;
   status?: string;
+  codeshareStatus?: string;
   callSign?: string;
   departure?: AdbMovement;
   arrival?: AdbMovement;
   aircraft?: { reg?: string; modeS?: string; model?: string };
 };
+
+export const CODESHARE_NOTE = "Codeshare: sold under this number but operated by another airline.";
+
+/**
+ * A codeshared flight is listed once per marketing number, so the same physical leg can appear twice.
+ * Keep one entry per leg (same airports and scheduled departure), preferring the operating listing.
+ */
+export function dedupeLegs(legs: ScheduleInfo[]): ScheduleInfo[] {
+  const byLeg = new Map<string, ScheduleInfo>();
+  for (const leg of legs) {
+    const key = `${leg.origin}|${leg.destination}|${leg.scheduledDeparture ? new Date(leg.scheduledDeparture).getTime() : ""}`;
+    const prev = byLeg.get(key);
+    if (!prev || (prev.notes.includes(CODESHARE_NOTE) && !leg.notes.includes(CODESHARE_NOTE))) byLeg.set(key, leg);
+  }
+  return [...byLeg.values()];
+}
 
 /** Parses "2026-10-10 14:05Z", "2026-10-10T14:05:00Z" or "2026-10-10 15:05+01:00"; bare times are UTC. */
 export function parseUtcish(s: string | null | undefined): Date | null {
@@ -81,7 +99,8 @@ async function adbLegs(flightNumber: string, dateLocal: string): Promise<AdbFlig
     signal: AbortSignal.timeout(10000),
     cache: "no-store",
   });
-  if (res.status === 204 || res.status === 404) return [];
+  // 400 means the API will not answer for this number or date (for example a date outside its window): no data, not an outage.
+  if (res.status === 204 || res.status === 404 || res.status === 400) return [];
   if (res.status === 429) throw new ProviderError("AeroDataBox", "quota or rate limit reached", 60);
   if (res.status === 401 || res.status === 403) throw new ProviderError("AeroDataBox", "API key rejected or not subscribed");
   if (!res.ok) throw new ProviderError("AeroDataBox", `HTTP ${res.status}`);
@@ -98,6 +117,7 @@ function adbInfo(pick: AdbFlight, origin?: string): ScheduleInfo {
   const revisedArr = adbTime(arr.revisedTime, arr.actualTimeUtc);
   const revisedDep = adbTime(dep.revisedTime, dep.actualTimeUtc);
   const notes: string[] = [];
+  if (pick.codeshareStatus === "IsCodeshared") notes.push(CODESHARE_NOTE);
   if (pick.departure?.airport?.iata && origin && pick.departure.airport.iata !== origin) {
     notes.push(`AeroDataBox lists this flight from ${pick.departure.airport.iata}, not ${origin}.`);
   }
@@ -147,7 +167,7 @@ async function aerodatabox(flightNumber: string, dateLocal: string, origin?: str
 }
 
 async function aerodataboxOptions(flightNumber: string, dateLocal: string): Promise<ScheduleInfo[]> {
-  return (await adbLegs(flightNumber, dateLocal)).map((f) => adbInfo(f));
+  return dedupeLegs((await adbLegs(flightNumber, dateLocal)).map((f) => adbInfo(f)));
 }
 
 /* ------------------------------ AviationStack ------------------------------ */
@@ -163,7 +183,7 @@ type AsFlight = {
   departure?: AsMove;
   arrival?: AsMove;
   aircraft?: { registration?: string; icao24?: string; iata?: string } | null;
-  flight?: { icao?: string };
+  flight?: { icao?: string; codeshared?: unknown };
 };
 
 function asLocal(s: string | undefined, iata: string | undefined): Date | null {
@@ -195,7 +215,10 @@ async function asFlights(flightNumber: string): Promise<AsFlight[]> {
   const key = env.aviationstackKey();
   if (!key) return [];
   const base = process.env.AVIATIONSTACK_BASE_URL || "http://api.aviationstack.com/v1";
-  const res = await fetch(`${base}/flights?access_key=${encodeURIComponent(key)}&flight_iata=${encodeURIComponent(flightNumber)}`, {
+  // AviationStack filters on the IATA or the ICAO number; choose by the airline code's shape.
+  const parsedNumber = parseFlightNumber(flightNumber);
+  const param = parsedNumber.ok && parsedNumber.carrierKind === "icao" ? "flight_icao" : "flight_iata";
+  const res = await fetch(`${base}/flights?access_key=${encodeURIComponent(key)}&${param}=${encodeURIComponent(flightNumber)}`, {
     signal: AbortSignal.timeout(10000),
     cache: "no-store",
   });
@@ -224,7 +247,7 @@ function asInfo(f: AsFlight): ScheduleInfo {
     registration: f.aircraft?.registration ?? null,
     callsign: f.flight?.icao ?? null,
     aircraftModel: f.aircraft?.iata ?? null,
-    notes: [],
+    notes: f.flight?.codeshared ? [CODESHARE_NOTE] : [],
   };
 }
 
@@ -238,7 +261,7 @@ async function aviationstack(flightNumber: string, dateLocal: string, origin?: s
 }
 
 async function aviationstackOptions(flightNumber: string, dateLocal: string): Promise<ScheduleInfo[]> {
-  return (await asFlights(flightNumber)).filter((x) => x.flight_date === dateLocal).map(asInfo);
+  return dedupeLegs((await asFlights(flightNumber)).filter((x) => x.flight_date === dateLocal).map(asInfo));
 }
 
 export const AeroDataBoxProvider: FlightDataProvider = { name: "AeroDataBox", kind: "schedule", getSchedule: aerodatabox, getScheduleOptions: aerodataboxOptions };

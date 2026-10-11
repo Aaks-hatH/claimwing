@@ -12,7 +12,7 @@ const g = globalThis as unknown as { __apiL1?: Map<string, Entry>; __inflight?: 
 const l1 = g.__apiL1 ?? (g.__apiL1 = new Map());
 const inflight = g.__inflight ?? (g.__inflight = new Map());
 
-export async function cached<T>(key: string, ttlSeconds: number, fn: () => Promise<T>): Promise<T> {
+export async function cached<T>(key: string, ttlSeconds: number | ((value: T) => number), fn: () => Promise<T>): Promise<T> {
   const now = Date.now();
   const hit = l1.get(key);
   if (hit && hit.expires > now) return hit.value as T;
@@ -29,7 +29,8 @@ export async function cached<T>(key: string, ttlSeconds: number, fn: () => Promi
       return value;
     }
     const value = await fn();
-    const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
+    const ttl = typeof ttlSeconds === "function" ? ttlSeconds(value) : ttlSeconds;
+    const expiresAt = new Date(Date.now() + ttl * 1000);
     l1.set(key, { value, expires: expiresAt.getTime() });
     await ApiCache.updateOne({ key }, { $set: { value, expiresAt } }, { upsert: true }).catch(() => undefined);
     if (l1.size > 2000) l1.clear();

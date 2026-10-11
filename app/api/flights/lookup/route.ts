@@ -1,74 +1,26 @@
-import { z } from "zod";
-import { HttpError, errorResponse, ok } from "@/lib/api";
-import { env } from "@/lib/env";
-import { scheduleProvider } from "@/lib/providers/schedule";
-import { cached } from "@/lib/providers/cache";
-import { getAirport, splitFlightNumber } from "@/lib/reference";
-import { utcToLocalParts } from "@/lib/time";
-import { clientIp, rateLimit } from "@/lib/ratelimit";
 import { NextResponse } from "next/server";
-
-const q = z.object({
-  flight: z.string().trim().toUpperCase().regex(/^[A-Z0-9]{2}\s?\d{1,4}[A-Z]?$/),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-});
+import { errorResponse } from "@/lib/api";
+import { lookupFlight, parseLookupInput } from "@/lib/flight-lookup";
+import { clientIp, rateLimit } from "@/lib/ratelimit";
 
 /** Looks up a flight's schedule to pre-fill the new-trip form. Uses the shared cache to save quota. */
 export async function GET(req: Request) {
   try {
+    const url = new URL(req.url);
+    // Malformed input is rejected before it costs a rate-limit slot or a provider call.
+    const parsed = parseLookupInput(url.searchParams.get("flight"), url.searchParams.get("date"));
+    if (!parsed.ok) return NextResponse.json(parsed.outcome.body, { status: parsed.outcome.httpStatus });
+
     const limit = await rateLimit("flight-lookup-public", clientIp(req), 30, 60 * 60);
     if (!limit.ok) {
+      const message = "Too many flight searches from this network. Try again later, or enter the details from your booking.";
       return NextResponse.json(
-        { error: "Too many flight searches from this network. Try again later." },
+        { found: false, status: "rate_limited", retryable: true, error: message, message },
         { status: 429, headers: { "Retry-After": String(limit.retryAfter) } },
       );
     }
-    const url = new URL(req.url);
-    const parsed = q.safeParse({ flight: url.searchParams.get("flight"), date: url.searchParams.get("date") });
-    if (!parsed.success) throw new HttpError(400, "Enter a flight number like BA117 and a date.");
-    const p = scheduleProvider();
-    if (!p?.getSchedule) {
-      return ok({ found: false, configured: false, message: "Automatic lookup isn't set up on this server. Enter the times from your booking." });
-    }
-    const flight = parsed.data.flight.replace(/\s+/g, "");
-    if (!splitFlightNumber(flight)) throw new HttpError(400, "Enter a flight number like BA117.");
-    let legs;
-    try {
-      legs = await cached(`lookup-options:${p.name}:${flight}:${parsed.data.date}`, 6 * 3600, async () =>
-        p.getScheduleOptions ? p.getScheduleOptions(flight, parsed.data.date) : [await p.getSchedule!(flight, parsed.data.date)].filter((x) => x !== null),
-      );
-    } catch (e) {
-      return ok({ found: false, configured: true, message: `Lookup failed: ${e instanceof Error ? e.message : "unknown error"}. Enter the times from your booking.` });
-    }
-    const options = legs
-      .filter((info) => info && info.scheduledDeparture && info.scheduledArrival && info.origin && info.destination)
-      .map((info) => {
-        const o = getAirport(info.origin!);
-        const d = getAirport(info.destination!);
-        const dep = utcToLocalParts(info.scheduledDeparture!, o?.tz);
-        const arr = utcToLocalParts(info.scheduledArrival!, d?.tz);
-        return {
-          origin: info.origin!,
-          destination: info.destination!,
-          originCity: o?.city ?? null,
-          destinationCity: d?.city ?? null,
-          flightDate: dep.date,
-          departureTime: dep.time,
-          arrivalDate: arr.date,
-          arrivalTime: arr.time,
-          icao24: info.icao24,
-          status: info.status,
-          source: info.source,
-          sortKey: new Date(info.scheduledDeparture!).getTime(),
-        };
-      })
-      .sort((a, b) => a.sortKey - b.sortKey)
-      .map(({ sortKey: _k, ...rest }) => rest);
-    if (!options.length) {
-      return ok({ found: false, configured: true, message: "We couldn't find that flight on that date. Check the number and date, or enter the details yourself." });
-    }
-    // The user always picks their flight and day. We never guess when there is more than one.
-    return ok({ found: true, configured: true, requestedDate: parsed.data.date, options, provider: env.scheduleProvider() });
+    const outcome = await lookupFlight(parsed.input);
+    return NextResponse.json(outcome.body, { status: outcome.httpStatus });
   } catch (err) {
     return errorResponse(err);
   }

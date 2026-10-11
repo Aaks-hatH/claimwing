@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { FLIGHT_NUMBER_EXAMPLES, isAirlineCode, looksLikeFlightNumber } from "./flight-number";
 
 /* Shared Zod schemas for forms (client) and route handlers (server). */
 
@@ -12,7 +13,7 @@ export const airlineCode = z
   .string()
   .trim()
   .toUpperCase()
-  .regex(/^[A-Z0-9]{2}$/, "Use the 2-character airline code (for example BA)");
+  .refine(isAirlineCode, "Use the airline code: 2 characters (for example BA) or 3 letters (for example BAW)");
 
 export const localDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Pick a date");
 export const localTime = z.string().regex(/^\d{2}:\d{2}$/, "Enter a time");
@@ -35,7 +36,7 @@ export const tripInput = z
       .string()
       .trim()
       .toUpperCase()
-      .regex(/^([A-Z0-9]{2})?\s?\d{1,4}[A-Z]?$/, "Enter the flight number, for example 117 or BA117"),
+      .refine(looksLikeFlightNumber, `Enter the flight number, for example 117 or ${FLIGHT_NUMBER_EXAMPLES}`),
     flightDate: localDate,
     origin: iata,
     destination: iata,

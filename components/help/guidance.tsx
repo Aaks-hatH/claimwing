@@ -19,7 +19,7 @@ type Guidance = {
 };
 
 const Ctx = createContext<Guidance | null>(null);
-const LOCAL_KEY = "claimwing.guidance";
+const LOCAL_KEY = "vola.guidance";
 
 function readLocal(): { dismissed: string[]; onboarding?: string } {
   try {

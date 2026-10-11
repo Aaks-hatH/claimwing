@@ -5,7 +5,7 @@
  *  - a delayed flight that replays from data/replays (labelled "Demo replay" everywhere)
  *  - a checked bag with generated before/after photos and one confirmed damage marker
  *
- * Demo login: demo@claimwing.app / the SEED_PASSWORD env var (default: claimwing-demo-2026)
+ * Demo login: demo@vola.app / the SEED_PASSWORD env var (default: vola-demo-2026)
  */
 import "./load-env";
 import bcrypt from "bcryptjs";
@@ -18,8 +18,8 @@ import { processImage } from "@/lib/images";
 import { deleteTripCascade } from "@/lib/cascade";
 import { BaggageItem, BaggagePhoto, DamageMarker, Notification, Trip, User } from "@/models";
 
-const EMAIL = "demo@claimwing.app";
-const PASSWORD = process.env.SEED_PASSWORD || "claimwing-demo-2026";
+const EMAIL = "demo@vola.app";
+const PASSWORD = process.env.SEED_PASSWORD || "vola-demo-2026";
 const ANGLES = ["front", "back", "left", "right", "top", "bottom", "tag"] as const;
 
 /** Draws a simple suitcase illustration for an angle. `damaged` adds a crack and a scuff. */

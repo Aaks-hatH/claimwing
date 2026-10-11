@@ -45,7 +45,7 @@ export const GET = withUser(
     return new NextResponse(body, {
       headers: {
         "Content-Type": "application/json",
-        "Content-Disposition": `attachment; filename="claimwing-export-${new Date().toISOString().slice(0, 10)}.json"`,
+        "Content-Disposition": `attachment; filename="vola-export-${new Date().toISOString().slice(0, 10)}.json"`,
         "Cache-Control": "private, no-store",
       },
     });

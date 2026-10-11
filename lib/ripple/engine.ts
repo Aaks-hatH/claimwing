@@ -145,7 +145,7 @@ export type RippleResult = {
 };
 
 const DISCLAIMER =
-  "Flight Ripple is a forecast, not an airline status and not legal advice. Compensation depends on the confirmed arrival time and the rules that apply, which ClaimWing checks separately.";
+  "Flight Ripple is a forecast, not an airline status and not legal advice. Compensation depends on the confirmed arrival time and the rules that apply, which Vola checks separately.";
 
 const minutesBetween = (a: Date, b: Date) => Math.round((b.getTime() - a.getTime()) / 60_000);
 const iso = (d: Date | null | undefined) => (d ? new Date(d).toISOString() : null);

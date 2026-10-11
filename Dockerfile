@@ -1,4 +1,4 @@
-# Production image for ClaimWing (Next.js standalone output).
+# Production image for Vola (Next.js standalone output).
 FROM node:22-bookworm-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./

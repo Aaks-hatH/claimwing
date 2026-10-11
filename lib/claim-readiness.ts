@@ -60,7 +60,7 @@ export function claimReadiness(ctx: NonNullable<ClaimContext>, opts: { now: Date
       label: "Rules checked",
       status: !p ? "warning" : p.status === "eligible" ? "done" : "warning",
       why: !p
-        ? "No regime ClaimWing checks covers this flight. You can still claim care costs from the airline."
+        ? "No regime Vola checks covers this flight. You can still claim care costs from the airline."
         : p.status === "needs_review"
           ? `Needs a closer look: ${p.explanation[p.explanation.length - 1]}`
           : p.status === "not_eligible"

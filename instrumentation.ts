@@ -7,8 +7,8 @@ export async function register() {
   if (process.env.NEXT_RUNTIME !== "nodejs") return;
   const on = ["1", "true", "yes"].includes((process.env.INTERNAL_CRON ?? "").toLowerCase());
   if (!on || !process.env.MONGODB_URI) return;
-  const g = globalThis as unknown as { __claimwingCron?: NodeJS.Timeout };
-  if (g.__claimwingCron) return;
+  const g = globalThis as unknown as { __volaCron?: NodeJS.Timeout };
+  if (g.__volaCron) return;
   const { runBackgroundCycle } = await import("./lib/cron");
   let running = false;
   const tick = async () => {
@@ -23,7 +23,7 @@ export async function register() {
       running = false;
     }
   };
-  g.__claimwingCron = setInterval(tick, 120_000);
+  g.__volaCron = setInterval(tick, 120_000);
   setTimeout(tick, 15_000);
   console.log("[cron] in-process flight polling enabled (every 2 minutes)");
 }

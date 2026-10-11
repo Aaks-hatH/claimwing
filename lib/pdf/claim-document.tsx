@@ -50,7 +50,7 @@ function Footer({ ctx }: { ctx: NonNullable<ClaimContext> }) {
   return (
     <>
       <Text style={s.footerLeft} fixed>
-        ClaimWing evidence packet · {ctx.trip.flightNumber} {ctx.trip.flightDate} · {ctx.trip.passengerName}
+        Vola evidence packet · {ctx.trip.flightNumber} {ctx.trip.flightDate} · {ctx.trip.passengerName}
         {ctx.trip.demoMode ? " · DEMO REPLAY, NOT REAL DATA" : ""}
       </Text>
       <Text style={s.footerRight} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} fixed />
@@ -144,10 +144,10 @@ export function ClaimDocument({ ctx, photos, letter, generatedAt }: { ctx: NonNu
   const tzD = ctx.destination?.tz;
 
   return (
-    <Document title={`ClaimWing evidence ${t.flightNumber} ${t.flightDate}`} author={t.passengerName} creator="ClaimWing" producer="ClaimWing">
+    <Document title={`Vola evidence ${t.flightNumber} ${t.flightDate}`} author={t.passengerName} creator="Vola" producer="Vola">
       {/* ---------- Cover ---------- */}
       <Page size="A4" style={s.page}>
-        <Text style={[s.small, { marginBottom: 18, color: C.primary, fontFamily: "Helvetica-Bold" }]}>CLAIMWING · EVIDENCE PACKET</Text>
+        <Text style={[s.small, { marginBottom: 18, color: C.primary, fontFamily: "Helvetica-Bold" }]}>VOLA · EVIDENCE PACKET</Text>
         <Text style={s.h1}>
           {ctx.includeFlight && ctx.includeBags ? "Flight and baggage claim" : ctx.includeBags ? "Baggage claim" : "Flight disruption claim"}
         </Text>
@@ -205,7 +205,7 @@ export function ClaimDocument({ ctx, photos, letter, generatedAt }: { ctx: NonNu
           </View>
         ))}
         <Text style={[s.small, { marginTop: 10 }]}>
-          Generated {utc(generatedAt)}. ClaimWing is a documentation tool, not legal advice. Eligibility is an automated estimate from the facts recorded; the airline or a court may decide differently.
+          Generated {utc(generatedAt)}. Vola is a documentation tool, not legal advice. Eligibility is an automated estimate from the facts recorded; the airline or a court may decide differently.
         </Text>
         <Footer ctx={ctx} />
       </Page>

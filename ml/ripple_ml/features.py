@@ -12,7 +12,7 @@ Historical statistics (target encodings) are computed from the training period o
 the training period receive out-of-fold values (computed without their own time block), so a
 row's own outcome never leaks into its features. Evaluation rows use the full training tables.
 
-ClaimWing's TypeScript inference (lib/ripple/model.ts) recomputes these features with the same
+Vola's TypeScript inference (lib/ripple/model.ts) recomputes these features with the same
 definitions; the exported artifact contains parity vectors that the TypeScript tests check.
 """
 from __future__ import annotations

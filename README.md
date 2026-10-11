@@ -1,12 +1,12 @@
-# ClaimWing
+# Vola
 
-Evidence for delayed flights and damaged bags. ClaimWing tracks a flight live, photographs a checked bag before and after, estimates eligibility under EU261, UK261, US DOT rules and the Montreal Convention, and exports one evidence packet (PDF) plus a ZIP of untouched originals.
+Evidence for delayed flights and damaged bags. Vola tracks a flight live, photographs a checked bag before and after, estimates eligibility under EU261, UK261, US DOT rules and the Montreal Convention, and exports one evidence packet (PDF) plus a ZIP of untouched originals.
 
 **Flight Ripple** forecasts delays from three connected sources: passengers on the same flight reporting what they see, the aircraft flying in before yours (and after it), and a gradient-boosted model trained on historical outcomes. Every result says whether it came from the trained model, a rule-based estimate or a simulation, and what data was missing.
 
 The **Demo Center** (`/demo`, no account needed) replays six deterministic, clearly simulated scenarios through the real algorithms: a three-flight delay cascade, conflicting passenger reports, an aircraft swap, a provider outage, a bag damage investigation and claim preparation.
 
-**Documentation support, not legal advice.** Eligibility results are automated estimates. ClaimWing never contacts an airline on the user's behalf.
+**Documentation support, not legal advice.** Eligibility results are automated estimates. Vola never contacts an airline on the user's behalf.
 
 ---
 
@@ -22,7 +22,7 @@ npm run seed                   # optional: demo account + demo trip
 npm run dev                    # http://localhost:3000
 ```
 
-Demo login after seeding: `demo@claimwing.app` / `claimwing-demo-2026` (change with `SEED_PASSWORD`).
+Demo login after seeding: `demo@vola.app` / `vola-demo-2026` (change with `SEED_PASSWORD`).
 
 ## Environment variables
 
@@ -32,7 +32,7 @@ Everything is documented in [`.env.example`](.env.example). The important ones:
 |---|---|
 | `MONGODB_URI` | **Required.** All data, and photos (GridFS) by default |
 | `AUTH_SECRET` | **Required.** Signs session cookies |
-| `AUTH_URL` | Public URL, e.g. `https://claimwing.fly.dev` (OAuth callbacks) |
+| `AUTH_URL` | Public URL, e.g. `https://vola.fly.dev` (OAuth callbacks) |
 | `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET` | Google sign-in (optional). Redirect URI: `{AUTH_URL}/api/auth/callback/google` |
 | `AERODATABOX_RAPIDAPI_KEY` | Scheduled, actual (gate) and runway times, aircraft transponder lookup, the "find flight" button. Strongly recommended |
 | `AVIATIONSTACK_KEY` | Alternative schedule source (free plan: HTTP only, small quota) |
@@ -59,7 +59,7 @@ Check a running deployment at `GET /api/health` (config + database). Signed in, 
 
 Tracking runs from 3 hours before scheduled departure until the arrival is final. The Flight tab polls every 20 s while open; `/api/cron/poll` (or `INTERNAL_CRON`) keeps polling when nobody is watching.
 
-**Delay measurement.** Legally, arrival is when a door opens (CJEU, *Germanwings* C-452/13). ClaimWing stores every candidate time with its source and uses, in order: the time the passenger entered, the gate arrival from the schedule API, the runway time, the first on-ground ADS-B report, the last ADS-B contact. Results within 15 minutes of the 3-hour threshold based on anything other than a gate or passenger-entered time are marked **Needs review** instead of being decided.
+**Delay measurement.** Legally, arrival is when a door opens (CJEU, *Germanwings* C-452/13). Vola stores every candidate time with its source and uses, in order: the time the passenger entered, the gate arrival from the schedule API, the runway time, the first on-ground ADS-B report, the last ADS-B contact. Results within 15 minutes of the 3-hour threshold based on anything other than a gate or passenger-entered time are marked **Needs review** instead of being decided.
 
 ## Eligibility rules
 
@@ -119,7 +119,7 @@ source_quality = provider 1.0, aircraft 0.9, passenger 0.6 x eligibility x moder
 
 Labels are "Unverified" (one person), "Some" or "Strong corroboration", "Contested" and "Old report". The score is never shown as a probability, and a single report never changes the forecast. Server-side protections: strict schema (unknown types and extra fields rejected), time-window and value checks, 10-minute duplicate protection, rate limits per person (30 per hour), per person per flight (6 per 10 minutes) and per flight (300 per 10 minutes), burst flagging, and lower weight for reports that don't fit the flight's phase or come from brand-new accounts. Users can turn sharing off (their past reports are withdrawn from every aggregate) and delete their reports in Settings; account export and deletion include them.
 
-**Aircraft Network** (`lib/ripple/rotation.ts`, `propagation.ts`). When the schedule provider assigns an aircraft registration to your flight, ClaimWing fetches that aircraft's legs for the day (AeroDataBox `/flights/reg/{reg}/{date}`, cached and shared). Flights are linked only when the same registration flies both, the earlier leg lands where the next departs, and the scheduled gap is 15 minutes to 12 hours. Flight numbers and mirror-image routes never create a link, and if your flight isn't in the aircraft's list (a likely swap) the rotation is shown as unknown. Assignment changes are kept on the trip so swaps are detected.
+**Aircraft Network** (`lib/ripple/rotation.ts`, `propagation.ts`). When the schedule provider assigns an aircraft registration to your flight, Vola fetches that aircraft's legs for the day (AeroDataBox `/flights/reg/{reg}/{date}`, cached and shared). Flights are linked only when the same registration flies both, the earlier leg lands where the next departs, and the scheduled gap is 15 minutes to 12 hours. Flight numbers and mirror-image routes never create a link, and if your flight isn't in the aircraft's list (a likely swap) the rotation is shown as unknown. Assignment changes are kept on the trip so swaps are detected.
 
 ```
 predicted_inbound_arrival = scheduled_inbound_arrival + predicted_arrival_delay

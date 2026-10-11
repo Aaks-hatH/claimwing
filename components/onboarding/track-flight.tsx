@@ -288,7 +288,7 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
                     <p className="mt-1 text-xs text-muted-foreground">{ripple.result.kindLabel}</p>
                     {ripple.result.dataQuality.missing.length > 0 && (
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Still to come: {ripple.result.dataQuality.missing.slice(0, 2).join("; ")}. ClaimWing fills these in as the <Term id="rotation">aircraft</Term> and live data appear.
+                        Still to come: {ripple.result.dataQuality.missing.slice(0, 2).join("; ")}. Vola fills these in as the <Term id="rotation">aircraft</Term> and live data appear.
                       </p>
                     )}
                   </>

@@ -6,8 +6,8 @@ export const metadata: Metadata = { title: "Terms" };
 export default function TermsPage() {
   return (
     <LegalPage title="Terms of use" updated="10 October 2026">
-      <h2>What ClaimWing is</h2>
-      <p>ClaimWing is a documentation tool. It helps you record flight and baggage facts and prepare your own claim. It is not a law firm, does not give legal advice, and does not represent you.</p>
+      <h2>What Vola is</h2>
+      <p>Vola is a documentation tool. It helps you record flight and baggage facts and prepare your own claim. It is not a law firm, does not give legal advice, and does not represent you.</p>
       <h2>Estimates, not guarantees</h2>
       <p>Eligibility results are automated estimates based on the facts stored and our reading of the rules. They can be wrong. Rules change, and airlines, regulators and courts decide each case on its facts.</p>
       <h2>Data accuracy</h2>

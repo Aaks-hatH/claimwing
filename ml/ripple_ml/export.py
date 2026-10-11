@@ -1,5 +1,5 @@
 """
-Exports LightGBM boosters to a compact JSON tree format that ClaimWing evaluates in TypeScript
+Exports LightGBM boosters to a compact JSON tree format that Vola evaluates in TypeScript
 (lib/ripple/gbdt.ts), so production needs no Python runtime or separate inference service.
 
 Tree format: parallel arrays. ``left``/``right`` hold a node index when >= 0, or ``-(leaf + 1)``

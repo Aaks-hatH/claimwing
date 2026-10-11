@@ -1,5 +1,5 @@
 # Fly.io config. Run `fly launch --no-deploy` to set your own app name and region.
-app = "claimwing"
+app = "vola"
 primary_region = "ewr"
 
 [build]

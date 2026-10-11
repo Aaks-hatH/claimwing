@@ -24,7 +24,7 @@ const PREDICTION_RETENTION_DAYS = 30;
 
 /** Pseudonymous id for a contributor on one flight. Different on every flight, not reversible. */
 export function contributorId(userId: string, flightKey: string) {
-  const secret = process.env.AUTH_SECRET || "claimwing-dev-secret";
+  const secret = process.env.AUTH_SECRET || "vola-dev-secret";
   return createHmac("sha256", secret).update(`${userId}:${flightKey}`).digest("hex").slice(0, 16);
 }
 

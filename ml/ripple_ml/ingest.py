@@ -37,7 +37,7 @@ CANONICAL = [
 
 
 def load_tz_table(repo_airports_json: str | None = None, extra: dict[str, str] | None = None) -> dict[str, str]:
-    """IATA code -> IANA time zone, from ClaimWing's own reference data (data/airports.json)."""
+    """IATA code -> IANA time zone, from Vola's own reference data (data/airports.json)."""
     table: dict[str, str] = {}
     path = repo_airports_json or os.path.join(os.path.dirname(__file__), "..", "..", "data", "airports.json")
     if os.path.exists(path):
@@ -107,7 +107,7 @@ def load_nycflights13(data_dir: str, tz_table: dict[str, str]) -> tuple[pd.DataF
     weather = pd.DataFrame({
         "origin": w.origin,
         "time_utc": pd.to_datetime(w.time_hour, utc=True),
-        # Converted to the units ClaimWing gets from Open-Meteo at inference time.
+        # Converted to the units Vola gets from Open-Meteo at inference time.
         "wind_kmh": w.wind_speed * MILES_TO_KM,
         "visibility_km": (w.visib * MILES_TO_KM).clip(upper=16),
         "precip_mm": w.precip * 25.4,

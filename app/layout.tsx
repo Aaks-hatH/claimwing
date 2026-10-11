@@ -4,10 +4,10 @@ import { Providers } from "@/components/providers";
 import { MotionSystem } from "@/components/ui/motion-system";
 
 export const metadata: Metadata = {
-  title: { default: "ClaimWing: evidence for delayed flights and damaged bags", template: "%s · ClaimWing" },
+  title: { default: "Vola: evidence for delayed flights and damaged bags", template: "%s · Vola" },
   description:
     "Track your flight live, photograph your bag before and after, and export one evidence packet for your compensation claim. Documentation support, not legal advice.",
-  applicationName: "ClaimWing",
+  applicationName: "Vola",
 };
 
 export const viewport: Viewport = {

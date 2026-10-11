@@ -1,10 +1,10 @@
 /**
- * One-time rename: ClaimWing -> Vola, everywhere.
+ * One-time rename: Vola -> Vola, everywhere.
  *
  * Run from the project root:   npx tsx scripts/rename-to-vola.ts
  * Preview without writing:     npx tsx scripts/rename-to-vola.ts --dry
  *
- * Keeps the original casing: ClaimWing -> Vola, claimwing -> vola, CLAIMWING -> VOLA.
+ * Keeps the original casing: Vola -> Vola, vola -> vola, VOLA -> VOLA.
  * Safe to run twice (the second run finds nothing). Delete this file afterwards.
  */
 import { promises as fs } from "node:fs";

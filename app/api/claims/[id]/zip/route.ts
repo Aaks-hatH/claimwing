@@ -58,7 +58,7 @@ export const GET = withUser<{ id: string }>(
     return new NextResponse(new Uint8Array(buf), {
       headers: {
         "Content-Type": "application/zip",
-        "Content-Disposition": `attachment; filename="ClaimWing-${ctx.trip.flightNumber}-${ctx.trip.flightDate}-originals.zip"`,
+        "Content-Disposition": `attachment; filename="Vola-${ctx.trip.flightNumber}-${ctx.trip.flightDate}-originals.zip"`,
         "Cache-Control": "private, no-store",
       },
     });

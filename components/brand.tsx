@@ -16,7 +16,7 @@ export function Logo({ className, href = "/" }: { className?: string; href?: str
   return (
     <Link href={href} className={cn("inline-flex items-center gap-2.5 text-[19px] tracking-tight stretch-semi", className)}>
       <LogoMark />
-      <span>ClaimWing</span>
+      <span>Vola</span>
     </Link>
   );
 }

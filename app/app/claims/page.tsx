@@ -22,7 +22,7 @@ export default async function ClaimsPage() {
 
   return (
     <>
-      <PageHeader title="Claims" description="Track each claim from draft to payment. ClaimWing never contacts the airline for you." />
+      <PageHeader title="Claims" description="Track each claim from draft to payment. Vola never contacts the airline for you." />
       {claims.length === 0 ? (
         <EmptyState
           icon={FileText}

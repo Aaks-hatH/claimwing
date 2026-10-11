@@ -31,8 +31,8 @@ const TRIP_TABS: Record<string, Topic> = {
     title: "Flight Ripple",
     intro: "A forecast of how late you'll be, built from live data, the aircraft flying in before yours, and passenger reports.",
     points: [
-      ["Observed, reported, predicted", "Observed means flight data recorded it. Reported means passengers said so. Predicted means ClaimWing estimated it. Each item is labelled."],
-      ["The incoming aircraft", "If the plane for your flight is late arriving, there may not be enough time to turn it around. ClaimWing only links flights when a data provider names the same aircraft."],
+      ["Observed, reported, predicted", "Observed means flight data recorded it. Reported means passengers said so. Predicted means Vola estimated it. Each item is labelled."],
+      ["The incoming aircraft", "If the plane for your flight is late arriving, there may not be enough time to turn it around. Vola only links flights when a data provider names the same aircraft."],
       ["Percentages", "Shown only when the trained model covers your flight. Otherwise you see Likely, Possible or Unlikely, based on the live evidence."],
       ["Reporting", "Tell others what you see at the gate. They see a summary like '2 people, 4 min ago', never who you are."],
     ],
@@ -48,10 +48,10 @@ const TRIP_TABS: Record<string, Topic> = {
   },
   claim: {
     title: "Claim tab",
-    intro: "Start a claim once the flight has arrived. ClaimWing builds a letter and an evidence packet from what you recorded.",
+    intro: "Start a claim once the flight has arrived. Vola builds a letter and an evidence packet from what you recorded.",
     points: [
       ["Readiness", "The checklist shows what's missing and links to where you can add it."],
-      ["Sending", "You send the packet yourself. ClaimWing doesn't contact airlines or take a cut."],
+      ["Sending", "You send the packet yourself. Vola doesn't contact airlines or take a cut."],
     ],
   },
 };
@@ -73,7 +73,7 @@ function topicFor(path: string, tab: string | null): Topic {
   if (/^\/app\/trips\/new/.test(path)) {
     return {
       title: "Add a trip",
-      intro: "Enter the flight number and date. ClaimWing looks up the times, or you can enter them yourself.",
+      intro: "Enter the flight number and date. Vola looks up the times, or you can enter them yourself.",
       points: [
         ["Which date?", "The local departure date shown on your boarding pass."],
         ["Why add it early?", "Tracking starts 3 hours before departure, and before-photos of your bag must be taken at check-in."],
@@ -89,11 +89,11 @@ function topicFor(path: string, tab: string | null): Topic {
       points: [
         ["Readiness", "Each missing item explains why it matters and links to where you can fix it."],
         ["Preview", "Open the PDF preview to check everything before you download or send it."],
-        ["Placeholders", "Anything in [BRACKETS] is a fact ClaimWing doesn't know. Fill it in before sending."],
+        ["Placeholders", "Anything in [BRACKETS] is a fact Vola doesn't know. Fill it in before sending."],
       ],
     };
   }
-  if (/^\/app\/claims/.test(path)) return { title: "Claims", intro: "Claims you've started and their status.", points: [["Status", "Mark a claim as sent, awaiting reply, paid or rejected so ClaimWing can track it."]] };
+  if (/^\/app\/claims/.test(path)) return { title: "Claims", intro: "Claims you've started and their status.", points: [["Status", "Mark a claim as sent, awaiting reply, paid or rejected so Vola can track it."]] };
   if (/^\/app\/settings/.test(path)) {
     return {
       title: "Settings",

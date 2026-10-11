@@ -10,7 +10,7 @@ export const GLOSSARY = {
   rotation: {
     term: "Aircraft rotation",
     short: "The sequence of flights one aircraft flies in a day. Your plane usually arrives from somewhere else just before your flight.",
-    more: "ClaimWing only links flights when a data provider names the same aircraft (by registration) on both. It never guesses from routes or flight numbers.",
+    more: "Vola only links flights when a data provider names the same aircraft (by registration) on both. It never guesses from routes or flight numbers.",
   },
   registration: {
     term: "Registration",
@@ -19,7 +19,7 @@ export const GLOSSARY = {
   propagation: {
     term: "Delay propagation",
     short: "When a late incoming aircraft makes the next flight late, and that one makes the following flight late.",
-    more: "ClaimWing estimates it from the incoming arrival time and the time the aircraft needs on the ground, as a range of minutes.",
+    more: "Vola estimates it from the incoming arrival time and the time the aircraft needs on the ground, as a range of minutes.",
   },
   knockOn: {
     term: "Knock-on delay",
@@ -32,7 +32,7 @@ export const GLOSSARY = {
   probability: {
     term: "Probability",
     short: "Out of many flights like this one, roughly how many would be at least this late. 30% means about 3 in 10.",
-    more: "Shown only when ClaimWing's trained model applies to the flight, alongside how well that model did on flights it had never seen.",
+    more: "Shown only when Vola's trained model applies to the flight, alongside how well that model did on flights it had never seen.",
   },
   calibration: {
     term: "Calibration",
@@ -53,7 +53,7 @@ export const GLOSSARY = {
   },
   adsb: {
     term: "ADS-B",
-    short: "Position reports broadcast by the aircraft itself and collected by volunteer receivers. ClaimWing uses them to time takeoff and landing.",
+    short: "Position reports broadcast by the aircraft itself and collected by volunteer receivers. Vola uses them to time takeoff and landing.",
   },
   gateArrival: {
     term: "Gate arrival",

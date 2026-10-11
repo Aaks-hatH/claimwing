@@ -5,7 +5,7 @@ import { ProviderError, type FlightDataProvider, type PositionReport } from "./t
 
 const FT = 0.3048;
 const KT = 0.514444;
-const USER_AGENT = "ClaimWing/1.0 (flight delay documentation; contact via app)";
+const USER_AGENT = "Vola/1.0 (flight delay documentation; contact via app)";
 
 /* ---------------------------- airplanes.live ---------------------------- */
 /**

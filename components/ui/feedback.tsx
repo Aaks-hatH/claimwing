@@ -176,7 +176,7 @@ export function PageHeader({
 export function NotLegalAdvice({ className }: { className?: string }) {
   return (
     <p className={cn("text-xs text-muted-foreground", className)}>
-      ClaimWing helps you document facts. It is not legal advice, and eligibility results are estimates, not guarantees.
+      Vola helps you document facts. It is not legal advice, and eligibility results are estimates, not guarantees.
     </p>
   );
 }

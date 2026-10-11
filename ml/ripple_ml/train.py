@@ -1,5 +1,5 @@
 """
-Trains and evaluates the Flight Ripple models, then writes one JSON artifact for ClaimWing.
+Trains and evaluates the Flight Ripple models, then writes one JSON artifact for Vola.
 
     python -m ripple_ml.train --source nycflights13 --data-dir <dir> --out ../data/models/ripple-model.json
     python -m ripple_ml.train --source bts --data-dir <dir with BTS monthly CSVs> --out ../data/models/ripple-model.json

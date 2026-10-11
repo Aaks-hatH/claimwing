@@ -55,7 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   callbacks: {
     ...authConfig.callbacks,
     async jwt({ token, user, account, profile }) {
-      // Runs at sign-in: make sure there is a ClaimWing user and keep its id in the token.
+      // Runs at sign-in: make sure there is a Vola user and keep its id in the token.
       if (account?.provider === "google") {
         await connectDB();
         const email = (profile?.email ?? user?.email ?? "").toLowerCase();

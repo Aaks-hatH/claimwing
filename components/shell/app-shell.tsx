@@ -90,13 +90,13 @@ export function AppShell({ user, children }: { user: { name: string; email: stri
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={() => window.dispatchEvent(new Event("claimwing:command-palette"))}
+              onClick={() => window.dispatchEvent(new Event("vola:command-palette"))}
               className="hidden items-center gap-2 rounded-full border px-3 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground lg:inline-flex"
               aria-label="Search pages, trips and actions (Ctrl K)"
             >
               <Search className="size-3.5" aria-hidden /> Search <kbd className="rounded border bg-muted px-1 font-sans text-[10px]">Ctrl K</kbd>
             </button>
-            <Button size="icon-sm" variant="ghost" className="lg:hidden" onClick={() => window.dispatchEvent(new Event("claimwing:command-palette"))} aria-label="Search pages, trips and actions">
+            <Button size="icon-sm" variant="ghost" className="lg:hidden" onClick={() => window.dispatchEvent(new Event("vola:command-palette"))} aria-label="Search pages, trips and actions">
               <Search aria-hidden />
             </Button>
             <Button asChild size="icon-sm" variant="ghost" aria-label="Demo Center (simulated scenarios)" title="Demo Center">

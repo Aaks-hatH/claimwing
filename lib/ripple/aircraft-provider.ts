@@ -14,7 +14,7 @@ import type { AircraftLeg, LegStatus } from "./rotation";
  * - AeroDataBox: GET /flights/reg/{registration}/{dateLocal} lists an aircraft's legs for a day,
  *   with scheduled, revised and runway times. This is what rotation tracking needs.
  * - AviationStack: can return a flight's registration, but has no search by registration on the
- *   plans ClaimWing targets, so rotations are reported as unavailable.
+ *   plans Vola targets, so rotations are reported as unavailable.
  * - ADS-B (airplanes.live, OpenSky): live positions only; no schedules or leg lists.
  *
  * Results are cached for every user following the same aircraft, so many viewers cost one request.

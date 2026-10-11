@@ -59,7 +59,7 @@ function save() {
 async function tick() {
   try {
     const res = await fetch(`https://api.airplanes.live/v2/callsign/${args.callsign}`, {
-      headers: { "User-Agent": "ClaimWing replay recorder" },
+      headers: { "User-Agent": "Vola replay recorder" },
     });
     const data = (await res.json()) as { now: number; ac?: Array<Record<string, unknown>> };
     const a = data.ac?.find((x) => typeof x.lat === "number");

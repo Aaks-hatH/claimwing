@@ -29,7 +29,7 @@ export function isFlightKey(key: unknown): key is DatedFlightKey {
   return typeof key === "string" && parseFlightKey(key) !== null;
 }
 
-/** The dated key for a ClaimWing trip (one trip is one dated flight leg). */
+/** The dated key for a Vola trip (one trip is one dated flight leg). */
 export function tripFlightKey(trip: { flightNumber: string; flightDate: string; origin: string }): DatedFlightKey {
   return datedFlightKey(trip.flightNumber, trip.flightDate, typeof trip.origin === "string" ? trip.origin : String(trip.origin));
 }

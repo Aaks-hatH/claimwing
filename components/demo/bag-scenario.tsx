@@ -196,7 +196,7 @@ export function BagScenario({ p: ext }: { p?: Player }) {
     const url = URL.createObjectURL(new Blob([JSON.stringify(body, null, 2)], { type: "application/json" }));
     const a = document.createElement("a");
     a.href = url;
-    a.download = "claimwing-demo-bag-findings.json";
+    a.download = "vola-demo-bag-findings.json";
     a.click();
     URL.revokeObjectURL(url);
   }

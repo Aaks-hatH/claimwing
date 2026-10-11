@@ -175,7 +175,7 @@ export function SignupForm({ googleEnabled, callbackUrl }: { googleEnabled: bool
           <label className="flex items-start gap-2 text-sm">
             <input type="checkbox" className="mt-0.5 size-4 accent-[var(--primary)]" {...form.register("accept")} />
             <span className="text-muted-foreground">
-              I agree to the <Link href="/terms" className="underline">terms</Link> and <Link href="/privacy" className="underline">privacy notice</Link>, and understand ClaimWing is not legal advice.
+              I agree to the <Link href="/terms" className="underline">terms</Link> and <Link href="/privacy" className="underline">privacy notice</Link>, and understand Vola is not legal advice.
             </span>
           </label>
           <FieldError message={e.accept?.message} />

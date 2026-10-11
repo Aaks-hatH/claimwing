@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * End-to-end checks against a running ClaimWing server and its real database.
+ * End-to-end checks against a running Vola server and its real database.
  *
  *   BASE_URL=http://localhost:3000 npm run test:e2e
  *

@@ -24,7 +24,7 @@ export default async function DashboardPage() {
     return (
       <>
         <TourCard className="mb-8" />
-        <PageHeader eyebrow="Welcome" title={`Hello, ${first}.`} description="Add a flight before you travel. ClaimWing tracks it live and keeps the evidence for you." />
+        <PageHeader eyebrow="Welcome" title={`Hello, ${first}.`} description="Add a flight before you travel. Vola tracks it live and keeps the evidence for you." />
         <EmptyState
           icon={Plane}
           title="No trips yet"

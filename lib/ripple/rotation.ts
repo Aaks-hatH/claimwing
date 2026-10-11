@@ -132,7 +132,7 @@ export function resolveRotation(
   const idx = own.findIndex((l) => sameFlight(l, target));
   if (idx === -1) {
     return unknownRotation(
-      `Aircraft ${registration} is not listed on this flight in the latest schedule data. The aircraft may have been changed, so ClaimWing does not link any flights.`,
+      `Aircraft ${registration} is not listed on this flight in the latest schedule data. The aircraft may have been changed, so Vola does not link any flights.`,
       { registration, swap, source: own[0]?.source ?? null, observedAt: own[0]?.observedAt.toISOString() ?? null },
     );
   }

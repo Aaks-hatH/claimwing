@@ -19,7 +19,7 @@ export function LegalPage({ title, updated, children }: { title: string; updated
         <div className="mt-8 space-y-4 text-sm leading-relaxed [&_h2]:mt-8 [&_h2]:text-base [&_h2]:font-semibold [&_li]:ml-5 [&_li]:list-disc">{children}</div>
         <p className="mt-10 text-sm">
           <Link href="/" className="underline">
-            Back to ClaimWing
+            Back to Vola
           </Link>
         </p>
       </main>

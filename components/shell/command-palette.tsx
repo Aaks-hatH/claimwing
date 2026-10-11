@@ -32,10 +32,10 @@ export function CommandPalette({ onHelp }: { onHelp: () => void }) {
       setOpen(true);
     }
     window.addEventListener("keydown", onKey);
-    window.addEventListener("claimwing:command-palette", onOpen);
+    window.addEventListener("vola:command-palette", onOpen);
     return () => {
       window.removeEventListener("keydown", onKey);
-      window.removeEventListener("claimwing:command-palette", onOpen);
+      window.removeEventListener("vola:command-palette", onOpen);
     };
   }, []);
 
@@ -120,7 +120,7 @@ export function CommandPalette({ onHelp }: { onHelp: () => void }) {
           className="fixed left-1/2 top-[12vh] z-50 w-[min(36rem,calc(100vw-2rem))] -translate-x-1/2 overflow-hidden rounded-2xl border bg-popover shadow-2xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95"
           aria-describedby={undefined}
         >
-          <DialogPrimitive.Title className="sr-only">Search ClaimWing</DialogPrimitive.Title>
+          <DialogPrimitive.Title className="sr-only">Search Vola</DialogPrimitive.Title>
           <div className="flex items-center gap-2 border-b px-4">
             <Search className="size-4 text-muted-foreground" aria-hidden />
             <input

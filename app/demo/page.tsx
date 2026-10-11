@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { SCENARIOS } from "@/lib/ripple/sim/scenarios";
 import { DemoCenter, type ScenarioCard } from "@/components/demo/demo-center";
 
-export const metadata: Metadata = { title: "Demo", description: "Simulated ClaimWing walkthroughs." };
+export const metadata: Metadata = { title: "Demo", description: "Simulated Vola walkthroughs." };
 
 const HIGHLIGHT: Record<string, number> = { cascade: 5, reports: 2, swap: 1, stale: 2 };
 

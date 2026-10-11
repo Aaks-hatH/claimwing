@@ -16,7 +16,7 @@ export const GET = withUser<{ id: string }>(
     const pdf = await renderClaimPdf(ctx, ctx.claim.letterText || templateLetter(ctx));
     // A preview isn't an export, so it doesn't change the claim's export time.
     if (!inline) await Claim.updateOne({ _id: ctx.claim._id, userId: user.oid }, { $set: { lastExportAt: new Date() } });
-    const name = `ClaimWing-${ctx.trip.flightNumber}-${ctx.trip.flightDate}${ctx.trip.demoMode ? "-DEMO" : ""}.pdf`;
+    const name = `Vola-${ctx.trip.flightNumber}-${ctx.trip.flightDate}${ctx.trip.demoMode ? "-DEMO" : ""}.pdf`;
     return new NextResponse(new Uint8Array(pdf), {
       headers: {
         "Content-Type": "application/pdf",

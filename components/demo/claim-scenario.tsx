@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/feedback";
 import { Textarea } from "@/components/ui/primitives";
 import { cn } from "@/lib/utils";
-import { ControlBar, usePlayer } from "./player";
+import { ControlBar, usePlayer, type Player } from "./player";
 import { CLAIM_HOW, HowCard } from "./how";
 
 const STEPS = ["Delay", "Arrival", "Evidence", "Eligibility", "Deadlines", "Letter", "Export"];
@@ -46,8 +46,12 @@ async function sha256(text: string) {
     .join("");
 }
 
-export function ClaimScenario() {
-  const p = usePlayer(STEPS.length, 6500);
+export const CLAIM_STEPS = STEPS.length;
+
+/** Pass `p` to drive the scenario from an outer slideshow: controls are hidden and the demo fills in the evidence, exports and verifies by itself. */
+export function ClaimScenario({ p: ext }: { p?: Player }) {
+  const own = usePlayer(STEPS.length, 6500);
+  const p = ext ?? own;
   const [boardingPass, setBoardingPass] = useState(false);
   const [receipts, setReceipts] = useState(false);
   const [letter, setLetter] = useState("");
@@ -133,11 +137,33 @@ export function ClaimScenario() {
   }
 
   const step = p.index;
+
+  // Slideshow mode: add the boarding pass, export, then verify, so every stage is seen.
+  useEffect(() => {
+    if (!ext || step < 2 || boardingPass) return;
+    const t = window.setTimeout(() => setBoardingPass(true), 1800);
+    return () => window.clearTimeout(t);
+  }, [ext, step, boardingPass]);
+  useEffect(() => {
+    if (!ext || step < 6 || !boardingPass || manifest || busy) return;
+    const t = window.setTimeout(() => void exportPacket(), 1400);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ext, step, boardingPass, manifest, busy]);
+  useEffect(() => {
+    if (!ext || step < 6 || !manifest || verify) return;
+    const t = window.setTimeout(() => void verifyPacket(), 2200);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ext, step, manifest, verify]);
+
   return (
     <div className="space-y-5">
-      <div className="z-20 lg:sticky lg:top-[4.5rem]">
-        <ControlBar p={p} labels={STEPS} title="Claim preparation" />
-      </div>
+      {!ext && (
+        <div className="z-20 lg:sticky lg:top-[4.5rem]">
+          <ControlBar p={p} labels={STEPS} title="Claim preparation" />
+        </div>
+      )}
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={step} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-3xl border border-signal/30 bg-info-soft/60 p-5" aria-live="polite">
           <p className="flex items-center gap-2 text-xs font-medium text-signal">

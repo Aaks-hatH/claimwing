@@ -32,33 +32,43 @@ export async function GET(req: Request) {
     }
     const flight = parsed.data.flight.replace(/\s+/g, "");
     if (!splitFlightNumber(flight)) throw new HttpError(400, "Enter a flight number like BA117.");
-    let info;
+    let legs;
     try {
-      info = await cached(`lookup:${p.name}:${flight}:${parsed.data.date}`, 6 * 3600, () => p.getSchedule!(flight, parsed.data.date));
+      legs = await cached(`lookup-options:${p.name}:${flight}:${parsed.data.date}`, 6 * 3600, async () =>
+        p.getScheduleOptions ? p.getScheduleOptions(flight, parsed.data.date) : [await p.getSchedule!(flight, parsed.data.date)].filter((x) => x !== null),
+      );
     } catch (e) {
       return ok({ found: false, configured: true, message: `Lookup failed: ${e instanceof Error ? e.message : "unknown error"}. Enter the times from your booking.` });
     }
-    if (!info || !info.scheduledDeparture || !info.scheduledArrival || !info.origin || !info.destination) {
+    const options = legs
+      .filter((info) => info && info.scheduledDeparture && info.scheduledArrival && info.origin && info.destination)
+      .map((info) => {
+        const o = getAirport(info.origin!);
+        const d = getAirport(info.destination!);
+        const dep = utcToLocalParts(info.scheduledDeparture!, o?.tz);
+        const arr = utcToLocalParts(info.scheduledArrival!, d?.tz);
+        return {
+          origin: info.origin!,
+          destination: info.destination!,
+          originCity: o?.city ?? null,
+          destinationCity: d?.city ?? null,
+          flightDate: dep.date,
+          departureTime: dep.time,
+          arrivalDate: arr.date,
+          arrivalTime: arr.time,
+          icao24: info.icao24,
+          status: info.status,
+          source: info.source,
+          sortKey: new Date(info.scheduledDeparture!).getTime(),
+        };
+      })
+      .sort((a, b) => a.sortKey - b.sortKey)
+      .map(({ sortKey: _k, ...rest }) => rest);
+    if (!options.length) {
       return ok({ found: false, configured: true, message: "We couldn't find that flight on that date. Check the number and date, or enter the details yourself." });
     }
-    const o = getAirport(info.origin);
-    const d = getAirport(info.destination);
-    const dep = utcToLocalParts(info.scheduledDeparture, o?.tz);
-    const arr = utcToLocalParts(info.scheduledArrival, d?.tz);
-    return ok({
-      found: true,
-      configured: true,
-      source: info.source,
-      origin: info.origin,
-      destination: info.destination,
-      departureTime: dep.time,
-      flightDate: dep.date,
-      arrivalDate: arr.date,
-      arrivalTime: arr.time,
-      icao24: info.icao24,
-      status: info.status,
-      provider: env.scheduleProvider(),
-    });
+    // The user always picks their flight and day. We never guess when there is more than one.
+    return ok({ found: true, configured: true, requestedDate: parsed.data.date, options, provider: env.scheduleProvider() });
   } catch (err) {
     return errorResponse(err);
   }

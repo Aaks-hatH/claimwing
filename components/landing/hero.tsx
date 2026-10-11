@@ -41,7 +41,7 @@ function readout(t: number) {
 
 function RiseWord({ children, delay, className }: { children: React.ReactNode; delay: number; className?: string }) {
   return (
-    <span className="-mr-[0.12em] inline-block overflow-hidden pb-[0.1em] pr-[0.12em] align-bottom">
+    <span className="inline-block overflow-hidden pb-[0.12em] pr-[0.1em] align-bottom">
       <motion.span className={cn("inline-block will-change-transform", className)} initial={{ y: "115%", rotate: 5 }} animate={{ y: 0, rotate: 0 }} transition={{ duration: 1.05, delay, ease: EASE }}>
         {children}
       </motion.span>

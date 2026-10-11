@@ -8,6 +8,8 @@ import type { RippleResponse } from "@/lib/ripple/service";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/primitives";
 import { Term } from "@/components/help/term";
+import { FlightPicker, type FlightOption } from "@/components/trips/flight-picker";
+import { DateTime } from "luxon";
 import { cn } from "@/lib/utils";
 
 type Existing = { id: string; flightNumber: string; flightDate: string; origin: { iata: string }; destination: { iata: string } };
@@ -26,6 +28,8 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
   const [number, setNumber] = useState("");
   const [date, setDate] = useState("");
   const [flight, setFlight] = useState<Flight | null>(null);
+  const [options, setOptions] = useState<FlightOption[]>([]);
+  const [picked, setPicked] = useState<number | null>(null);
   const [name, setName] = useState(defaultName);
   const [booking, setBooking] = useState("");
   const [busy, setBusy] = useState(false);
@@ -54,36 +58,59 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
     };
   }, [step, tripId]);
 
-  async function find(e: React.FormEvent) {
-    e.preventDefault();
+  async function search(searchDate: string) {
+    if (!parsed) return setError("Enter a flight number like BA117 or U2 8013.");
+    if (!searchDate) return setError("Choose the departure date shown on your booking.");
     setError(null);
     setNotice(null);
-    if (!parsed) return setError("Enter a flight number like BA117 or U2 8013.");
-    if (!date) return setError("Choose the departure date shown on your booking.");
     setBusy(true);
+    const manual = (d: string) => setFlight({ airline: parsed[1], number: parsed[2], flightDate: d, origin: "", destination: "", departureTime: "", arrivalDate: d, arrivalTime: "", found: false });
     try {
-      const r = await fetch(`/api/flights/lookup?flight=${encodeURIComponent(parsed[1] + parsed[2])}&date=${date}`);
+      const r = await fetch(`/api/flights/lookup?flight=${encodeURIComponent(parsed[1] + parsed[2])}&date=${searchDate}`);
       const b = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(b.error ?? "Flight search is unavailable right now.");
-      if (b.found) {
-        setFlight({ airline: parsed[1], number: parsed[2], flightDate: b.flightDate ?? date, origin: b.origin, destination: b.destination, departureTime: b.departureTime, arrivalDate: b.arrivalDate, arrivalTime: b.arrivalTime, icao24: b.icao24, source: b.source, found: true });
+      setDate(searchDate);
+      setPicked(null);
+      if (b.found && Array.isArray(b.options) && b.options.length) {
+        setOptions(b.options as FlightOption[]);
+        setFlight({ airline: parsed[1], number: parsed[2], flightDate: searchDate, origin: "", destination: "", departureTime: "", arrivalDate: searchDate, arrivalTime: "", found: true });
       } else {
+        setOptions([]);
         setNotice(b.message ?? "No schedule match. Enter the details from your booking.");
-        setFlight({ airline: parsed[1], number: parsed[2], flightDate: date, origin: "", destination: "", departureTime: "", arrivalDate: date, arrivalTime: "", found: false });
+        manual(searchDate);
       }
       setStep(1);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Flight search failed. You can enter the details yourself.");
-      setFlight({ airline: parsed[1], number: parsed[2], flightDate: date, origin: "", destination: "", departureTime: "", arrivalDate: date, arrivalTime: "", found: false });
+      setOptions([]);
+      manual(searchDate);
     } finally {
       setBusy(false);
     }
+  }
+
+  function find(e: React.FormEvent) {
+    e.preventDefault();
+    void search(date);
+  }
+
+  function shiftDay(delta: -1 | 1) {
+    const next = DateTime.fromISO(date).plus({ days: delta }).toFormat("yyyy-LL-dd");
+    void search(next);
+  }
+
+  function choose(i: number) {
+    const o = options[i];
+    if (!o || !flight) return;
+    setPicked(i);
+    setFlight({ ...flight, flightDate: o.flightDate, origin: o.origin, destination: o.destination, departureTime: o.departureTime, arrivalDate: o.arrivalDate, arrivalTime: o.arrivalTime, icao24: o.icao24, source: o.source, found: true });
   }
 
   function confirm(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     if (!flight) return;
+    if (flight.found && options.length > 0 && picked === null) return setError("Pick your flight from the list.");
     const f = { ...flight, origin: flight.origin.trim().toUpperCase(), destination: flight.destination.trim().toUpperCase() };
     if (!/^[A-Z]{3}$/.test(f.origin) || !/^[A-Z]{3}$/.test(f.destination) || f.origin === f.destination) return setError("Use two different 3-letter airport codes, like JFK and LHR.");
     if (!/^\d{2}:\d{2}$/.test(f.departureTime) || !/^\d{2}:\d{2}$/.test(f.arrivalTime) || !f.arrivalDate) return setError("Enter the scheduled departure and arrival times from your booking.");
@@ -180,18 +207,8 @@ export function TrackFlightWizard({ defaultName, existing, onDone, initialTripId
 
           {step === 1 && flight && (
             <form onSubmit={confirm} className="space-y-4" noValidate>
-              {flight.found ? (
-                <div className="rounded-2xl border bg-background/60 p-4">
-                  <p className="text-xs text-muted-foreground">Found{flight.source ? ` in ${flight.source}` : ""}. Check it&apos;s your flight.</p>
-                  <p className="mt-2 flex items-center gap-3 font-display text-3xl">
-                    {flight.origin} <Plane className="size-5 text-signal" aria-hidden /> {flight.destination}
-                  </p>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {flight.airline}
-                    {flight.number} on {flight.flightDate}, departs {flight.departureTime}, arrives {flight.arrivalDate !== flight.flightDate ? `${flight.arrivalDate} ` : ""}
-                    {flight.arrivalTime} (local times)
-                  </p>
-                </div>
+              {flight.found && options.length > 0 ? (
+                <FlightPicker flightLabel={`${flight.airline}${flight.number}`} date={date} options={options} selected={picked} onSelect={choose} onShiftDay={shiftDay} busy={busy} />
               ) : (
                 <div className="space-y-3 rounded-2xl border p-4">
                   {notice && <p className="text-sm text-muted-foreground">{notice}</p>}

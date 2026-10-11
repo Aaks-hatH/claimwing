@@ -25,8 +25,8 @@ export function Reveal({ children, className, delay = 0, y = 28 }: { children: R
 export function Eyebrow({ n, children, className }: { n: string; children: ReactNode; className?: string }) {
   return (
     <Reveal className={cn("eyebrow mb-5 flex items-center gap-3 text-xs text-muted-foreground", className)} y={12}>
-      <span className="text-signal">{n}</span>
-      <span aria-hidden className="h-px w-8 bg-current opacity-40" />
+      <span className="text-foreground">{n}</span>
+      <span aria-hidden className="h-[2px] w-8 bg-current opacity-40" />
       <span>{children}</span>
     </Reveal>
   );
@@ -42,7 +42,7 @@ function Word({ p, range, accent, accentClassName, children }: { p: MotionValue<
   const opacity = useTransform(p, range, [0.14, 1]);
   const y = useTransform(p, range, [14, 0]);
   return (
-    <motion.span style={{ opacity, y }} className={cn("mr-[0.2em] inline-block", accent && cn("font-accent text-[1.12em] font-normal italic leading-[0.8] tracking-[-0.02em] text-signal", accentClassName))}>
+    <motion.span style={{ opacity, y }} className={cn("mr-[0.2em] inline-block", accent && cn("font-[760]", accentClassName))}>
       {children}
     </motion.span>
   );
@@ -52,16 +52,16 @@ function Word({ p, range, accent, accentClassName, children }: { p: MotionValue<
  * A heading that fills in word by word as you scroll it into place.
  * Wrap words in *asterisks* to set them in the italic serif accent.
  */
-export function ScrollHeading({ text, as: Tag = "h2", className, accentClassName }: { text: string; as?: "h1" | "h2" | "h3"; className?: string; accentClassName?: string }) {
+export function ScrollHeading({ text, as: Tag = "h2", className, accentClassName, fillBy = 0.4 }: { text: string; as?: "h1" | "h2" | "h3"; className?: string; accentClassName?: string; /** Viewport height fraction (from the top) at which the heading is fully filled in. Raise it for a heading near the page end. */ fillBy?: number }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.92", "start 0.4"] });
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start 0.92", `start ${fillBy}`] });
   const words = parse(text);
   if (reduce) {
     return (
       <Tag className={className}>
         {words.map((t, i) => (
-          <span key={i} className={cn("mr-[0.2em] inline-block", t.accent && cn("font-accent text-[1.12em] font-normal italic leading-[0.8] text-signal", accentClassName))}>
+          <span key={i} className={cn("mr-[0.2em] inline-block", t.accent && cn("font-[760]", accentClassName))}>
             {t.w}
           </span>
         ))}
@@ -91,13 +91,13 @@ export function ScrollTimeline({ steps }: { steps: { when: string; title: string
   const fill = useSpring(scrollYProgress, { stiffness: 90, damping: 24, mass: 0.5 });
   return (
     <ol ref={ref} className="relative space-y-16 pl-14 md:space-y-20">
-      <span aria-hidden className="absolute bottom-2 left-[17px] top-2 w-px bg-border" />
-      <motion.span aria-hidden style={{ scaleY: fill }} className="absolute bottom-2 left-[17px] top-2 w-[2px] origin-top bg-signal" />
+      <span aria-hidden className="absolute bottom-2 left-[17px] top-2 w-[2px] bg-border" />
+      <motion.span aria-hidden style={{ scaleY: fill }} className="absolute bottom-2 left-[17px] top-2 w-[2px] origin-top bg-foreground" />
       {steps.map((s, i) => (
         <motion.li key={s.when} className="relative" initial={{ opacity: 0, x: -28 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "0px 0px -22% 0px" }} transition={{ duration: 0.8, ease: EASE }}>
           <motion.span
             aria-hidden
-            className="absolute -left-14 top-1 flex size-9 items-center justify-center rounded-full bg-signal font-mono text-xs font-semibold text-signal-foreground ring-4 ring-background"
+            className="absolute -left-14 top-1 flex size-9 items-center justify-center rounded-[2px] bg-foreground font-mono text-xs font-semibold text-background ring-4 ring-background"
             initial={{ scale: 0.4 }}
             whileInView={{ scale: 1 }}
             viewport={{ once: true, margin: "0px 0px -22% 0px" }}
@@ -122,11 +122,11 @@ export function PacketCard({ title, rows }: { title: string; rows: [string, stri
   const front = useTransform(scrollYProgress, [0, 1], [50, -50]);
   return (
     <figure ref={ref} className="relative mx-auto w-full max-w-md lg:mx-0">
-      <motion.div aria-hidden style={{ rotate: back, y: backY, x: 12 }} className="absolute inset-0 rounded-2xl border bg-sky/60" />
-      <motion.div style={{ y: front }} className="relative rounded-2xl border bg-card p-6 sm:p-8">
+      <motion.div aria-hidden style={{ rotate: back, y: backY, x: 12 }} className="absolute inset-0 rounded-[2px] border-2 bg-secondary" />
+      <motion.div style={{ y: front }} className="relative rounded-[2px] border-2 bg-card p-6 text-card-foreground sm:p-8">
         <div className="flex items-center justify-between border-b pb-4">
           <span className="eyebrow text-[11px] text-muted-foreground">Evidence packet</span>
-          <span className="rounded bg-sky px-2 py-0.5 text-[11px] font-medium text-signal">Sample</span>
+          <span className="rounded-[2px] bg-foreground px-2 py-0.5 text-[11px] font-medium text-background">Sample</span>
         </div>
         <p className="stretch-semi mt-5 text-2xl leading-[1.05]">{title}</p>
         <dl className="mt-5 divide-y text-sm">
@@ -138,7 +138,7 @@ export function PacketCard({ title, rows }: { title: string; rows: [string, stri
           ))}
         </dl>
         <motion.div
-          className="eyebrow absolute -right-3 -top-4 rounded-full border-2 border-signal bg-card px-3 py-1 text-[10px] font-semibold text-signal"
+          className="eyebrow absolute -right-3 -top-4 rounded-[2px] border-2 border-foreground bg-card px-3 py-1 text-[10px] font-semibold text-foreground"
           initial={{ scale: 2.4, opacity: 0, rotate: -24 }}
           whileInView={{ scale: 1, opacity: 1, rotate: -8 }}
           viewport={{ once: true, margin: "0px 0px -20% 0px" }}
@@ -158,14 +158,12 @@ export function ScrollMarquee({ items }: { items: string[] }) {
   const x = useTransform(scrollY, [0, 3000], [0, -1100]);
   const row = [...items, ...items, ...items, ...items];
   return (
-    <div aria-hidden className="select-none overflow-hidden border-y bg-background py-5 md:py-7">
+    <div aria-hidden className="select-none overflow-hidden border-y-2 bg-background py-5 md:py-7">
       <motion.div style={{ x: reduce ? 0 : x }} className="stretch-display flex w-max items-center gap-8 whitespace-nowrap text-6xl md:gap-14 md:text-8xl">
         {row.map((t, i) => (
           <span key={i} className="flex items-center gap-8 md:gap-14">
             <span className={cn(i % 2 === 1 && "text-transparent [-webkit-text-stroke:1.5px_var(--foreground)]")}>{t}</span>
-            <svg viewBox="0 0 24 24" className="size-8 shrink-0 text-signal md:size-12">
-              <path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12Z" fill="currentColor" />
-            </svg>
+            <span className="size-3 shrink-0 bg-current opacity-60 md:size-4" />
           </span>
         ))}
       </motion.div>

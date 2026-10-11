@@ -105,7 +105,7 @@ export function ArrivalsBoard() {
   const reasons = primary ? primary.explanation.slice(1, 4) : [result.summary];
 
   return (
-    <div className="overflow-hidden rounded-3xl bg-board text-board-ink">
+    <div className="overflow-hidden rounded-[2px] bg-board text-board-ink ring-2 ring-[var(--sw-rail)]">
       {/* Board */}
       <div className="px-3 pb-4 pt-4 sm:px-6 sm:pt-5">
         <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
@@ -135,14 +135,14 @@ export function ArrivalsBoard() {
                   aria-pressed={active}
                   onClick={() => setSelected(i)}
                   className={cn(
-                    "relative col-span-full grid grid-cols-subgrid items-center rounded-md py-1.5 pl-2 pr-1 text-left transition-colors md:pl-3",
-                    active ? "bg-white/[0.07]" : "hover:bg-white/[0.04]",
+                    "relative col-span-full grid grid-cols-subgrid items-center rounded-[2px] py-1.5 pl-2 pr-1 text-left transition-colors md:pl-3",
+                    active ? "bg-white/[0.09]" : "hover:bg-white/[0.05]",
                     "focus-visible:outline-board-accent",
                   )}
                 >
                   <span
                     aria-hidden
-                    className={cn("absolute inset-y-1 left-0 w-[3px] rounded-full", active ? "bg-board-accent" : "bg-transparent")}
+                    className={cn("absolute inset-y-1 left-0 w-[3px]", active ? "bg-board-accent" : "bg-transparent")}
                   />
                   <Flaps className="hidden md:inline-flex" text={clock(r.scheduled)} length={5} startDelay={i * 3} label={`Due ${clock(r.scheduled)}`} />
                   <Flaps text={r.flight} length={6} startDelay={i * 3} label={`${r.airline} ${r.flight}`} />
@@ -171,7 +171,7 @@ export function ArrivalsBoard() {
       </div>
 
       {/* Controls and the rule behind the number */}
-      <div className="grid gap-px bg-white/10 md:grid-cols-[1.1fr_1fr]">
+      <div className="grid gap-[2px] bg-[var(--sw-rail)] md:grid-cols-[1.1fr_1fr]">
         <div className="space-y-6 bg-card p-5 text-card-foreground sm:p-6">
           <div>
             <div className="flex items-baseline justify-between gap-4">
@@ -211,8 +211,8 @@ export function ArrivalsBoard() {
                 <label
                   key={c}
                   className={cn(
-                    "cursor-pointer rounded-full border px-3 py-1.5 text-[13px] transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring",
-                    cause === c ? "border-signal bg-signal text-signal-foreground" : "bg-background hover:border-signal",
+                    "cursor-pointer rounded-[2px] border-2 px-3 py-1.5 text-[13px] font-medium transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring",
+                    cause === c ? "border-foreground bg-foreground text-background" : "border-input bg-card hover:border-foreground",
                   )}
                 >
                   <input type="radio" name="cause" value={c} checked={cause === c} onChange={() => setCause(c)} className="sr-only" />
